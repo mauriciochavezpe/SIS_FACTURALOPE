@@ -4,9 +4,6 @@ from datetime import datetime
 # from app.utils.utils import getIP
 from app.schemas.user_schema import UserSchema
 from app.extension import db
-# from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-# from app.auth.jwt_handler import generate_jwt
-
 
 def get_all_users():
     schema = UserSchema(session=db.session)
