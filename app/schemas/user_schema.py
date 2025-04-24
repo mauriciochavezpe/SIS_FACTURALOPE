@@ -2,7 +2,7 @@ from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from marshmallow_sqlalchemy.fields import Nested
 from app import db
 
-from app.models.User import User
+from app.models.entities.User import User
 
 class UserSchema(SQLAlchemyAutoSchema):
     class Meta:
