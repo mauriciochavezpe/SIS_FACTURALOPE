@@ -1,8 +1,8 @@
 from app import db
 
-from app.models.Auditoria import Auditoria
-from .associations.product_storage import product_storage
-from .entities.Category import Category
+from .Auditoria import Auditoria
+from app.models.associations.product_storage import product_storage
+from .Category import Category
 
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)

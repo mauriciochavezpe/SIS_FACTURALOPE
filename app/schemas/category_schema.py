@@ -2,11 +2,11 @@ from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from marshmallow_sqlalchemy.fields import Nested
 from app import db
 
-from app.models.entities.Product import Product
+from app.models.entities.Category import Category
 
-class ProductSchema(SQLAlchemyAutoSchema):
+class CategorySchema(SQLAlchemyAutoSchema):
     class Meta:
-        model = Product
+        model = Category
         load_instance = True
         include_fk = True
         

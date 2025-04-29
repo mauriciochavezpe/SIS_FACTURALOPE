@@ -1,6 +1,6 @@
 from app import db
 
-from app.models.Auditoria import Auditoria
+from .Auditoria import Auditoria
 from app.models.enums.document_types import DocumentType # TIPO DOCUMENTO según SUNAT
 
 class Customer(db.Model):

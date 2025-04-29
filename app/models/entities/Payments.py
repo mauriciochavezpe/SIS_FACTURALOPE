@@ -1,6 +1,6 @@
 from app import db
 
-from app.models.Auditoria import Auditoria
+from .Auditoria import Auditoria
 
 class Payment(db.Model):
     id = db.Column(db.Integer, primary_key=True)

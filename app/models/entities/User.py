@@ -1,7 +1,7 @@
 from app import db
 
-from app.models.Auditoria import Auditoria
-from .enums.document_types import DocumentType
+from .Auditoria import Auditoria
+from app.models.enums.document_types import DocumentType
 # from .associations.user_typedocument import user_typedocument
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)

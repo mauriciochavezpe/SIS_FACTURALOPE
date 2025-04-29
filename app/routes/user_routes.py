@@ -37,14 +37,15 @@ def update_user_routes(user_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@user_blueprint.route('/login', methods=['POST'])    
+@user_blueprint.route('/login', methods=['POST'])
 def login_user_routes():
     try:
         users,status = login_user()
         return jsonify(users), status
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-    
+
+@user_blueprint.route('/logout', methods=['POST'])        
 def logout_user_routes():
     try:
         users,status = logout_user()

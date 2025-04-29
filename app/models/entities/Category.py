@@ -1,6 +1,6 @@
 from app import db
 
-from app.models.Auditoria import Auditoria
+from app.models.entities.Auditoria import Auditoria
 
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)

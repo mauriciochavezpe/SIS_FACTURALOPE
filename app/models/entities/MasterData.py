@@ -1,6 +1,6 @@
 from app import db
 
-from app.models.Auditoria import Auditoria
+from app.models.entities.Auditoria import Auditoria
 class MasterData(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     data_value = db.Column(db.String(50), unique=True, nullable=False) # DNI, YAPE  | lacteos

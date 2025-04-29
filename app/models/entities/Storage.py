@@ -1,7 +1,7 @@
 from app import db
 
-from app.models.Auditoria import Auditoria
-from .associations.product_storage import product_storage
+from .Auditoria import Auditoria
+from app.models.associations.product_storage import product_storage
 class Storage(db.Model): #almacenamineto de los archivos
     id = db.Column(db.Integer, primary_key=True)
     string_path = db.Column(db.String(500), nullable=True)
