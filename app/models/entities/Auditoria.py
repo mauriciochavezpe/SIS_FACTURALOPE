@@ -1,5 +1,5 @@
 from app import db
-# from Auditory import Auditoria
+# from .Auditory import Auditoria
 from datetime import datetime
 
 class Auditoria(db.Model):

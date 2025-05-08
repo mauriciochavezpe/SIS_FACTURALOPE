@@ -2,7 +2,7 @@ from app import db
 
 from .Auditoria import Auditoria
 
-class Payment(db.Model):
+class Payment(Auditoria):
     id = db.Column(db.Integer, primary_key=True)
     invoice_id = db.Column(db.Integer, db.ForeignKey('invoice.id'), nullable=False)
     amount = db.Column(db.Float, nullable=False)

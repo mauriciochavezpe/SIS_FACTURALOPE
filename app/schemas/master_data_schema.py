@@ -12,5 +12,3 @@ class MasterDataSchema(SQLAlchemySchema):
     data_value = auto_field()
     description_value = auto_field()
     is_active = auto_field()
-    created_at = auto_field()
-    updated_at = auto_field()

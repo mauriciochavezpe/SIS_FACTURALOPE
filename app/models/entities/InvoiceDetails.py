@@ -2,7 +2,7 @@ from app import db
 from app.models.entities.Auditoria import Auditoria
 from decimal import Decimal
 
-class InvoiceDetail(db.Model):
+class InvoiceDetail(Auditoria):
     id = db.Column(db.Integer, primary_key=True)
     invoice_id = db.Column(db.Integer, db.ForeignKey('invoice.id'), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)

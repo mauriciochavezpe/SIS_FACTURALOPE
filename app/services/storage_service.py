@@ -35,7 +35,7 @@ def create_storage():
             file_path=file_path,
             file_type=file.content_type,
             file_size=os.path.getsize(file_path),
-            estatus_id=1  # Active status
+            eid_status=1  # Active status
         )
         
         db.session.add(storage)
@@ -96,3 +96,10 @@ def delete_storage(id):
         db.session.rollback()
         return {"error": str(e)}, 500
 
+def get_all_storage():
+    try:
+        schema = StorageSchema(session=db.session)
+        storages = db.session.query(Storage).all()
+        return schema.dump(storages, many=True), 200
+    except Exception as e:
+        return {"error": str(e)}, 500

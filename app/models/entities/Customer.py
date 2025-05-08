@@ -3,7 +3,7 @@ from app import db
 from .Auditoria import Auditoria
 from app.models.enums.document_types import DocumentType # TIPO DOCUMENTO según SUNAT
 
-class Customer(db.Model):
+class Customer(Auditoria):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)

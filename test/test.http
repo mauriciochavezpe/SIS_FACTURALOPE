@@ -1,5 +1,6 @@
 ## get request by user
-GET http://127.0.0.1:5000/api/products/
+GET http://127.0.0.1:5000/api/customers
+
 Content-Type: application/json
 
 ### CREATED
@@ -9,11 +10,31 @@ Content-Type: application/json
 {
     "name": "producto prueba",
     "price": 200,
+    "description": "producto prueba",
     "stock_actual": 100,
     "stock_inicial": 100,
-    "category_id": 1
+    "category_id": 70,
+    "id_status": 1
+}
+
+### UPDATED
+PUT http://127.0.0.1:5000/api/products/2
+Content-Type: application/json
+
+{
+    "name": "producto prueba",
+    "price": 200,
+    "stock_actual": 200,
+    "stock_inicial": 200,
+    "category_id": 70,
+    "description": "producto prueba 2"
+}
+
+### DELETED
+DELETE http://12
 
 }
+
 ###dddddddddddddddddddddddddddddddddddd
 PUT http://127.0.0.1:5000/api/products/1
 Content-Type: application/json
@@ -27,3 +48,17 @@ Content-Type: application/json
     "description": "producto prueba",
     "imagen_path": "https://example.com/image.jpg"
 }
+
+----------------------------------
+
+
+### GET PRODUCTS
+GET http://127.0.0.1:5000/api/products/
+Content-Type: application/json
+
+### GET USERS
+GET http://127.0.0.1:5000/api/users/1
+Content-Type: application/json
+
+### GET CATEGORIES
+GET 

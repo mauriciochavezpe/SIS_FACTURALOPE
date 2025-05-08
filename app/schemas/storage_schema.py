@@ -12,6 +12,4 @@ class StorageSchema(SQLAlchemySchema):
     file_path = auto_field()
     file_type = auto_field()
     file_size = auto_field()
-    estatus_id = auto_field()
-    created_at = auto_field()
-    updated_at = auto_field()
+    eid_status = auto_field()

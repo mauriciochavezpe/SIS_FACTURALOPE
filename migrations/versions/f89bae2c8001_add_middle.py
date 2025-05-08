@@ -38,12 +38,12 @@ def upgrade():
         batch_op.drop_column('type_document')
 
     with op.batch_alter_table('product', schema=None) as batch_op:
-        batch_op.add_column(sa.Column('estatus_id', sa.Integer(), nullable=True))
+        batch_op.add_column(sa.Column('eid_status', sa.Integer(), nullable=True))
         batch_op.drop_column('category_id')
         batch_op.drop_column('is_active')
 
     with op.batch_alter_table('storage', schema=None) as batch_op:
-        batch_op.alter_column('estatus_id',
+        batch_op.alter_column('eid_status',
                existing_type=sa.VARCHAR(length=500),
                type_=sa.Integer(),
                existing_nullable=True)
@@ -64,7 +64,7 @@ def downgrade():
         batch_op.drop_column('id_status')
 
     with op.batch_alter_table('storage', schema=None) as batch_op:
-        batch_op.alter_column('estatus_id',
+        batch_op.alter_column('eid_status',
                existing_type=sa.Integer(),
                type_=sa.VARCHAR(length=500),
                existing_nullable=True)
@@ -72,7 +72,7 @@ def downgrade():
     with op.batch_alter_table('product', schema=None) as batch_op:
         batch_op.add_column(sa.Column('is_active', sa.BOOLEAN(), autoincrement=False, nullable=True))
         batch_op.add_column(sa.Column('category_id', sa.INTEGER(), autoincrement=False, nullable=True))
-        batch_op.drop_column('estatus_id')
+        batch_op.drop_column('eid_status')
 
     with op.batch_alter_table('master_data', schema=None) as batch_op:
         batch_op.add_column(sa.Column('type_document', sa.VARCHAR(length=50), autoincrement=False, nullable=False))

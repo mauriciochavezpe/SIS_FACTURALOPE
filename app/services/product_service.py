@@ -20,7 +20,7 @@ def get_all_products():
                 if hasattr(Product, key) and value.strip("'") != '':
                     query = query.filter(getattr(Product, key) == value.strip("'"))
                     
-        query.filter(Product.estatus_id == 23)
+        query.filter(Product.id_status == 23)
         
         results = query.all()
         if not results:
@@ -74,6 +74,7 @@ def update_product(id):
         
         # Obtener el producto por su ID
         product = Product.query.get(id)
+        print(f"product: {product}")
         if not product:
             return {"error": "Producto no encontrado"}, 404
         
@@ -96,11 +97,10 @@ def delete_product(id):
         product = Product.query.get(id)
         if not product:
             return {"error": "Producto no encontrado"}, 404
-        product.estatus_id = 25
+        product.id_status = 25
         # db.session.delete(product)
         db.session.commit()
         
         return {"message": "Producto eliminado"}, 200
     except Exception as e:
         return {"error": str(e)}, 500
-

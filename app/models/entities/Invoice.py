@@ -2,7 +2,7 @@ from app import db
 
 from .Auditoria import Auditoria
 
-class Invoice(db.Model):
+class Invoice(Auditoria):
     id = db.Column(db.Integer, primary_key=True)
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False) # ruc, boleta
     # type_invoice_id = db.Column(db.Integer, nullable=False)  # Factura, nota de crédito, nota de débito
@@ -12,11 +12,11 @@ class Invoice(db.Model):
     total = db.Column(db.Numeric(12,2), nullable=False, default=0)
     subtotal = db.Column(db.Numeric(12,2), nullable=False, default=0)
     tax = db.Column(db.Numeric(12,2), nullable=False, default=0) # IGV
-    status_id = db.Column(db.Integer, db.ForeignKey('master_data.id'), nullable=False)
+    id_status = db.Column(db.Integer, db.ForeignKey('master_data.id'), nullable=False)
     
 
     # invoice_details = db.relationship('InvoiceDetail', back_populates='invoice')
     invoice_details = db.relationship('InvoiceDetail', back_populates='invoice', lazy=True, cascade='all, delete-orphan')
     
     def __repr__(self):
-        return f'<Invoice {self.invoice_number}>'
+        return f'<Invoice {self.num_invoice}>'

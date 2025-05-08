@@ -8,11 +8,9 @@ class InvoiceSchema(SQLAlchemySchema):
         include_fk = True
     
     id = auto_field()
-    invoice_number = auto_field()
+    num_invoice = auto_field()
     customer_id = auto_field()
     date = auto_field()
     due_date = auto_field()
     total = auto_field()
-    status_id = auto_field()
-    created_at = auto_field()
-    updated_at = auto_field()
+    id_status = auto_field()

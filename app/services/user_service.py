@@ -20,6 +20,9 @@ def get_all_users():
         query.filter(User.id_status == 23)
         
         results = query.all()
+        if not results:
+            return results, 200
+        
         print(f"results: {results}")
         return jsonify([schema.dump(item) for item in results]), 200
         # return jsonify([item.to_dict() for item in results]), 200

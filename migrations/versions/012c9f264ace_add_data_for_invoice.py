@@ -22,12 +22,12 @@ def upgrade():
         batch_op.add_column(sa.Column('due_date', sa.DateTime(), nullable=True))
         batch_op.add_column(sa.Column('subtotal', sa.Numeric(precision=12, scale=2), nullable=False))
         batch_op.add_column(sa.Column('tax', sa.Numeric(precision=12, scale=2), nullable=False))
-        batch_op.add_column(sa.Column('status_id', sa.Integer(), nullable=False))
+        batch_op.add_column(sa.Column('id_status', sa.Integer(), nullable=False))
         batch_op.alter_column('total',
                existing_type=sa.DOUBLE_PRECISION(precision=53),
                type_=sa.Numeric(precision=12, scale=2),
                existing_nullable=False)
-        batch_op.create_foreign_key(None, 'master_data', ['status_id'], ['id'])
+        batch_op.create_foreign_key(None, 'master_data', ['id_status'], ['id'])
         batch_op.drop_column('type_invoice_id')
 
     with op.batch_alter_table('invoice_detail', schema=None) as batch_op:
@@ -62,7 +62,7 @@ def downgrade():
                existing_type=sa.Numeric(precision=12, scale=2),
                type_=sa.DOUBLE_PRECISION(precision=53),
                existing_nullable=False)
-        batch_op.drop_column('status_id')
+        batch_op.drop_column('id_status')
         batch_op.drop_column('tax')
         batch_op.drop_column('subtotal')
         batch_op.drop_column('due_date')

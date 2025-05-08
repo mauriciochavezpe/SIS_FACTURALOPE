@@ -22,5 +22,3 @@ class CustomerSchema(SQLAlchemySchema):
     is_active = auto_field()
     credit_limit = auto_field()
     payment_term_days = auto_field()
-    created_at = auto_field()
-    updated_at = auto_field()

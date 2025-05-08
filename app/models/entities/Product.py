@@ -4,14 +4,14 @@ from .Auditoria import Auditoria
 from app.models.associations.product_storage import product_storage
 from .Category import Category
 
-class Product(db.Model):
+class Product(Auditoria):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     price = db.Column(db.Float, nullable=False)
     description = db.Column(db.String(255), nullable=True)
     stock_inicial = db.Column(db.Integer, nullable=False) # stock semanal
     stock_actual = db.Column(db.Integer, nullable=False) # stock diario  
-    estatus_id = db.Column(db.Integer, nullable=True)
+    id_status = db.Column(db.Integer, nullable=True)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=True)
     
     # Relación muchos a muchos con Storage

@@ -19,7 +19,7 @@ def get_all_categories():
                 if hasattr(Category, key) and value.strip("'") != '':
                     query = query.filter(getattr(Category, key) == value.strip("'"))
                     
-        query.filter(Category.estatus_id == 23)
+        query.filter(Category.id_status == 23)
         
         results = query.all()
         if not results:
