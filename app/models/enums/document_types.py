@@ -28,3 +28,22 @@ class DocumentType(Enum):
             'code': doc_type.code,
             'description': doc_type.description
         } for doc_type in cls}
+        
+    @classmethod
+    def validate_document(cls, doc_type_code: str, doc_number: str) -> bool:
+        """Valida el número de documento según el tipo"""
+        doc_type = cls.get_by_code(doc_type_code)
+        if not doc_type:
+            return False
+        
+        if doc_type == cls.DNI:
+            return len(doc_number) == 8 and doc_number.isdigit()
+        elif doc_type == cls.RUC:
+            return len(doc_number) == 11 and doc_number.isdigit()
+        elif doc_type == cls.CE:
+            return 8 <= len(doc_number) <= 12
+        elif doc_type == cls.PASSPORT:
+            return 6 <= len(doc_number) <= 12
+        elif doc_type == cls.CDI:
+            return True  # Asume válido, puedes refinar
+        return False

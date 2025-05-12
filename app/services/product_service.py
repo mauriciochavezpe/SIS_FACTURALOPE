@@ -37,7 +37,7 @@ def get_all_products():
 def create_product():
     try:
         data = request.get_json()
-        print(f"data: {data}")
+        print(f"data11: {data}")
         schema = ProductSchema(session=db.session)
         
         # Validar los datos de entrada

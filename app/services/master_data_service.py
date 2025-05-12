@@ -74,3 +74,13 @@ def delete_master_data(id):
     except Exception as e:
         db.session.rollback()
         return {"error": str(e)}, 500
+
+def get_master_data_by_id(id):
+    try:
+        master_data = MasterData.query.get(id)
+        if not master_data:
+            return {"error": "MasterData not found"}, 404
+            
+        return MasterDataSchema(session=db.session).dump(master_data), 200
+    except Exception as e:
+        return {"error": str(e)}, 500

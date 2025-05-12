@@ -6,8 +6,8 @@ category_blueprint = Blueprint('category', __name__)
 @category_blueprint.route('/', methods=['POST'])
 def create_category_route():
     try:
-        category_data = request.get_json()
-        category, status = create_category(category_data)
+        # category_data = request.get_json()
+        category, status = create_category()
         return jsonify(category), status
     
     except Exception as e:
@@ -25,8 +25,7 @@ def get_all_categories_route():
 @category_blueprint.route('/<int:category_id>', methods=['PUT'])
 def update_category_route(category_id):
     try:
-        category_data = request.get_json()
-        category,status = update_category(category_id,category_data)
+        category,status = update_category(category_id)
         return jsonify(category),status
     
     except Exception as e:

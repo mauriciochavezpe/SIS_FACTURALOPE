@@ -4,7 +4,7 @@ from app.models.entities.InvoiceDetails import InvoiceDetail
 from app.schemas.invoice_detail_schema import InvoiceDetailSchema
 from decimal import Decimal
 
-def get_invoice_details(invoice_id=None):
+def get_invoice_details_all(invoice_id=None):
     try:
         schema = InvoiceDetailSchema(session=db.session)
         query = InvoiceDetail.query
@@ -66,14 +66,16 @@ def update_invoice_detail(id):
             setattr(detail, key, value)
             
         if 'quantity' in data or 'unit_price' in data or 'discount' in data:
-            quantity = Decimal(str(detail.quantity))
-            unit_price = Decimal(str(detail.unit_price))
-            discount = Decimal(str(detail.discount or 0))
-            
+            discount = detail.discount or 0
+            quantity = detail.quantity
+            unit_price = detail.unit_price
+            print(quantity, unit_price, discount)
             detail.subtotal = float(quantity * unit_price - discount)
-            detail.tax = float(detail.subtotal * Decimal('0.18'))
+            print(detail.subtotal)
+            detail.tax = float(detail.subtotal * 0.18)
+            print(detail.tax)
             detail.total = float(detail.subtotal + detail.tax)
-        
+            # print(detail.total)        
         db.session.commit()
         return schema.dump(detail), 200
     except Exception as e:

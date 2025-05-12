@@ -37,3 +37,23 @@ class Customer(Auditoria):
     def document_type_description(self):
         doc_type = DocumentType.get_by_code(self.document_type)
         return doc_type.description if doc_type else None
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'username': self.username,
+            'email': self.email,
+            'phone': self.phone,
+            'document_number': self.document_number,
+            'is_active': self.is_active,
+            'is_business': self.is_business,
+            'commercial_name': self.commercial_name,
+            'business_name': self.business_name,
+            'address': self.address,
+            'city': self.city,
+            'province': self.province,
+            'postal_code': self.postal_code,
+            'country': self.country,
+            'document_type': self.document_type,
+            'document_type_description': self.document_type_description
+        }

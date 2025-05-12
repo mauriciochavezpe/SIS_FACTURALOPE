@@ -1,0 +1,285 @@
+#### get request by user
+GET http://127.0.0.1:5000/api/products/
+
+Content-Type: application/json
+
+#### CREATED
+POST http://127.0.0.1:5000/api/users/
+Content-Type: application/json
+
+{
+    "username": "testuser",
+    "email": "test@example.com",
+    "password": "SecurePass123!",
+    "document_number": "12345678",
+    "is_admin": false,
+    "id_status": 1
+}
+
+#### CREATED
+POST http://127.0.0.1:5000/api/users/
+Content-Type: application/json
+
+{
+    "name": "producto prueba",
+    "price": 200,
+    "description": "producto prueba",
+    "stock_actual": 100,
+    "stock_inicial": 100,
+    "category_id": 70,
+    "id_status": 1
+}
+
+#### UPDATED
+PUT http://127.0.0.1:5000/api/users/1
+Content-Type: application/json
+
+{
+    "document_number": "12345678",
+    "email": "test2@example.com",
+    "id_status": 1,
+    "is_active": true,
+    "is_admin": false,
+    "password": "SecurePass123!",
+    "username": "testuser"
+  }
+
+#### DELETED
+DELETE http://12
+
+}
+
+######################
+POST http://127.0.0.1:5000/api/products/
+Content-Type: application/json
+
+{
+    "name": "producto prueba",
+    "price": 200,
+    "stock_actual": 200,
+    "stock_inicial": 200,
+    "description": "producto prueba"
+}
+
+#### PUT PRODUCT
+PUT http://127.0.0.1:5000/api/products/1
+Content-Type: application/json
+
+{
+    "name": "producto prueba",
+    "price": 200,
+    "stock_actual": 200,
+    "stock_inicial": 200,
+    "description": "producto prueba"
+}
+
+#### GET PRODUCTS
+GET http://127.0.0.1:5000/api/products/
+Content-Type: application/json
+
+#### GET USERS
+GET http://127.0.0.1:5000/api/users/1
+Content-Type: application/json
+
+#### GET CATEGORIES
+GET http://127.0.0.1:5000/api/categories
+Content-Type: application/json
+
+#### create category
+POST http://127.0.0.1:5000/api/categories
+Content-Type: application/json
+    
+    {
+        "name": "test category",
+        "description": "test description",
+        "id_status": 1
+    }
+
+### update category
+PUT http://127.0.0.1:5000/api/categories/1
+Content-Type: application/json
+    
+    {
+        "name": "test category 2",
+        "description": "test description 3",
+        "id_status": 0
+    }
+
+#### GET INVOICES
+GET http://127.0.0.1:5000/api/customers
+Content-Type: application/json
+
+
+#### GET INVOICES BY ID
+GET http://127.0.0.1:5000/api/invoices/1
+Content-Type: application/json
+
+
+####CREATE INVOICE
+POST http://127.0.0.1:5000/api/invoices
+Content-Type: application/json
+    
+    {
+        "user_id": 1,
+        "date": "2023-07-10",
+        "total": 1000,
+        "id_status": 1
+    }
+
+
+#### CREATE CUSTOMER
+POST http://127.0.0.1:5000/api/customers
+Content-Type: application/json
+    
+    {
+    "username": "usertest2025",
+    "email": "test2025@example.com",
+    "password": "SecurePass123!",
+    "phone": "1234567890",
+    "document_type": "1",
+    "document_number": "87654321",
+    "business_name": "Test Company",
+    "commercial_name": "Test Brand",
+    "address": "Test Address 123",
+    "city": "Lima",
+    "province": "Lima",
+    "country": "Peru",
+    "is_business": false,
+    "is_active": true  }
+
+#### UPDATE CUSTOMER
+PUT http://127.0.0.1:5000/api/customers/7
+Content-Type: application/json
+    
+    {
+    "username": "testcustomer2",
+    "email": "test12@example.com",
+    "password": "SecurePass123!",
+    "phone": "51900000000",
+    "document_type": "1",
+    "document_number": "12345278",
+    "business_name": "Test Company",
+    "commercial_name": "Test Brand",
+    "address": "Test Address 123",
+    "city": "Lima",
+    "province": "Lima",
+    "country": "Peru",
+    "is_business": false,
+    "is_active": true  }
+
+
+#### CRUD MASTERDATA
+
+GET http://127.0.0.1:5000/api/master_data/27
+Content-Type: application/json
+
+
+#### UPDATE MASTERDATA
+PUT http://127.0.0.1:5000/api/master_data/27
+Content-Type: application/json
+
+    {
+    "code_table": "T_METODO_PAGO",
+  "data_value": "MP3",
+  "description_value": "DEPOSITO2",
+  "is_active": true
+    }
+
+
+#### GET INVOICE
+GET http://127.0.0.1:5000/api/invoices/
+Content-Type: application/json
+
+#### CREATE INVOICE
+POST http://127.0.0.1:5000/api/invoices
+Content-Type: application/json
+
+    {
+    "customer_id": 1,
+    "date": "2025-05-12T14:48:58.000Z",
+    "total": 1000,
+    "id_status": 1,
+    "num_invoice": "12345678"
+
+    }
+
+#### UPDATE INVOICE
+PUT http://127.0.0.1:5000/api/invoices/1
+Content-Type: application/json
+
+    {
+    "user_id": 1,
+    "date": "2023-07-10",
+    "total": 1000,
+    "id_status": 1,
+    "num_invoice": "98745612"
+    }
+
+### get invoice details
+GET http://127.0.0.1:5000/api/invoices_details/invoice/1
+Content-Type: application/json
+
+
+### CREATE INVOICE DETAIL
+POST http://127.0.0.1:5000/api/invoices_details
+Content-Type: application/json
+
+    {
+    "invoice_id": 1,
+    "product_id": 3,
+    "quantity": 1,
+    "unit_price": 100,
+    "discount": 0,
+    "subtotal": 100,
+    "tax": 18,
+    "total": 118
+    }
+
+###  UPDATE INVOICE DETAIL
+PUT http://127.0.0.1:5000/api/invoices_details/1
+Content-Type: application/json
+
+    {
+    "invoice_id": 1,
+    "product_id": 2,
+    "quantity": 1,
+    "unit_price": 100,
+    "discount": 0,
+    "subtotal": 100,
+    "tax": 18,
+    "total": 120
+    }
+
+
+
+### GET STORAGE
+GET http://127.0.0.1:5000/api/storages/
+Content-Type: application/json
+
+
+### CREATE STORAGE
+POST http://127.0.0.1:5000/api/storages/
+Content-Type: application/json
+
+    {
+    "file_name": "test.jpg",
+    "file_path": "test.jpg",
+    "file_type": "image/jpeg",
+    "file_size": 1024,
+    "id_status": 1
+    }
+
+### UPDATE STORAGE
+PUT http://127.0.0.1:5000/api/storages/1
+Content-Type: application/json
+
+    {
+    "file_name": "test2.jpg",
+    "file_path": "test2.jpg",
+    "file_type": "image/jpeg",
+    "file_size": 2048
+    }
+
+### DELETE STORAGE
+DELETE http://127.0.0.1:5000/api/storages/1
+Content-Type: application/json

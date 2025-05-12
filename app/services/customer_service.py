@@ -3,44 +3,73 @@ from app.schemas.customer_schema import CustomerSchema
 from app.extension import db
 from app.models.entities.Customer import Customer
 from flask import request, jsonify
+from sqlalchemy import Boolean
 def create_customer():
     try:
         data = request.get_json()
         schema = CustomerSchema(session=db.session)
-        
+        # validated_data = schema.load(data)
+        print(f"data: {schema}")
         # Validate document number format
         if not DocumentType.validate_document(data['document_type'], data['document_number']):
             return {
                 "error": "Invalid document number format for the selected document type"
             }, 400
         
-        # Set default status if not provided
-        # if 'id_status' not in data:
-        #     data['id_status'] = CustomerStatus.ACTIVE.id
-            
-        # ...existing code...
+        new_customer = Customer(**data) 
+        print(f"new_customer: {new_customer}")
+        db.session.add(new_customer)
+        db.session.commit()
+        return schema.dump(new_customer), 201
         
     except Exception as e:
         db.session.rollback()
         return {"error": str(e)}, 500
-    
+ 
 def get_all_customers():
     try:
-        schema = CustomerSchema(session=db.session)
         filter = request.args.to_dict()
         query = db.session.query(Customer)
         
-        if filter:
-            for key, value in filter.items():
-                if hasattr(Customer, key) and value.strip("'") != '':
-                    query = query.filter(getattr(Customer, key) == value.strip("'"))
-                    
-        query.filter(Customer.id_status == 23)
+        # Aplicar filtros si están presentes
+        for key, value in filter.items():
+            print(f'Filtering by {key}: {value}')
+            if hasattr(Customer, key):
+                query = query.filter(getattr(Customer, key) == value)
         
         results = query.all()
+        print(f'Total customers found: {len(results)}')
         if not results:
-            return results, 200
+            return [], 200
         
-        return jsonify([schema.dump(item) for item in results]), 200
+        schema = CustomerSchema(session=db.session, many=True)
+        serialized_results = schema.dump(results)
+        print(f'Serialized results: {serialized_results}')
+        return serialized_results, 200
+
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return {"error": str(e)}, 500
+
+def get_customers_by_id(user_id):
+    try:
+        customer = db.session.query(Customer).filter_by(id=user_id).first()
+        if not customer:
+            return {"error": "Customer not found"}, 404
+        schema = CustomerSchema(session=db.session)
+        return schema.dump(customer), 200
+    except Exception as e:
+        return {"error": str(e)}, 500
+
+def update_customers_by_id(user_id):
+    try:
+        customer = db.session.query(Customer).filter_by(id=user_id).first()
+        if not customer:
+            return {"error": "Customer not found"}, 404
+        data = request.get_json()
+        for key, value in data.items():
+            setattr(customer, key, value)
+        db.session.commit()
+        schema = CustomerSchema(session=db.session)
+        return schema.dump(customer), 200
+    except Exception as e:
+        return {"error": str(e)}, 500

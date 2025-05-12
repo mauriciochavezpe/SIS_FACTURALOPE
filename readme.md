@@ -15,3 +15,9 @@
 - create report sell monthly
 - create report product with amount sales
 - create report product with amount 
+
+
+
+### test
+- pytest tests/ -v
+- pytest tests/unit/services/test_product_service.py -v

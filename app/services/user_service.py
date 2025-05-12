@@ -24,48 +24,50 @@ def get_all_users():
             return results, 200
         
         print(f"results: {results}")
-        return jsonify([schema.dump(item) for item in results]), 200
+        return [schema.dump(item) for item in results], 200
         # return jsonify([item.to_dict() for item in results]), 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return {"error": str(e)}, 500
 
-def create_user(user_data):
+def create_user():
     try:
+        user_data = request.get_json()
         print(f"create_user: {user_data}")
         schema = UserSchema(session=db.session)
         user = schema.load(user_data, session=db.session)
         db.session.add(user)
         db.session.commit()
-        return jsonify(schema.dump(user)), 201
+        return schema.dump(user), 201
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return {"error": str(e)}, 500
 
 def get_user_by_id(user_id):
     try:
         schema = UserSchema(session=db.session)
         user = db.session.query(User).filter_by(id=user_id).first()
         if user:
-            return jsonify(schema.dump(user)), 200
+            return schema.dump(user), 200
         else:
-            return jsonify({"error": "User not found"}), 404
+            return {"error": "User not found"}, 404
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return {"error": str(e)}, 500
 
-def update_user(user_id, user_data):
+def update_user(user_id):
     try:
         schema = UserSchema(session=db.session)
         user = db.session.query(User).filter_by(id=user_id).first()
+        user_data = request.get_json()
         if user:
             # Update user attributes
             for key, value in user_data.items():
                 if hasattr(user, key):
                     setattr(user, key, value)
             db.session.commit()
-            return jsonify(schema.dump(user)), 200
+            return schema.dump(user), 200
         else:
-            return jsonify({"error": "User not found"}), 404
+            return {"error": "User not found"}, 404
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return {"error": str(e)}, 500
 
 #validar inicio de sesion
 def login_user(email, password):
@@ -73,15 +75,15 @@ def login_user(email, password):
         schema = UserSchema(session=db.session)
         user = db.session.query(User).filter_by(email=email, password=password).first()
         if user:
-            return jsonify(schema.dump(user)), 200
+            return schema.dump(user), 200
         else:
-            return jsonify({"error": "Invalid credentials"}), 401
+            return {"error": "Invalid credentials"}, 401
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return {"error": str(e)}, 500
 
 def logout_user():
     try:
         # Implement logout logic here (e.g., invalidate JWT token)
-        return jsonify({"message": "Logged out successfully"}), 200
+        return {"message": "Logged out successfully"}, 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return {"error": str(e)}, 500

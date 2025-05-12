@@ -6,7 +6,7 @@ class Storage(Auditoria): #almacenamineto de los archivos
     id = db.Column(db.Integer, primary_key=True)
     string_path = db.Column(db.String(500), nullable=True)
     match_id = db.Column(db.Integer, nullable=True)
-    eid_status = db.Column(db.Integer, default=False)
+    id_status = db.Column(db.Integer, default=False)
     category_id = db.Column(db.Integer, nullable=True)
     file_path = db.Column(db.String(500), nullable=False)  # Ruta al archivo
     file_name = db.Column(db.String(255), nullable=False)  # Nombre del archivo
