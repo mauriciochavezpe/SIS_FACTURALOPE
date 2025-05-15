@@ -1,4 +1,4 @@
-from flask import Flask, jsonify ##,, request
+from flask import Flask
 from app.config.config import Config
 from app.extension import db, migrate, jwt
 from app.routes import register_blueprints
