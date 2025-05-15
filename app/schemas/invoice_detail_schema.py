@@ -1,11 +1,14 @@
-from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
+from marshmallow_sqlalchemy import SQLAlchemyAutoSchema,fields
 from app.models.entities.InvoiceDetails import InvoiceDetail
+from app.schemas.product_schema import ProductSchema
 
 class InvoiceDetailSchema(SQLAlchemyAutoSchema):
     class Meta:
         model = InvoiceDetail
         load_instance = True
         include_fk = True
+    
+    product = fields.Nested(ProductSchema)  
     
     # id = auto_field()
     # invoice_id = auto_field()

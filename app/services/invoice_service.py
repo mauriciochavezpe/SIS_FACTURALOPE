@@ -3,6 +3,7 @@ from app import db
 from decimal import Decimal
 from app.models.entities.Invoice import Invoice
 from app.models.entities.InvoiceDetails import InvoiceDetail
+from app.models.entities.Product import Product
 from app.schemas.invoice_schema import InvoiceSchema
 from app.models.entities.MasterData import MasterData
 from app.schemas.invoice_detail_schema import InvoiceDetailSchema
@@ -91,7 +92,8 @@ def get_details_by_invoice(id):
     try:
         schema = InvoiceSchema(session=db.session)
         # invoice = Invoice.query.get(id)
-        invoice = db.session.query(Invoice).join(InvoiceDetail, Invoice.id == InvoiceDetail.invoice_id).filter(Invoice.id == id).first()
+        invoice = db.session.query(Invoice).join(InvoiceDetail, Invoice.id == InvoiceDetail.invoice_id).join(Product, InvoiceDetail.product_id == Product.id).filter(Invoice.id == id).first()
+        # obtener la información del producto en el join
         print("invoice",invoice)
         if not invoice:
             return {"error": "Invoice not found"}, 404

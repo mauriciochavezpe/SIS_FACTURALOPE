@@ -287,7 +287,7 @@ DELETE http://127.0.0.1:5000/api/storages/1
 Content-Type: application/json
 
 
-### GET INVOICE DETAILS
+### Gx|ET INVOICE DETAILS
 GET http://127.0.0.1:5000/api/invoices/details/8
 Content-Type: application/json
 
