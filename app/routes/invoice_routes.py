@@ -3,7 +3,9 @@ from app.services.invoice_service import (
     get_all_invoices,
     create_invoice,
     update_invoice,
-    delete_invoice
+    delete_invoice,
+    get_details_by_invoice,
+    create_invoice_details
 )
 
 invoice_blueprint = Blueprint('invoices', __name__)
@@ -41,5 +43,22 @@ def delete_invoice_routes(id):
     try:
         result, status = delete_invoice(id)
         return jsonify(result), status
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@invoice_blueprint.route('/details/<int:id>', methods=['GET'])
+def get_details_by_invoice_routes(id):
+    try:
+        invoice, status = get_details_by_invoice(id)
+        return jsonify(invoice), status
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@invoice_blueprint.route('/details', methods=['POST'])
+def create_invoice_details_routes():
+    try:
+        invoice_details, status = create_invoice_details()
+        return jsonify(invoice_details), status
     except Exception as e:
         return jsonify({'error': str(e)}), 500

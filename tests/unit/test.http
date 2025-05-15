@@ -8,7 +8,7 @@ POST http://127.0.0.1:5000/api/users/
 Content-Type: application/json
 
 {
-    "username": "testuser",
+    "username": "@mchp2025TLV!.",
     "email": "test@example.com",
     "password": "SecurePass123!",
     "document_number": "12345678",
@@ -175,14 +175,16 @@ Content-Type: application/json
 
 
 #### UPDATE MASTERDATA
-PUT http://127.0.0.1:5000/api/master_data/27
+POST http://127.0.0.1:5000/api/master_data/
 Content-Type: application/json
 
     {
-    "code_table": "T_METODO_PAGO",
-  "data_value": "MP3",
-  "description_value": "DEPOSITO2",
-  "is_active": true
+    "code_table": "T_SUNAT",
+  "data_value": "IGV",
+  "description_table": "T_SUNAT",
+  "description_value": "0.18",
+  "is_active": true,
+  "id_status": 1
     }
 
 
@@ -283,3 +285,40 @@ Content-Type: application/json
 ### DELETE STORAGE
 DELETE http://127.0.0.1:5000/api/storages/1
 Content-Type: application/json
+
+
+### GET INVOICE DETAILS
+GET http://127.0.0.1:5000/api/invoices/details/8
+Content-Type: application/json
+
+### create invoice details
+POST http://127.0.0.1:5000/api/invoices/details
+Content-Type: application/json
+
+    {
+    "product_id": 3,
+    "date": "2025-05-12T14:48:58.000Z",
+    "customer_id": 1,
+    "num_invoice": "EB-00000016",
+    "subtotal": 0,
+    "total": 23.6,
+    "details":[{
+        "discount": "0.00",
+        "product_id": 2,
+        "quantity": 1,
+        "subtotal": "10.00",
+        "tax": "18.00",
+        "total": "11.80",
+        "unit_price": "10.00"
+    },
+    {
+        "discount": "0.00",
+        "product_id": 3,
+        "quantity": 1,
+        "subtotal": "10.00",
+        "tax": "18.00",
+        "total": "11.80",
+        "unit_price": "10.00"
+    }
+    ]
+    }

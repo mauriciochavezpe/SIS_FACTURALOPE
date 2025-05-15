@@ -9,7 +9,7 @@ class Invoice(Auditoria):
     num_invoice = db.Column(db.String(50), unique=True, nullable=False) #F001-0001, B001-0001
     date = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
     due_date = db.Column(db.DateTime, nullable=True)
-    total = db.Column(db.Numeric(12,2), nullable=False, default=0)
+    total = db.Column(db.Numeric(12,2), nullable=False, default=0) # total de la factura
     subtotal = db.Column(db.Numeric(12,2), nullable=False, default=0)
     tax = db.Column(db.Numeric(12,2), nullable=False, default=0) # IGV
     id_status = db.Column(db.Integer, db.ForeignKey('master_data.id'), nullable=False)

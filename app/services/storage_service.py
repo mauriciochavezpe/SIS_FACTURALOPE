@@ -70,7 +70,7 @@ def create_storage():
         db.session.rollback()
         return {"error": str(e)}, 500
 
-def update_storage():
+def update_storage(id):
     try:
         data = request.get_json()
         schema = StorageSchema(session=db.session)
@@ -81,7 +81,7 @@ def update_storage():
             return {"errors": errors}, 400
             
         # Update storage
-        storage = Storage.query.get(data['id'])
+        storage = Storage.query.get(id)
         if not storage:
             return {"error": "Storage not found"}, 404
         

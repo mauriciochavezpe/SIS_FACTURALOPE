@@ -1,7 +1,12 @@
 from flask import request
 from app import db
+from decimal import Decimal
 from app.models.entities.Invoice import Invoice
+from app.models.entities.InvoiceDetails import InvoiceDetail
 from app.schemas.invoice_schema import InvoiceSchema
+from app.models.entities.MasterData import MasterData
+from app.schemas.invoice_detail_schema import InvoiceDetailSchema
+from app.schemas.custom_detail_by_invoice_schema import ComplexInvoiceSchema
 from datetime import datetime
 
 def get_all_invoices():
@@ -76,6 +81,96 @@ def delete_invoice(id):
         db.session.delete(invoice)
         db.session.commit()
         return {"message": "Invoice deleted successfully"}, 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}, 500
+
+
+def get_details_by_invoice(id):
+    try:
+        schema = InvoiceSchema(session=db.session)
+        # invoice = Invoice.query.get(id)
+        invoice = db.session.query(Invoice).join(InvoiceDetail, Invoice.id == InvoiceDetail.invoice_id).filter(Invoice.id == id).first()
+        print("invoice",invoice)
+        if not invoice:
+            return {"error": "Invoice not found"}, 404
+        
+        result = schema.dump(invoice)
+        result['details'] = InvoiceDetailSchema(session=db.session, many=True).dump(invoice.invoice_details)
+        return result, 200  
+
+    except Exception as e:
+        return {"error": str(e)}, 500
+
+
+def create_invoice_details():
+    try:
+        data = request.get_json()
+        schema = ComplexInvoiceSchema(session=db.session)
+        
+        # Validate input data
+        errors = schema.validate(data)
+        if errors:
+            return {"errors": errors}, 400
+        
+        ## create invoice
+        invoice = Invoice(
+            customer_id = data['customer_id'],
+            num_invoice = data['num_invoice'],
+            date = data['date'],
+            id_status = 23,
+            subtotal = 0,
+            tax = 0,
+            total = 0
+        )
+        db.session.add(invoice)
+        # db.session.commit()
+        db.session.flush()  # Obtener ID de la factura
+        # realizar una consulta a la tabla master_data para obtener el valor de la tasa de IGV
+        master_data = db.session.query(MasterData).filter_by(code_table='T_SUNAT', data_value='IGV').first()
+        if not master_data:
+            return {"error": "IGV rate not found in MasterData"}, 404
+        
+        igv_rate = Decimal(master_data.description_value)
+        total_global = 0
+        invoice_details = []
+        # Create new invoice detail
+        for detail in data['details']:
+
+            if Decimal(detail['discount']) > 0:
+                detail['subtotal'] -= Decimal(detail['discount'])
+            
+            detail['total'] = Decimal(detail['subtotal']) + (Decimal(igv_rate) * Decimal(detail['subtotal']))
+            print("tax",igv_rate)     
+            print("subtotal",detail['subtotal'])     
+            print("total",detail['total'])     
+            invoice_detail = InvoiceDetail(
+                invoice_id = invoice.id,
+                product_id = detail['product_id'],
+                quantity = detail['quantity'],
+                unit_price = detail['unit_price'],
+                discount = detail['discount'] or 0.00,
+                subtotal = detail['subtotal'],
+                tax = igv_rate,
+                total = detail['total']
+            )
+            
+            total_global += invoice_detail.total
+
+            invoice_details.append(invoice_detail)
+        
+        db.session.add_all(invoice_details)
+        # db.session.commit()
+        # calculamos el tota de la factura y procedemos a actualizar
+
+        invoice.total = total_global
+        db.session.commit()
+        invoice_schema = InvoiceSchema()
+        result = invoice_schema.dump(invoice)
+        result['details'] = InvoiceDetailSchema(many=True).dump(invoice_details)
+            
+        return result, 201
         
     except Exception as e:
         db.session.rollback()

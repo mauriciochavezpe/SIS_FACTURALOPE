@@ -11,7 +11,7 @@ class InvoiceDetail(Auditoria):
     discount = db.Column(db.Numeric(12,2), default=0)
     subtotal = db.Column(db.Numeric(12,2), nullable=False)
     tax = db.Column(db.Numeric(12,2), nullable=False)  # IGV por línea
-    total = db.Column(db.Numeric(12,2), nullable=False)
+    total = db.Column(db.Numeric(12,2), nullable=False) # Total precio
     
     # invoice = db.relationship('Invoice', back_populates='invoice_details')
      # Relación con Product

@@ -1,4 +1,4 @@
-from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
+from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from app.models.entities.InvoiceDetails import InvoiceDetail
 
 class InvoiceDetailSchema(SQLAlchemyAutoSchema):
