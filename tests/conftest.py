@@ -13,7 +13,7 @@ from app.extension import db
 @pytest.fixture(scope='session')
 def app():
     """Create and configure a test application instance."""
-    app = create_app('testing')
+    app = create_app()
     # app.config.update({
     #     'TESTING': True,
     #     'SQLALCHEMY_DATABASE_URI': 'postgresql://postgres:123456@localhost:5432/Facturacion',

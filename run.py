@@ -1,8 +1,9 @@
 from app import create_app, db
 from app.utils.batch import cargarBatch
+from flask_cors import CORS
 
 app = create_app()
-
+CORS(app,resources={r"/*": {"origins": "*"}})
 
 if __name__ == "__main__":
     with app.app_context():

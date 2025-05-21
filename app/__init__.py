@@ -9,7 +9,7 @@ from app.routes import register_blueprints
 # from app.utils.Storage.config import authenticate_service_account
  
  
-def create_app(text='testing'):
+def create_app():
         app = Flask(__name__) 
         app.config.from_object(Config)
         # Inicializar extensiones
