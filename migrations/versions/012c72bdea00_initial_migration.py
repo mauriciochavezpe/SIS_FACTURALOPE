@@ -1,8 +1,8 @@
-"""sync product model with database
+"""initial migration
 
-Revision ID: 628a0c5328b9
-Revises: 258832f8ff0f
-Create Date: 2025-05-08 01:15:13.459862
+Revision ID: 012c72bdea00
+Revises: 
+Create Date: 2025-05-20 20:18:46.154505
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '628a0c5328b9'
-down_revision = '258832f8ff0f'
+revision = '012c72bdea00'
+down_revision = None
 branch_labels = None
 depends_on = None
 
@@ -79,7 +79,7 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('string_path', sa.String(length=500), nullable=True),
     sa.Column('match_id', sa.Integer(), nullable=True),
-    sa.Column('eid_status', sa.Integer(), nullable=True),
+    sa.Column('id_status', sa.Integer(), nullable=True),
     sa.Column('category_id', sa.Integer(), nullable=True),
     sa.Column('file_path', sa.String(length=500), nullable=False),
     sa.Column('file_name', sa.String(length=255), nullable=False),

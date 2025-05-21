@@ -10,14 +10,3 @@ class MasterData(Auditoria):
     description_table = db.Column(db.String(255), nullable=False) # DOCUMENTO DE IDENTIDAD, PAGOS | categoria de lacteos |
     id_status  = db.Column(db.Integer, nullable=False)
     
-    # is_client = db.Column(db.Boolean, default=False)
-    
-    # Relationship
-    # user_type = db.relationship(
-    #     'User',
-    #     secondary=user_typedocument,
-    #     back_populates='master_data'
-    # )
-    
-    
-    # products = db.relationship("Product", back_populates="category")  # 👈 uno a muchos

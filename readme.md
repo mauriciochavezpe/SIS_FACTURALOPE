@@ -17,6 +17,10 @@
 - create report product with amount 
 
 
+- python -m venv venv
+- .venv\Scripts\activate
+- pip install -r requirements.txt
+
 
 ### test
 - pytest tests/ -v

@@ -2,7 +2,6 @@ from app import db
 
 from .Auditoria import Auditoria
 from app.models.enums.document_types import DocumentType
-# from .associations.user_typedocument import user_typedocument
 class User(Auditoria):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
@@ -13,12 +12,6 @@ class User(Auditoria):
     id_status = db.Column(db.Integer, nullable=False)
     document_number = db.Column(db.String(20), unique=True, nullable=False)
 
-    # Relationship with MasterData
-    # master_data = db.relationship(
-    #     'MasterData',
-    #     secondary=user_typedocument,
-    #     back_populates='user_type'
-    # )
     
     # POR DEFECTO TRAERA 1 - DNI
     @property
