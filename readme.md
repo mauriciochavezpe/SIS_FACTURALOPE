@@ -25,3 +25,6 @@
 ### test
 - pytest tests/ -v
 - pytest tests/unit/services/test_product_service.py -v
+
+
+- https://cpe.sunat.gob.pe/sites/default/files/inline-files/servicios%20web%20disponibles%20%281%29.pdf

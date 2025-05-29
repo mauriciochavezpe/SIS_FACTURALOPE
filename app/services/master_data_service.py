@@ -2,6 +2,13 @@ from flask import request
 from app import db
 from app.models.entities.MasterData import MasterData
 from app.schemas.master_data_schema import MasterDataSchema
+from app.utils.generar_xml import generar_xml, crear_xml_y_zip
+from app.config.certificado import obtener_certificado, firmar_xml_con_placeholder
+from datetime import datetime
+from app.utils.conexion_sunat import (conexion_sunat_mejorada,conexion_sunat)
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
 def get_all_master_data():
     try:
@@ -82,5 +89,42 @@ def get_master_data_by_id(id):
             return {"error": "MasterData not found"}, 404
             
         return MasterDataSchema(session=db.session).dump(master_data), 200
+    except Exception as e:
+        return {"error": str(e)}, 500
+
+def generacion_factura_dummy():
+    try:
+        data = request.get_json()
+        load_dotenv()
+        xml_string =generar_xml() ## aqui esta el xml con placeholders
+        # print("firmar_xml",obtener_certificado())
+        # print("xml_firmado",xml_firmado)        
+        
+        xml_firmado = xml_string.replace("@fecha", datetime.now().strftime("%Y-%m-%d"))
+        xml_firmado = xml_firmado.replace("@serie", data.get("documento"))
+        xml_firmado = xml_firmado.replace("@tipo_moneda", "PEN")
+        xml_firmado = xml_firmado.replace("@tipo", "01")
+        xml_firmado = xml_firmado.replace("@monto_total", data.get("monto_total"))
+        xml_firmado = xml_firmado.replace("@monto_igv", data.get("monto_igv"))
+        xml_firmado = xml_firmado.replace("@porcentaje_igv", data.get("porcentaje_igv"))
+        xml_firmado = xml_firmado.replace("@monto", data.get("monto_total"))
+        xml_firmado = xml_firmado.replace("@ruc_cliente", data.get("ruc_cliente"))
+        xml_firmado = xml_firmado.replace("@ruc", str(os.getenv("SUNAT_RUC")))
+        xml_firmado = xml_firmado.replace("@razon_social_cliente", data.get("razon_social_cliente"))
+        xml_firmado = xml_firmado.replace("@razon_social", os.getenv("RAZON_SOCIAL"))
+        xml_firmado = xml_firmado.replace("@descripcion", data.get("descripcion"))
+        xml_firmado = xml_firmado.replace("@precio", data.get("monto_total"))
+        xml_firmado = xml_firmado.replace("@subtotal", data.get("subtotal"))
+
+        # xml_firmado = firmar_xml_con_placeholder(xml_firmado)
+        # print("xml_firmado",xml_firmado)
+
+        # probar con sunat 
+        # result = crear_xml_y_zip(xml_firmado,data)
+        path_xml = os.path.join('assets', '20603786590-01-F001-00000001.zip')
+        # obtener url de sunat
+        # result = conexion_sunat_mejorada(path_xml)
+        result = conexion_sunat(path_xml)
+        return result.json(), 200
     except Exception as e:
         return {"error": str(e)}, 500
