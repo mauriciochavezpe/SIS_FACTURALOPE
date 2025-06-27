@@ -61,3 +61,5 @@ coverage.xml
 # Misc
 .DS_Store
 Thumbs.db
+/assets/
+/CDR/
