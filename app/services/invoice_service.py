@@ -105,7 +105,7 @@ def get_details_by_invoice(id):
     except Exception as e:
         return {"error": str(e)}, 500
 
-
+## definicion personalizada
 def create_invoice_details():
     try:
         data = request.get_json()
@@ -174,6 +174,73 @@ def create_invoice_details():
             
         return result, 201
         
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}, 500
+    
+def create_invoice_detail_sunat():
+    try:
+        data = request.get_json()
+        
+        
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}, 500
+    
+def crear_factura_standard(data):
+    try:
+   
+         ## create invoice
+        invoice = Invoice(
+            customer_id = data['customer_id'],
+            num_invoice = data['num_invoice'],
+            serie = data['serie'],
+            date = data['date'],
+            id_status = 23,
+            subtotal = data['subtotal'] or 0,
+            total = 0
+        )
+        db.session.add(invoice)
+        db.session.flush()  # Obtener ID de la factura
+        
+    
+        master_data = db.session.query(MasterData).filter_by(code_table='T_SUNAT', data_value='IGV').first()
+        if not master_data:
+            return {"error": "IGV rate not found in MasterData"}, 404
+        igv_rate = Decimal(master_data.description_value)
+        total_global = 0
+        invoice_details = []
+        invoice.tax = igv_rate
+        # Create new invoice detail
+        for detail in data['details']:
+
+            if Decimal(detail['discount']) > 0:
+                detail['subtotal'] -= Decimal(detail['discount'])
+            
+            detail['total'] = Decimal(detail['subtotal']) + (Decimal(igv_rate) * Decimal(detail['subtotal']))
+            invoice_detail = InvoiceDetail(
+                invoice_id = invoice.id,
+                product_id = detail['product_id'],
+                quantity = detail['quantity'],
+                unit_price = detail['unit_price'],
+                discount = detail['discount'] or 0.00,
+                subtotal = detail['subtotal'],
+                tax = igv_rate,
+                total = detail['total']
+            )
+            
+            total_global += invoice_detail.total
+
+            invoice_details.append(invoice_detail)
+        db.session.add_all(invoice_details)
+        # db.session.commit()
+        # calculamos el tota de la factura y procedemos a actualizar
+
+        invoice.total = total_global
+        db.session.commit()
+        invoice_schema = InvoiceSchema()
+        result = invoice_schema.dump(invoice)
+        result['details'] = InvoiceDetailSchema(many=True).dump(invoice_details)
     except Exception as e:
         db.session.rollback()
         return {"error": str(e)}, 500

@@ -334,7 +334,8 @@ POST http://127.0.0.1:5000/api/master_data/factura_dummy
 Content-Type: application/json
 
 {
-    "documento": "F001-510",
+    "documento": "F001-00000001",
+    "tipo_documento": "01",
     "monto_total": "1.18",
     "monto_igv": "0.18",
     "porcentaje_igv": "18",

@@ -1,0 +1,187 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+    <ext:UBLExtensions>
+        <ext:UBLExtension>
+        <ext:ExtensionContent><ds:Signature>
+<ds:SignedInfo>
+<ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+<ds:SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
+<ds:Reference URI="">
+<ds:Transforms>
+<ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+</ds:Transforms>
+<ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
+<ds:DigestValue>CRejTcFhx4MaLderDgpgpQSIFDU=</ds:DigestValue>
+</ds:Reference>
+</ds:SignedInfo>
+<ds:SignatureValue>ewsW1uPqCyKKIXOD8woKZcALW5k8Ct4pXqu79T/vHIuq1IqgIbl/ZCBn26ReBd7H
+jmFQyk7hNjYi5o809qVsgSEYcM1hzlkVUcmqqnT/wOklTbVJD2DeM2x0TK1qOzqQ
+/hi/4CY8YXb/DDItQqctm8qzKjjlA762A6hlqKr4taZmuZ9ACCJhUJGhQy0WUg+S
+1//+veKhaFYOnrlRGiLS+ntCXDEyvxg/qJwNC9uKViR6eCPGiORnULTCDtSE76sN
+Na9aUYO5J9D+/VLbBUboATRd6k+ok4C8fA86qwWjiIERVsVX966TizocFoD5Wm3O
+DVTKKI5SzaA/corZVtph5A==</ds:SignatureValue>
+<ds:KeyInfo>
+<ds:X509Data>
+<ds:X509Certificate>MIIIpDCCBoygAwIBAgIUHON/o3yPYcKW9g/Q/ntYDRb33XowDQYJKoZIhvcNAQEL
+BQAwbzELMAkGA1UEBhMCUEUxPDA6BgNVBAoMM1JlZ2lzdHJvIE5hY2lvbmFsIGRl
+IElkZW50aWZpY2FjacOzbiB5IEVzdGFkbyBDaXZpbDEiMCAGA1UEAwwZRUNFUC1S
+RU5JRUMgQ0EgQ2xhc3MgMSBJSTAeFw0yNTA1MjEyMTE0NDJaFw0yODA1MjAyMTE0
+NDJaMIIBAzELMAkGA1UEBhMCUEUxEjAQBgNVBAgMCUxJTUEtTElNQTEMMAoGA1UE
+BwwDQVRFMSwwKgYDVQQKDCNQRVJVIExPR0lTVElDIEFORFJFUyBFRFVBUkRPIFMu
+Ui5MLjEaMBgGA1UEYQwRTlRSUEUtMjA2MDM3ODY1OTAxITAfBgNVBAsMGEVSRVBf
+U1VOQVRfMjAyNTAwMDY4MzQ0NzEUMBIGA1UECwwLMjA2MDM3ODY1OTAxTzBNBgNV
+BAMMRnx8VVNPIFRSSUJVVEFSSU98fCBQRVJVIExPR0lTVElDIEFORFJFUyBFRFVB
+UkRPIFMuUi5MLiBDRFQgMjA2MDM3ODY1OTAwggEiMA0GCSqGSIb3DQEBAQUAA4IB
+DwAwggEKAoIBAQCUqrJJfsT+IjhFlru4Z6UKw8+ay0ut7M4UoyCRwKxGca+GdrsL
+hWXidHA8VrTbwm/fQaayzNITc3hoNMiFJ0aovBFztnS1EO1akOkVQpOSV6xQeU5P
+vL/sDmVHDb4nZZH29eem6EI/li2/qW6rokWbcXoR+raBh2sjIsprQgk2PiSi6fp/
+E1xxxGSPLWHeo5kpp1D2FK64s2egiQSLaGxk/zjFay4KpfgbsfpBLYtrHksYcBkE
+QP0wUNVCxTNXBnt8OeyEXN0pdO2qPcwOSLMrLobCsj/wjENJoroOn26/ZxDS4s23
+pshFtTjgt/2jm+V0wyHGgk+HxYfdOnszk9JZAgMBAAGjggOgMIIDnDAMBgNVHRMB
+Af8EAjAAMB8GA1UdIwQYMBaAFMx9H1biib++Q+2V38FGe79L/d0lMHAGCCsGAQUF
+BwEBBGQwYjA5BggrBgEFBQcwAoYtaHR0cDovL2NydC5yZW5pZWMuZ29iLnBlL3Jv
+b3QzL2NhY2xhc3MxaWkuY3J0MCUGCCsGAQUFBzABhhlodHRwOi8vb2NzcC5yZW5p
+ZWMuZ29iLnBlMIICNwYDVR0gBIICLjCCAiowdwYRKwYBBAGCk2QCAQMBAGWHaAAw
+YjAxBggrBgEFBQcCARYlaHR0cHM6Ly93d3cucmVuaWVjLmdvYi5wZS9yZXBvc2l0
+b3J5LzAtBggrBgEFBQcCARYhUG9s7XRpY2EgR2VuZXJhbCBkZSBDZXJ0aWZpY2Fj
+afNuMIHEBhErBgEEAYKTZAIBAwEAZ4doADCBrjAyBggrBgEFBQcCARYmaHR0cHM6
+Ly9wa2kucmVuaWVjLmdvYi5wZS9yZXBvc2l0b3Jpby8weAYIKwYBBQUHAgIwbB5q
+AEQAZQBjAGwAYQByAGEAYwBpAPMAbgAgAGQAZQAgAFAAcgDhAGMAdABpAGMAYQBz
+ACAAZABlACAAQwBlAHIAdABpAGYAaQBjAGEAYwBpAPMAbgAgAEUAQwBFAFAALQBS
+AEUATgBJAEUAQzCB5wYRKwYBBAGCk2QCAQMBAWeHcwMwgdEwgc4GCCsGAQUFBwIC
+MIHBHoG+AEMAZQByAHQAaQBmAGkAYwBhAGQAbwAgAEQAaQBnAGkAdABhAGwAIABU
+AHIAaQBiAHUAdABhAHIAaQBvACAAcABhAHIAYQAgAEEAZwBlAG4AdABlACAAQQB1
+AHQAbwBtAGEAdABpAHoAYQBkAG8AIABDAGwAYQBzAHMAIAAxACwAIABlAG4AIABj
+AHUAbQBwAGwAaQBtAGkAZQBuAHQAbwAgAGQAZQBsACAARABMACAATgC6ACAAMQAz
+ADcAMDATBgNVHSUEDDAKBggrBgEFBQcDBDB6BgNVHR8EczBxMDagNKAyhjBodHRw
+Oi8vY3JsLnJlbmllYy5nb2IucGUvY3JsL3NoYTIvY2FjbGFzczFpaS5jcmwwN6A1
+oDOGMWh0dHA6Ly9jcmwyLnJlbmllYy5nb2IucGUvY3JsL3NoYTIvY2FjbGFzczFp
+aS5jcmwwHQYDVR0OBBYEFL8680dZu16S2murjd50hf5i8LqvMA4GA1UdDwEB/wQE
+AwIGwDANBgkqhkiG9w0BAQsFAAOCAgEAWXx6YQDSHW7hTVnceIUBVZiDpmYd2wk2
+VzQzEshEwdbOk4lKBlQ4RPNdMGhkIQul3/0qsadNhQahsG90KxrXB/lWszimUYeZ
+0nML4oIfj/V0I+NlymKhkljLcc00oJ5NvdF1gX95nRIwugMeCqTcxTpJ2u4edaOG
+8QpOiE8ia2Jac2ZjPA36LfHWKcGdj/dy/mbibEUrV3RZ66siYVMG1I4C54KgxdE9
+Uo/R6u2Yirmn5rQgrzntEz9DRpFwH1r11qfUpd+wXYwSgjnqH9ZY4aVLyPywtCpM
+ghUzA13IAr/rwVGFV3IFWdmUWuOg/9xGEOmzc0tK9kMfUM0G5HT1qW3vsKQXRZ07
+rl5LUsGUUkd4xSwTNLSzXEr1Id2jG9bhNuz1mWGMCJ8YrWZxY1oxWxtbCRsDELmL
+05j4CjspVQql9aX2RcBk1NgM9XyRq48XU8Z5pQMRyoX1sFL0JMUa2pneTeeqC5FK
+GvdD1JtB8LA5acj3rSQPcMpzxwQ5UVBU+Ai5ET43BgkntlQY/F1XPdkeB81vdltd
+MoG8HzoGgdrkFqAkciCmnNfqrywaql+F8U8Dymn86rhLcVWNKTUdqhbDvjumA6ks
+Em0PzKmKHZds4dEuk1ZWg+ldOOLe11NHdNm9wQShEyidWRIYeqCrC5aw8Y87XL2K
+l/PrRtE4iqY=
+</ds:X509Certificate>
+</ds:X509Data>
+</ds:KeyInfo>
+</ds:Signature></ext:ExtensionContent>
+        </ext:UBLExtension>
+    </ext:UBLExtensions>
+
+    <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+    <cbc:CustomizationID>2.0</cbc:CustomizationID>
+    <cbc:ID>F001-00000011</cbc:ID>
+    <cbc:IssueDate>2025-06-26</cbc:IssueDate>
+    <cbc:InvoiceTypeCode listID="0101">01</cbc:InvoiceTypeCode>
+    <cbc:DocumentCurrencyCode>PEN</cbc:DocumentCurrencyCode>
+
+    <!-- Datos del emisor -->
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+        <cac:PartyIdentification>
+            <cbc:ID schemeID="6" schemeName="SUNAT:Identificador de Documento de Identidad" schemeAgencyName="PE:SUNAT" schemeURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo06">20603786590</cbc:ID>
+        </cac:PartyIdentification>
+        <cac:PartyLegalEntity>
+            <cbc:RegistrationName>PERU LOGISTIC ANDRES EDUARDO S.R.L.</cbc:RegistrationName>
+            <cac:RegistrationAddress>
+                <cbc:AddressTypeCode>0000</cbc:AddressTypeCode>
+                <cbc:CityName>LIMA</cbc:CityName>
+                <cbc:District>ATE</cbc:District>
+                <cac:AddressLine>
+                    <cbc:Line>AV. LOS VIRREYES  - MZA.: A  - LOTE: 22  - URBANIZACION TILDA  - ATE</cbc:Line>
+                </cac:AddressLine>
+            </cac:RegistrationAddress>
+        </cac:PartyLegalEntity>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+
+    <!-- Datos del cliente -->
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+        <cac:PartyIdentification>
+            <cbc:ID schemeID="6" schemeName="SUNAT:Identificador de Documento de Identidad" schemeAgencyName="PE:SUNAT" schemeURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo06">20612922773</cbc:ID>
+        </cac:PartyIdentification>
+        <cac:PartyLegalEntity>
+            <cbc:RegistrationName>SERVICENTRO RONSOCO S.A.C.</cbc:RegistrationName>
+             <cac:RegistrationAddress>
+                <cbc:AddressTypeCode>0000</cbc:AddressTypeCode>
+                <cbc:CityName>CORONEL PORTILLO</cbc:CityName>
+                <cbc:District>CALLERIA</cbc:District>
+                <cac:AddressLine>
+                    <cbc:Line>CAR. FEDERICO BASADRE  - FUNDO FRACCION DE FUNDO VILLA S  - CALLERIA</cbc:Line>
+                </cac:AddressLine>
+            </cac:RegistrationAddress>
+        </cac:PartyLegalEntity>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+
+    <!-- Forma de pago -->
+    <cac:PaymentTerms>
+        <cbc:ID>FormaPago</cbc:ID>
+        <cbc:PaymentMeansID>Contado</cbc:PaymentMeansID>
+    </cac:PaymentTerms>
+    <!-- Totales -->
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="PEN">0.18</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="PEN">1</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="PEN">0.18</cbc:TaxAmount>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:ID>1000</cbc:ID>
+                    <cbc:Name>IGV</cbc:Name>
+                    <cbc:TaxTypeCode>VAT</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="PEN">1</cbc:LineExtensionAmount>
+        <cbc:TaxInclusiveAmount currencyID="PEN">1.18</cbc:TaxInclusiveAmount>
+        <cbc:PayableAmount currencyID="PEN">1.18</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    
+    <!-- Línea de detalle -->
+    <cac:InvoiceLine>
+        <cbc:ID>1</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="NIU">1</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="PEN">1</cbc:LineExtensionAmount>
+        <cac:PricingReference>
+            <cac:AlternativeConditionPrice>
+                <cbc:PriceAmount currencyID="PEN">1.18</cbc:PriceAmount>
+                <cbc:PriceTypeCode>01</cbc:PriceTypeCode>
+            </cac:AlternativeConditionPrice>
+        </cac:PricingReference>
+        <cac:TaxTotal>
+            <cbc:TaxAmount currencyID="PEN">0.18</cbc:TaxAmount>
+            <cac:TaxSubtotal>
+                <cbc:TaxableAmount currencyID="PEN">1</cbc:TaxableAmount>
+                <cbc:TaxAmount currencyID="PEN">0.18</cbc:TaxAmount>
+                <cac:TaxCategory>
+                    <cbc:Percent>18</cbc:Percent>
+                    <cbc:TaxExemptionReasonCode>10</cbc:TaxExemptionReasonCode>
+                    <cac:TaxScheme>
+                        <cbc:ID>1000</cbc:ID>
+                        <cbc:Name>IGV</cbc:Name>
+                        <cbc:TaxTypeCode>VAT</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                </cac:TaxCategory>
+            </cac:TaxSubtotal>
+        </cac:TaxTotal>
+        <cac:Item>
+            <cbc:Description>TEST 1</cbc:Description>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="PEN">1.18</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    </Invoice>

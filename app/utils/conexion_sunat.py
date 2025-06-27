@@ -1,10 +1,10 @@
-import base64
 from zeep import Client, Transport
 from zeep.wsse.username import UsernameToken    
 import logging
 from zeep.settings import Settings
 from requests.adapters import HTTPAdapter
 from datetime import datetime
+from dotenv import load_dotenv
 import requests
 import base64
 import time
@@ -17,8 +17,9 @@ from .utils import get_sunat_response_code, get_sunat_response_xml
 from app.config.certificado import firmar_xml_con_placeholder
 from enum import Enum
 from xml.etree import ElementTree as ET
-from dotenv import load_dotenv
-
+from app.services.serie_services import get_last_number
+from app import db
+from app.services.invoice_service import crear_factura_standard
 # Configurar logging para debug
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -174,222 +175,7 @@ def conexion_sunat(path):
         return error_response, 500
 
 
-def conexion_sunat_mejorada(path):
-    """
-    Conexión para envío de comprobantes a SUNAT Beta o Producción
-    Args:
-        path (str): Ruta del archivo .zip firmado a enviar
-    """
-    try:
-        # 1. VALIDACIÓN DE ARCHIVO ZIP
-        if not os.path.exists(path):
-            return {"error": f"Archivo no encontrado: {path}"}, 404
-
-        # leer el zip en base64
-        with open(path, 'rb') as f:
-            zip_content = f.read()
-
-        # zip_base64 = base64.b64encode(zip_content).decode('utf-8')
-
-        if not zip_content:
-            return {"error": "El archivo ZIP está vacío"}, 400
-
-        file_name = os.path.basename(path)
-        logger.info(f"📦 Procesando archivo: {file_name}")
-
-        # 2. DETERMINAR RUTA WSDL
-        wsdl_url = ""#os.getenv("sunat_qas")  # Puede ser URL o vacío
-        if not wsdl_url or not wsdl_url.startswith("http"):
-            base_path = os.path.dirname(os.path.abspath(__file__))
-            wsdl_url = os.path.normpath(os.path.join(base_path, "..", "wsdl", "billService.wsdl"))
-
-        logger.info(f"🌐 WSDL a usar: {wsdl_url}")
-
-        # 3. CREDENCIALES SUNAT
-        ruc = os.getenv("SUNAT_RUC")
-        usuario = os.getenv("SUNAT_USUARIO_SECUNDARIO")
-        password = os.getenv("SUNAT_PASS_SECUNDARIO")
-
-        if not all([ruc, usuario, password]):
-            return {
-                "error": "Credenciales incompletas para SUNAT",
-                "requeridas": ["SUNAT_RUC", "SUNAT_USUARIO_SECUNDARIO", "SUNAT_PASS_SECUNDARIO"],
-                "encontradas": {
-                    "SUNAT_RUC": bool(ruc),
-                    "SUNAT_USUARIO_SECUNDARIO": bool(usuario),
-                    "SUNAT_PASS_SECUNDARIO": bool(password)
-                }
-            }, 500
-
-        usuario_completo = f"{ruc}{usuario}"
-        logger.info(f"👤 Usuario: {usuario_completo}")
-
-        # 4. CONFIGURAR SESIÓN HTTP CON RETRY
-        session = Session()
-        retry_strategy = Retry(
-            total=5,
-            backoff_factor=3,
-            status_forcelist=[429, 500, 502, 503, 504]
-        )
-        adapter = HTTPAdapter(max_retries=retry_strategy)
-        session.mount("https://", adapter)
-        session.mount("http://", adapter)
-        session.auth = HTTPBasicAuth(usuario_completo, password)
-        session.headers.update({
-            'Content-Type': 'text/xml; charset=utf-8',
-            'User-Agent': 'SUNAT-Client-Python/1.0',
-            'Accept': 'text/xml, application/soap+xml'
-        })
-
-        transport = Transport(session=session, timeout=120, operation_timeout=120)
-
-        # 5. CONFIGURAR CLIENTE SOAP
-        settings = Settings(strict=False, xml_huge_tree=True)
-        try:
-            client = Client(wsdl=wsdl_url, transport=transport, settings=settings)
-            logger.info("✅ Cliente SOAP creado correctamente.")
-        except Exception as e:
-            return {
-                "error": "No se pudo cargar el WSDL correctamente",
-                "detalle": str(e)
-            }, 500
-
-        # 6. PREPARAR ARCHIVO
-        zip_base64 = base64.b64encode(zip_content).decode("utf-8")
-
-        # 7. INTENTAR ENVÍO A SUNAT
-        try:
-            logger.info("📤 Enviando documento a SUNAT...")
-            if hasattr(client.service, "sendBill"):
-                response = client.service.sendBill(file_name, zip_base64)
-            else:
-                return {
-                    "error": "El método sendBill no está disponible en el servicio",
-                    "wsdl_usado": wsdl_url
-                }, 500
-
-        except Exception as e:
-            logger.error(f"❌ Error en el envío a SUNAT: {e}")
-            return {
-                "error": f"Error enviando a SUNAT: {str(e)}",
-                "sugerencias": [
-                    "Revisa que el XML firmado sea correcto",
-                    "Verifica el RUC y las credenciales",
-                    "Prueba usando WSDL local"
-                ]
-            }, 500
-
-        # 8. PROCESAR RESPUESTA
-        if not hasattr(response, 'applicationResponse'):
-            return {"error": "SUNAT no devolvió applicationResponse"}, 500
-
-        cdr_zip = response.applicationResponse
-        if isinstance(cdr_zip, str):
-            cdr_zip = base64.b64decode(cdr_zip)
-        elif isinstance(cdr_zip, bytes):
-            pass
-        else:
-            return {"error": "CDR devuelto en formato desconocido"}, 500
-
-        cdr_filename = f"cdr/R-{file_name}"
-        os.makedirs("cdr", exist_ok=True)
-        with open(cdr_filename, "wb") as f:
-            f.write(cdr_zip)
-
-        logger.info(f"📄 CDR guardado como: {cdr_filename}")
-
-        return {
-            "estado": "enviado",
-            "cdr_file": cdr_filename,
-            "original_file": file_name,
-            "message": "✅ Envío exitoso a SUNAT. Revisa el CDR."
-        }, 200
-
-    except Exception as e:
-        logger.error(f"❌ Error general conectando a SUNAT: {e}", exc_info=True)
-        return {
-            "error": str(e),
-            "error_type": type(e).__name__,
-            "file": path,
-            "sugerencias": [
-                "Verifica la conexión a internet",
-                "Revisa el WSDL y credenciales",
-                "Asegúrate que el archivo ZIP no esté dañado"
-            ]
-        }, 500
-
-
-
-def procesar_respuesta_sunat(response, file_name):
-    """Procesa la respuesta de SUNAT y extrae el CDR"""
-    try:
-        # Diferentes estructuras de respuesta según el servicio
-        cdr_content = None
-        status_code = None
-        status_message = None
-        
-        # Intentar diferentes atributos de respuesta
-        if hasattr(response, 'applicationResponse'):
-            cdr_content = response.applicationResponse
-        elif hasattr(response, 'ApplicationResponse'):
-            cdr_content = response.ApplicationResponse
-        elif hasattr(response, 'cdr'):
-            cdr_content = response.cdr
-        elif hasattr(response, 'zipFile'):
-            cdr_content = response.zipFile
-        
-        # Obtener códigos de estado si están disponibles
-        if hasattr(response, 'statusCode'):
-            status_code = response.statusCode
-        elif hasattr(response, 'StatusCode'):
-            status_code = response.StatusCode
-            
-        if hasattr(response, 'statusMessage'):
-            status_message = response.statusMessage
-        elif hasattr(response, 'StatusMessage'):
-            status_message = response.StatusMessage
-
-        if not cdr_content:
-            return {
-                "error": "No se encontró CDR en la respuesta",
-                "response_attributes": [attr for attr in dir(response) if not attr.startswith('_')],
-                "full_response": str(response)
-            }, 500
-
-        # Guardar CDR
-        cdr_filename = f'{file_name.replace(".zip", "")}-CDR.zip'
-        
-        # Decodificar CDR si es base64
-        if isinstance(cdr_content, str):
-            try:
-                cdr_content = base64.b64decode(cdr_content)
-            except Exception:
-                cdr_content = cdr_content.encode('utf-8')
-        
-        with open(cdr_filename, 'wb') as f:
-            f.write(cdr_content)
-
-        logger.info(f"CDR guardado como: {cdr_filename}")
-
-        response_info = {
-            "message": "Envío exitoso a SUNAT",
-            "cdr_file": cdr_filename,
-            "original_file": file_name,
-            "status": "success"
-        }
-
-        if status_code:
-            response_info["status_code"] = status_code
-        if status_message:
-            response_info["status_message"] = status_message
-
-        return response_info, 200
-
-    except Exception as e:
-        logger.error(f"Error procesando respuesta: {e}")
-        return {"error": f"Error procesando respuesta SUNAT: {str(e)}"}, 500
-
-
+ 
 def descargar_wsdl_local(url, ruta_local="app/wsdl/billService_beta.wsdl"):
     """Descarga el WSDL y lo guarda localmente para evitar problemas de conexión"""
     try:
@@ -422,27 +208,7 @@ def descargar_wsdl_local(url, ruta_local="app/wsdl/billService_beta.wsdl"):
         return False, str(e)
 
 
-def build_soap_envelope(data, user, pwd):
-    return f"""<?xml version="1.0" encoding="UTF-8"?>
-<soapenv:Envelope 
-    xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
-    xmlns:br="http://service.sunat.gob.pe" 
-    xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
-  <soapenv:Header>
-    <wsse:Security soapenv:mustUnderstand="1">
-      <wsse:UsernameToken>
-        <wsse:Username>{user}</wsse:Username>
-        <wsse:Password>{pwd}</wsse:Password>
-      </wsse:UsernameToken>
-    </wsse:Security>
-  </soapenv:Header>
-  <soapenv:Body>
-    <br:sendBill>
-      <fileName>{data['fileName']}</fileName>
-      <contentFile>{data['contentFile']}</contentFile>
-    </br:sendBill>
-  </soapenv:Body>
-</soapenv:Envelope>"""
+ 
 
 
 def download_file(url, dest, auth_header):
@@ -477,7 +243,7 @@ def download_wsdl_files():
         time.sleep(0.5)
 
 
-def send_to_sunat(xml_firmado, data, env = "qas"):
+def send_to_sunat(xml_firmado, info_xml,data, env = "qas"):
     try:
         if env == "qas":
             URL = os.getenv("sunat_qas")
@@ -486,16 +252,11 @@ def send_to_sunat(xml_firmado, data, env = "qas"):
 
         #generacion de name del file
         ruc = os.getenv("SUNAT_RUC")
-        
-        serie = data.get("documento").split("-")[0]
-        correlativo = data.get("documento").split("-")[1]
         tipo_doc = "01"
-        name_file = f"{ruc}-{tipo_doc}-{serie}-{correlativo}"
+        name_file = f"{ruc}-{tipo_doc}-{info_xml.get('serie')}" # Ej: 20512345678-01-F001-00000001
         nombre_xml = f"{name_file}.xml"
         nombre_zip =  f"{name_file}.zip"
         RB = "assets" # ruta_base
-        print(data.get("ruc_cliente"))
-        # consultar el ruc del cliente
        
         try:
             #guardamos el file en la carpeta assets
@@ -537,6 +298,28 @@ def send_to_sunat(xml_firmado, data, env = "qas"):
             payload = client.service.sendBill(**args)
 
             result = descomprimir_cdr(payload)
+            ## agregar factura a la base de datos
+            # Aquí puedes agregar la lógica para guardar el resultado en tu base de datos
+            create_structure_invoice = {
+                                      "date": datetime.now(),
+                                      "customer_id": 1,
+                                      "num_invoice": f"{info_xml.get('correlativo'):08d}",
+                                      "serie": info_xml.get("serie").split("-")[0],
+                                      "subtotal": data.get("subtotal"),
+                                      "total": data.get("monto_total"),
+                                      "details": [
+                                          {
+                                              "product_id": 1,
+                                              "quantity": 1,
+                                              "unit_price": data.get("monto_total"),
+                                              "discount": 0,
+                                              "subtotal": data.get("subtotal"),
+                                              "tax": data.get("monto_igv"),
+                                              "total": data.get("monto_total")
+                                          }]
+                                      }
+            crear_factura_standard(create_structure_invoice)
+
             print("✅ Enviado correctamente. SUNAT respondió con CDR.")
             return result
         except Exception as e:
@@ -545,7 +328,6 @@ def send_to_sunat(xml_firmado, data, env = "qas"):
         
     except Exception as e:
         return {"error":"Error al enviar a SUNAT", "error_type": type(e).__name__, "full_error": str(e)}, 500
-
 
 def descomprimir_cdr(zip_bytes):
     try:
@@ -631,7 +413,6 @@ def validar_ruc(ruc):
             raise ValueError(payload["error"])
         else:
             cliente = payload.get("lista", [])
-            print("cliente",cliente)
             # quitar los espacios en blanco
             if cliente and isinstance(cliente[0], dict):
                 cliente[0] = {k: v.strip() if isinstance(v, str) else v for k, v in cliente[0].items()}
@@ -691,7 +472,11 @@ def complete_data_xml(data):
         xml_string = agregar_datos_ruc_cliente(xml_string,data.get("ruc_cliente"))  # Agregar datos del RUC emisor
         xml_string = agregar_datos_ruc(xml_string,os.getenv("SUNAT_RUC"))  # Agregar datos del RUC cliente
         xml_string = xml_string.replace("@fecha", datetime.now().strftime("%Y-%m-%d"))
-        xml_string = xml_string.replace("@serie", data.get("documento"))
+        try:
+           serie_number = get_last_number(data.get("tipo_documento"), data.get("documento").split("-")[0])
+        except Exception as e:
+            raise ValueError(f"Error al obtener el tipo de documento. Asegúrate de que el campo 'documento' esté presente en los datos. {e}")
+        xml_string = xml_string.replace("@serie", serie_number.get("serie"))
         xml_string = xml_string.replace("@tipo_moneda", "PEN")
         xml_string = xml_string.replace("@tipo", "01")
         xml_string = xml_string.replace("@monto_total", data.get("monto_total"))
@@ -703,7 +488,7 @@ def complete_data_xml(data):
         xml_string = xml_string.replace("@subtotal", data.get("subtotal"))
         xml_string = xml_string.replace("@cantidad", data.get("cantidad"))
         xml_string = firmar_xml_con_placeholder(xml_string) # Firmar el XML
-        return xml_string
+        return xml_string, serie_number
         
     except Exception as e:
         print(f"❌ Error al completar el XML: {e}")

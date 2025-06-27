@@ -98,8 +98,8 @@ def get_master_data_by_id(id):
 def generacion_factura_dummy():
     try:
         data = request.get_json()
-        xml_firmado = complete_data_xml(data) # luego de completar los datos, se firma el XML
-        result = send_to_sunat(xml_firmado,data)
+        xml_firmado, serie_number = complete_data_xml(data) # luego de completar los datos, se firma el XML
+        result = send_to_sunat(xml_firmado,serie_number,data)
         return result, 200
     except Exception as e:
         return {"error2": str(e)}, 500
