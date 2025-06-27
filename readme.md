@@ -28,3 +28,20 @@
 
 
 - https://cpe.sunat.gob.pe/sites/default/files/inline-files/servicios%20web%20disponibles%20%281%29.pdf
+
+
+
+| Código | Significado                         | Acción sugerida                 |
+| ------ | ----------------------------------- | ------------------------------- |
+| `0`    | **Aceptado**                        | OK – comprobante aceptado.      |
+| `98`   | **Aceptado con observaciones**      | Revisión necesaria.             |
+| `99`   | **Rechazado**                       | Debes corregir el comprobante.  |
+| `9999` | **Error en el sistema de SUNAT**    | Reintentar o contactar a SUNAT. |
+| `0011` | **RUC del emisor no está habido**   | Verifica estado del RUC.        |
+| `0128` | **El comprobante ya fue informado** | Ya registrado, no reenviar.     |
+| `0149` | **Serie y número ya informados**    | Duplicado, cambiar correlativo. |
+
+
+
+Catalogos [https://www.sunat.gob.pe/legislacion/superin/2015/anexoI-274-2015.pdf]
+

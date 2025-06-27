@@ -2,6 +2,7 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.serialization import pkcs12
 from cryptography.hazmat.backends import default_backend
 import os
+from dotenv import load_dotenv
 from lxml import etree
 import xmlsec
 
@@ -33,18 +34,20 @@ def obtener_certificado(ruta_p12="assets/certificado.p12", contrasena_p12="Dino1
         return None
 
 
-
+# FIRMA EL XML CON EL CERTIFICADO
 def firmar_xml_con_placeholder(xml_con_placeholder):
     # Paso 1: reemplazar el marcador @firma_digital por un nodo vacío temporal
     # xml_con_placeholder = xml_con_placeholder.replace(
     #     "@firma_digital", "<placeholder_firma/>"
     # )
+    load_dotenv()
 
     # Paso 2: parsear el XML string a ElementTree
     tree = etree.fromstring(xml_con_placeholder.encode("utf-8"))
     doc = etree.ElementTree(tree)
     path_p12 = os.path.join("assets","certificado.p12")
-    p12_password = "Dino1490"
+    p12_password = os.getenv("FLASK_PASS_SUNAT")
+    
     # Paso 3: cargar certificado .p12
     with open(path_p12, 'rb') as f:
         pfx_data = f.read()
@@ -58,10 +61,7 @@ def firmar_xml_con_placeholder(xml_con_placeholder):
         "ext": "urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2"
     }
     extension_content = doc.find(".//ext:ExtensionContent", namespaces=ns)
-    # placeholder = extension_content.find("<placeholder_firma/>")
-    # if placeholder is not None:
-    #     extension_content.remove(placeholder)
-
+  
     # Paso 5: crear nodo de firma
     signature_node = xmlsec.template.create(
         tree,
@@ -69,11 +69,10 @@ def firmar_xml_con_placeholder(xml_con_placeholder):
         xmlsec.Transform.RSA_SHA1,
         ns="ds"
     )
-    print("signature_node",str(signature_node))
     extension_content.append(signature_node)
 
     # Configurar transformaciones y referencia
-    ref = xmlsec.template.add_reference(signature_node, xmlsec.Transform.SHA1)
+    ref = xmlsec.template.add_reference(signature_node, xmlsec.Transform.SHA1, uri="")
     xmlsec.template.add_transform(ref, xmlsec.Transform.ENVELOPED)
     key_info = xmlsec.template.ensure_key_info(signature_node)
     xmlsec.template.add_x509_data(key_info)

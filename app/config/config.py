@@ -1,6 +1,6 @@
 class Config:
-    # SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:123456@localhost:5432/Facturacion'
-    SQLALCHEMY_DATABASE_URI='postgres://postgres.uukguxgscqxrajsgdrqi:Ie8yL1W8sDWRgimN@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require'
+    SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:123456@localhost:5432/Facturacion'
+    # SQLALCHEMY_DATABASE_URI='postgres://postgres.uukguxgscqxrajsgdrqi:Ie8yL1W8sDWRgimN@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require'
 
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -12,7 +12,7 @@ class Config:
 
     # Configuraciones de Supabase para el cliente
     # Configuración de la base de datos
-    SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://postgres.uukguxgscqxrajsgdrqi:Ie8yL1W8sDWRgimN@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require"
+    # SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://postgres.uukguxgscqxrajsgdrqi:Ie8yL1W8sDWRgimN@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Configuración de JWT
@@ -32,6 +32,4 @@ class Config:
     POSTGRES_PASSWORD = "Ie8yL1W8sDWRgimN"
     POSTGRES_HOST = "db.uukguxgscqxrajsgdrqi.supabase.co"
     POSTGRES_DATABASE = "postgres"
-    # SUPABASE_URL = "https://uukguxgscqxrajsgdrqi.supabase.co"
-    # SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1a2d1eGdzY3F4cmFqc2dkcnFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczNTE4NzMsImV4cCI6MjA2MjkyNzg3M30.DyFnh1ZtAfOnN4-lIKAXks3ShjlNJctGQwEoLytgAQg"
-    
+  

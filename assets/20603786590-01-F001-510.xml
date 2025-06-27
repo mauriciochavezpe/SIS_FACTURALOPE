@@ -1,29 +1,25 @@
 <?xml version='1.0' encoding='utf-8'?>
 <Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
-
     <ext:UBLExtensions>
         <ext:UBLExtension>
-        <ext:ExtensionContent>
-            <!-- Aquí va la firma digital -->
-           <!--  @firma_digital -->
-        <ds:Signature>
+        <ext:ExtensionContent><ds:Signature>
 <ds:SignedInfo>
 <ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
 <ds:SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
-<ds:Reference>
+<ds:Reference URI="">
 <ds:Transforms>
 <ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
 </ds:Transforms>
 <ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
-<ds:DigestValue>wp2yQg5tVPFfl6dC3hGtM13teQk=</ds:DigestValue>
+<ds:DigestValue>YLO1QpNSzI9a4ysTz6xGMAYCzhY=</ds:DigestValue>
 </ds:Reference>
 </ds:SignedInfo>
-<ds:SignatureValue>WROZO/bu+20OdfFgrydD4zr3sCwGcZGstXaL70YZ8vOZt6gF8R+YAeyDAC4M8h+s
-i6BW2+ncGfsiliFwnjtFb1jgetA2xIguMPza2vY+4XpXr43iBq2pqfOf5lPCpa/u
-W/yG1RpC0vDL3yHJm1u6uhSNZzmRiFEsjrOJlZ/pe73iRqYKnAc4XlCq4DfOT+QR
-UDZwkGUbu9rzo4fB07jVOSu4bbtOsx93OonMSQqwF3fehYSTSNItDlUdM9uIuFZR
-sN+RRKyUCFc6NaCldHpKBkwdVQa09vpR3uWD5Vb02cug72mD2Q1CFL8lJ9tCXX8r
-gL5eG6pSx9hwxk+5tUgWMg==</ds:SignatureValue>
+<ds:SignatureValue>LJxu0ekJzh4JWO8GL+aFQRWepvOgBA4UmYGZyHCfisnIvvI5O6ZiRA5xcvA/B5OF
+/m1OsJqSTdc9Djq6+OE0PXcJb3DBc5QGzZuMxiJrK+mh5+kVTtqgYEhG5Im4Dbv4
++qprEA0mQJspXdz7VT5uaV8DC6kSHBJM+yfZsCgEwVT+xsCwHQXlsMnw/zBDDFIu
+3EiNYxxw9XC4RYUcSNHQby5aR72ABdwtFturr3M0gXvsFq+X9DtaE4wOME8MiYO0
+GTF1K03lCo1+rqvteqqi+K3PHWX0LIml5VAJgiyE9mG32H3PSqE76NxgbO+XSOyN
+4janWiNsU17uYGwUL9krGQ==</ds:SignatureValue>
 <ds:KeyInfo>
 <ds:X509Data>
 <ds:X509Certificate>MIIIpDCCBoygAwIBAgIUHON/o3yPYcKW9g/Q/ntYDRb33XowDQYJKoZIhvcNAQEL
@@ -82,17 +78,27 @@ l/PrRtE4iqY=
 
     <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
     <cbc:CustomizationID>2.0</cbc:CustomizationID>
-    <cbc:ID>F001-502</cbc:ID>
-    <cbc:IssueDate>2025-05-26</cbc:IssueDate>
+    <cbc:ID>F001-510</cbc:ID>
+    <cbc:IssueDate>2025-06-26</cbc:IssueDate>
     <cbc:InvoiceTypeCode listID="0101">01</cbc:InvoiceTypeCode>
     <cbc:DocumentCurrencyCode>PEN</cbc:DocumentCurrencyCode>
 
     <!-- Datos del emisor -->
     <cac:AccountingSupplierParty>
         <cac:Party>
+        <cac:PartyIdentification>
+            <cbc:ID schemeID="6" schemeName="SUNAT:Identificador de Documento de Identidad" schemeAgencyName="PE:SUNAT" schemeURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo06">20603786590</cbc:ID>
+        </cac:PartyIdentification>
         <cac:PartyLegalEntity>
             <cbc:RegistrationName>PERU LOGISTIC ANDRES EDUARDO S.R.L.</cbc:RegistrationName>
-            <cbc:CompanyID schemeID="6">20603786590</cbc:CompanyID>
+            <cac:RegistrationAddress>
+                <cbc:AddressTypeCode>0000</cbc:AddressTypeCode>
+                <cbc:CityName>LIMA</cbc:CityName>
+                <cbc:District>ATE</cbc:District>
+                <cac:AddressLine>
+                    <cbc:Line>AV. LOS VIRREYES  - MZA.: A  - LOTE: 22  - URBANIZACION TILDA  - ATE</cbc:Line>
+                </cac:AddressLine>
+            </cac:RegistrationAddress>
         </cac:PartyLegalEntity>
         </cac:Party>
     </cac:AccountingSupplierParty>
@@ -100,13 +106,50 @@ l/PrRtE4iqY=
     <!-- Datos del cliente -->
     <cac:AccountingCustomerParty>
         <cac:Party>
+        <cac:PartyIdentification>
+            <cbc:ID schemeID="6" schemeName="SUNAT:Identificador de Documento de Identidad" schemeAgencyName="PE:SUNAT" schemeURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo06">20612922773</cbc:ID>
+        </cac:PartyIdentification>
         <cac:PartyLegalEntity>
-            <cbc:RegistrationName>Servicentro Ronsoco S.a.C.</cbc:RegistrationName>
-            <cbc:CompanyID schemeID="6">20612922773</cbc:CompanyID>
+            <cbc:RegistrationName>SERVICENTRO RONSOCO S.A.C.</cbc:RegistrationName>
+             <cac:RegistrationAddress>
+                <cbc:AddressTypeCode>0000</cbc:AddressTypeCode>
+                <cbc:CityName>CORONEL PORTILLO</cbc:CityName>
+                <cbc:District>CALLERIA</cbc:District>
+                <cac:AddressLine>
+                    <cbc:Line>CAR. FEDERICO BASADRE  - FUNDO FRACCION DE FUNDO VILLA S  - CALLERIA</cbc:Line>
+                </cac:AddressLine>
+            </cac:RegistrationAddress>
         </cac:PartyLegalEntity>
         </cac:Party>
     </cac:AccountingCustomerParty>
 
+    <!-- Forma de pago -->
+    <cac:PaymentTerms>
+        <cbc:ID>FormaPago</cbc:ID>
+        <cbc:PaymentMeansID>Contado</cbc:PaymentMeansID>
+    </cac:PaymentTerms>
+    <!-- Totales -->
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="PEN">0.18</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="PEN">1</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="PEN">0.18</cbc:TaxAmount>
+            <cac:TaxCategory>
+                <cac:TaxScheme>
+                    <cbc:ID>1000</cbc:ID>
+                    <cbc:Name>IGV</cbc:Name>
+                    <cbc:TaxTypeCode>VAT</cbc:TaxTypeCode>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="PEN">1</cbc:LineExtensionAmount>
+        <cbc:TaxInclusiveAmount currencyID="PEN">1.18</cbc:TaxInclusiveAmount>
+        <cbc:PayableAmount currencyID="PEN">1.18</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    
     <!-- Línea de detalle -->
     <cac:InvoiceLine>
         <cbc:ID>1</cbc:ID>
@@ -114,14 +157,14 @@ l/PrRtE4iqY=
         <cbc:LineExtensionAmount currencyID="PEN">1</cbc:LineExtensionAmount>
         <cac:PricingReference>
             <cac:AlternativeConditionPrice>
-                <cbc:PriceAmount currencyID="PEN">1</cbc:PriceAmount>
+                <cbc:PriceAmount currencyID="PEN">1.18</cbc:PriceAmount>
                 <cbc:PriceTypeCode>01</cbc:PriceTypeCode>
             </cac:AlternativeConditionPrice>
         </cac:PricingReference>
         <cac:TaxTotal>
             <cbc:TaxAmount currencyID="PEN">0.18</cbc:TaxAmount>
             <cac:TaxSubtotal>
-                <cbc:TaxableAmount currencyID="PEN">0.82</cbc:TaxableAmount>
+                <cbc:TaxableAmount currencyID="PEN">1</cbc:TaxableAmount>
                 <cbc:TaxAmount currencyID="PEN">0.18</cbc:TaxAmount>
                 <cac:TaxCategory>
                     <cbc:Percent>18</cbc:Percent>
@@ -135,33 +178,10 @@ l/PrRtE4iqY=
             </cac:TaxSubtotal>
         </cac:TaxTotal>
         <cac:Item>
-        <cbc:Description>TEST 1</cbc:Description>
+            <cbc:Description>TEST 1</cbc:Description>
         </cac:Item>
         <cac:Price>
-            <cbc:PriceAmount currencyID="PEN">1</cbc:PriceAmount>
+            <cbc:PriceAmount currencyID="PEN">1.18</cbc:PriceAmount>
         </cac:Price>
     </cac:InvoiceLine>
-
-    <!-- Totales -->
-    <cac:TaxTotal>
-        <cbc:TaxAmount currencyID="PEN">0.18</cbc:TaxAmount>
-        <cac:TaxSubtotal>
-        <cbc:TaxableAmount currencyID="PEN">0.82</cbc:TaxableAmount>
-        <cbc:TaxAmount currencyID="PEN">0.18</cbc:TaxAmount>
-        <cac:TaxCategory>
-            <cbc:ID schemeID="UN/ECE 5305">S</cbc:ID>
-            <cbc:Percent>18</cbc:Percent>
-            <cbc:TaxExemptionReasonCode>10</cbc:TaxExemptionReasonCode>
-            <cac:TaxScheme>
-            <cbc:ID>1000</cbc:ID>
-            <cbc:Name>IGV</cbc:Name>
-            <cbc:TaxTypeCode>VAT</cbc:TaxTypeCode>
-            </cac:TaxScheme>
-        </cac:TaxCategory>
-        </cac:TaxSubtotal>
-    </cac:TaxTotal>
-
-    <cac:LegalMonetaryTotal>
-        <cbc:PayableAmount currencyID="PEN">1</cbc:PayableAmount>
-    </cac:LegalMonetaryTotal>
     </Invoice>

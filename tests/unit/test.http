@@ -1,5 +1,5 @@
 #### get request by user
-GET http://127.0.0.1:5000/api/products
+GET http://127.0.0.1:5000/api/master_data
 Content-Type: application/json
 
 
@@ -334,12 +334,12 @@ POST http://127.0.0.1:5000/api/master_data/factura_dummy
 Content-Type: application/json
 
 {
-    "documento": "F001-503",
-    "monto_total": "1",
+    "documento": "F001-510",
+    "monto_total": "1.18",
     "monto_igv": "0.18",
     "porcentaje_igv": "18",
     "ruc_cliente": "20612922773",
-    "razon_social_cliente": "Servicentro Ronsoco S.a.C.",
     "descripcion": "TEST 1",
-    "subtotal": "0.82"
+    "subtotal": "1",
+    "cantidad": "1"
 }
