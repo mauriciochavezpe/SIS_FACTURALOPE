@@ -1,5 +1,6 @@
 from app import db
-from app.models.entities.Auditoria import Auditoria
+from .Auditoria import Auditoria
+
 from decimal import Decimal
 
 class InvoiceDetail(Auditoria):

@@ -99,12 +99,6 @@ def generacion_factura_dummy():
     try:
         data = request.get_json()
         xml_firmado = complete_data_xml(data) # luego de completar los datos, se firma el XML
-
-
-         
-        # probar con sunat 
-        # result = crear_xml_y_zip(xml_firmado,data)
-        # path_xml = os.path.join('assets', '20603786590-01-F001-00000001.zip')
         result = send_to_sunat(xml_firmado,data)
         return result, 200
     except Exception as e:

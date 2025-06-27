@@ -486,6 +486,7 @@ def send_to_sunat(xml_firmado, data, env = "qas"):
 
         #generacion de name del file
         ruc = os.getenv("SUNAT_RUC")
+        
         serie = data.get("documento").split("-")[0]
         correlativo = data.get("documento").split("-")[1]
         tipo_doc = "01"
@@ -686,7 +687,6 @@ def complete_data_xml(data):
         str: XML completado.
     """
     try:
-        print("data",data)
         xml_string = generar_xml()  # Aquí se obtiene el XML con placeholders
         xml_string = agregar_datos_ruc_cliente(xml_string,data.get("ruc_cliente"))  # Agregar datos del RUC emisor
         xml_string = agregar_datos_ruc(xml_string,os.getenv("SUNAT_RUC"))  # Agregar datos del RUC cliente
@@ -703,7 +703,6 @@ def complete_data_xml(data):
         xml_string = xml_string.replace("@subtotal", data.get("subtotal"))
         xml_string = xml_string.replace("@cantidad", data.get("cantidad"))
         xml_string = firmar_xml_con_placeholder(xml_string) # Firmar el XML
-        print(xml_string)
         return xml_string
         
     except Exception as e:

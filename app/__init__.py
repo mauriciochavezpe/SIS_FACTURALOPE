@@ -20,7 +20,7 @@ def create_app():
         # Swagger
         # api.init_app(app)
         # from app.models import   # ajusta según tus modelos
-        from app.models import User,Customer,MasterData, Invoice, InvoiceDetail, Product, Payment
+        from app.models.entities import User,Customer,MasterData, Invoice, InvoiceDetails, Product, Payments, Serie
         # drive_service = authenticate_service_account()
         # print("Autenticación exitosa, {drive_service}")
         

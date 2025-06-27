@@ -13,9 +13,8 @@ class Invoice(Auditoria):
     subtotal = db.Column(db.Numeric(12,2), nullable=False, default=0)
     tax = db.Column(db.Numeric(12,2), nullable=False, default=0) # IGV
     id_status = db.Column(db.Integer, db.ForeignKey('master_data.id'), nullable=False)
-    
+    serie = db.Column(db.String(10), nullable=True) # F001, B001
 
-    # invoice_details = db.relationship('InvoiceDetail', back_populates='invoice')
     invoice_details = db.relationship('InvoiceDetail', back_populates='invoice', lazy=True, cascade='all, delete-orphan')
     
     def __repr__(self):
