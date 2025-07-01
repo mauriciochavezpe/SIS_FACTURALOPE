@@ -243,7 +243,7 @@ def download_wsdl_files():
         time.sleep(0.5)
 
 
-def send_to_sunat(xml_firmado, info_xml,data, env = "qas"):
+def send_to_sunat(xml_string, info_xml,data, env = "qas"):
     try:
         if env == "qas":
             URL = os.getenv("sunat_qas")
@@ -256,13 +256,37 @@ def send_to_sunat(xml_firmado, info_xml,data, env = "qas"):
         name_file = f"{ruc}-{tipo_doc}-{info_xml.get('serie')}" # Ej: 20512345678-01-F001-00000001
         nombre_xml = f"{name_file}.xml"
         nombre_zip =  f"{name_file}.zip"
-        RB = "assets" # ruta_base
-       
+        RB = "assets" # ruta_base,
+        carpeta_CRD = "CDR" # carpeta donde se guardan los CDRs
+        try:
+            create_structure_invoice = {
+                                        "date": datetime.now(),
+                                        "customer_id": data.get("customer_id", 1),  # Si no hay customer_id, usar 1 como dummy
+                                        "num_invoice": f"{info_xml.get('correlativo'):08d}",
+                                        "serie": info_xml.get("serie").split("-")[0],
+                                        "subtotal": data.get("subtotal"),
+                                        "total": data.get("monto_total"),
+                                        "details": [
+                                            {
+                                                "product_id": item.get("producto_id", 1),  # Si no hay producto_id, usar 1 como dummy
+                                                "quantity": item.get("cantidad"),
+                                                "unit_price": item.get("monto_total"),
+                                                "discount": item.get("descuento", 0),
+                                                "subtotal": item.get("subtotal"),
+                                                "tax": item.get("monto_igv"),
+                                                "total": item.get("monto_total")
+                                            } for item in data.get("details", [])]
+                                        }
+        except Exception as e:
+            return {"error": "Error al interpretar los datos del invoice"}, 500
+        
+        # agregamos los items de la factura y procedemos a firmar el XML
+        xml_string = complete_details_products(xml_string, data.get("details", []))
+        xml_firmado = firmar_xml_con_placeholder(xml_string) # Firmar el XML
         try:
             #guardamos el file en la carpeta assets
-            create_xml(xml_firmado,RB, nombre_xml)
-            payload_zip, status= create_zip(xml_firmado,RB, nombre_zip)
-            # print("status",status)
+            create_xml(xml_firmado,RB, nombre_xml,flag_cdr=False) # flag_cdr=False porque no es un CDR
+            payload_zip, status= create_zip(xml_firmado,RB, nombre_zip,flag_cdr=False) # flag_cdr=False porque no es un CDR
             if status == 200:
                 zip_base64 = payload_zip['content_base64']
             else:
@@ -278,13 +302,11 @@ def send_to_sunat(xml_firmado, info_xml,data, env = "qas"):
         wsdl_path = os.path.abspath(wsdl_path)
         usuario = os.getenv("SUNAT_USUARIO_DUMMY")
         password = os.getenv("SUNAT_PASS_DUMMY")
-        # print(f"{usuario} {password}")
         userNameToken = UsernameToken(usuario,password)
         client = Client(
         wsdl=wsdl_path,  # Asegúrate que esté en esta ruta
         wsse=userNameToken
         )
-
         
         # Preparar parámetros
         args = {
@@ -296,30 +318,15 @@ def send_to_sunat(xml_firmado, info_xml,data, env = "qas"):
         try:
             print("📤 Enviando comprobante a SUNAT...")
             payload = client.service.sendBill(**args)
-
             result = descomprimir_cdr(payload)
             ## agregar factura a la base de datos
-            # Aquí puedes agregar la lógica para guardar el resultado en tu base de datos
-            create_structure_invoice = {
-                                      "date": datetime.now(),
-                                      "customer_id": 1,
-                                      "num_invoice": f"{info_xml.get('correlativo'):08d}",
-                                      "serie": info_xml.get("serie").split("-")[0],
-                                      "subtotal": data.get("subtotal"),
-                                      "total": data.get("monto_total"),
-                                      "details": [
-                                          {
-                                              "product_id": 1,
-                                              "quantity": 1,
-                                              "unit_price": data.get("monto_total"),
-                                              "discount": 0,
-                                              "subtotal": data.get("subtotal"),
-                                              "tax": data.get("monto_igv"),
-                                              "total": data.get("monto_total")
-                                          }]
-                                      }
-            crear_factura_standard(create_structure_invoice)
-
+            # agregamos los datos de la factura a la base de datos
+            try:
+                crear_factura_standard(create_structure_invoice)
+            except Exception as e:
+                print("❌ Error al crear la factura en la base de datos:", str(e))
+                raise(e)
+            
             print("✅ Enviado correctamente. SUNAT respondió con CDR.")
             return result
         except Exception as e:
@@ -335,15 +342,11 @@ def descomprimir_cdr(zip_bytes):
             # de momento consideramos el 1 porque el otro es dummy
             nombre_xml = zip_file.namelist()[1]  # Ej: R-20512345678-01-F001-00000001.xml
             xml_bytes = zip_file.read(nombre_xml)
-            data = {
-                "filename": nombre_xml,
-                "documento": xml_bytes
-            }
+            xml_str = xml_bytes.decode("utf-8")
             # la ruta
-            current_dir = os.path.dirname(os.path.abspath(__file__))  # /.../app/utils
-            carpeta_cdr = os.path.join(current_dir, "..", "CDR")
-            create_xml(xml_bytes, carpeta_cdr, nombre_xml)
-            create_zip(xml_bytes, carpeta_cdr, nombre_xml)
+            carpeta_cdr = "CDR"
+            create_xml(xml_str, carpeta_cdr, nombre_xml,flag_cdr=True)
+            # create_zip(xml_bytes, carpeta_cdr, nombre_xml,flag_cdr=True)
 
             return read_xml_cdr(xml_bytes,nombre_xml)
 
@@ -357,12 +360,7 @@ def descomprimir_cdr(zip_bytes):
 def read_xml_cdr(xml_bytes, name):
     try:
 
-        # Descomprimir el ZIP en memoria
-        # with zipfile.ZipFile(io.BytesIO(zip_bytes)) as zip_file:
-        #     nombre_xml = zip_file.namelist()[0]  # Ej: RUC-01-F001-00000001.xml
-        #     xml_bytes = zip_file.read(nombre_xml)
-
-        # Parsear el XML
+        #Crear el XML
         root = ET.fromstring(xml_bytes)
 
         # Extraer información básica del CDR
@@ -480,16 +478,79 @@ def complete_data_xml(data):
         xml_string = xml_string.replace("@tipo_moneda", "PEN")
         xml_string = xml_string.replace("@tipo", "01")
         xml_string = xml_string.replace("@monto_total", data.get("monto_total"))
+        # xml_string = firmar_xml_con_placeholder(xml_string) # Firmar el XML
         xml_string = xml_string.replace("@monto_igv", data.get("monto_igv"))
-        xml_string = xml_string.replace("@porcentaje_igv", data.get("porcentaje_igv"))
-        xml_string = xml_string.replace("@monto", data.get("monto_total"))
-        xml_string = xml_string.replace("@descripcion", data.get("descripcion"))
-        xml_string = xml_string.replace("@precio", data.get("monto_total"))
         xml_string = xml_string.replace("@subtotal", data.get("subtotal"))
-        xml_string = xml_string.replace("@cantidad", data.get("cantidad"))
-        xml_string = firmar_xml_con_placeholder(xml_string) # Firmar el XML
         return xml_string, serie_number
         
     except Exception as e:
         print(f"❌ Error al completar el XML: {e}")
         return {"error": str(e)}, 500
+    
+    
+def complete_details_products(xml_string, productos):
+    """
+    Agrega los detalles de los productos al XML.
+    """
+    #  tambien hay una tabla de los unitCode que se pueden usar
+    try:
+        xml_productos =[]
+        fragmento_xml = """
+        <!-- Detalle de productos @index-->
+        <cac:InvoiceLine>
+            <cbc:ID>@id_producto</cbc:ID>
+            <cbc:InvoicedQuantity unitCode="NIU">@cantidad</cbc:InvoicedQuantity>
+            <cbc:LineExtensionAmount currencyID="@tipo_moneda">@subtotal</cbc:LineExtensionAmount>
+            <cac:PricingReference>
+                <cac:AlternativeConditionPrice>
+                    <cbc:PriceAmount currencyID="@tipo_moneda">@monto_total</cbc:PriceAmount>
+                    <cbc:PriceTypeCode>01</cbc:PriceTypeCode>
+                </cac:AlternativeConditionPrice>
+            </cac:PricingReference>
+            <cac:TaxTotal>
+                <cbc:TaxAmount currencyID="@tipo_moneda">@monto_igv</cbc:TaxAmount>
+                <cac:TaxSubtotal>
+                    <cbc:TaxableAmount currencyID="@tipo_moneda">@subtotal</cbc:TaxableAmount>
+                    <cbc:TaxAmount currencyID="@tipo_moneda">@monto_igv</cbc:TaxAmount>
+                    <cac:TaxCategory>
+                        <cbc:Percent>@tax_igv</cbc:Percent>
+                        <cbc:TaxExemptionReasonCode>10</cbc:TaxExemptionReasonCode>
+                        <cac:TaxScheme>
+                            <cbc:ID>1000</cbc:ID>
+                            <cbc:Name>IGV</cbc:Name>
+                            <cbc:TaxTypeCode>VAT</cbc:TaxTypeCode>
+                        </cac:TaxScheme>
+                    </cac:TaxCategory>
+                </cac:TaxSubtotal>
+            </cac:TaxTotal>
+            <cac:Item>
+                <cbc:Description>@descripcion</cbc:Description>
+            </cac:Item>
+            <cac:Price>
+                <cbc:PriceAmount currencyID="@tipo_moneda">@monto_total</cbc:PriceAmount>
+            </cac:Price>
+        </cac:InvoiceLine>
+        
+        """
+        ## como rrecorrer el loop de productos
+        for i in range(len(productos)):
+            producto = productos[i]
+            xml_producto = (
+                fragmento_xml
+                .replace("@index", str(i + 1))  # Usar i+1 para que empiece desde 1
+                .replace("@id_producto", str(producto.get("product_id", "")))
+                .replace("@cantidad", str(producto.get("quantity", "")))
+                .replace("@tipo_moneda", "PEN")
+                .replace("@subtotal", str(producto.get("subtotal", "")))
+                .replace("@monto_total", str(producto.get("monto_total", "")))
+                .replace("@monto_igv", str(producto.get("monto_igv", "")))
+                .replace("@tax_igv", str(producto.get("tax", "")))
+                .replace("@descripcion", str(producto.get("description", "")))
+            )
+            xml_productos.append(xml_producto)
+        xml_string = xml_string.replace("@detalle_productos", "".join(xml_productos))
+        return xml_string
+    except Exception as e:
+        print(f"❌ Error al agregar los detalles de los productos: {e}")
+        return {"error": str(e)}, 500
+    

@@ -31,7 +31,7 @@ def generar_xml():
     <cac:AccountingSupplierParty>
         <cac:Party>
         <cac:PartyIdentification>
-            <cbc:ID schemeID="6" schemeName="SUNAT:Identificador de Documento de Identidad" schemeAgencyName="PE:SUNAT" schemeURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo06">@ruc</cbc:ID>
+            <cbc:ID schemeID="6">@ruc</cbc:ID>
         </cac:PartyIdentification>
         <cac:PartyLegalEntity>
             <cbc:RegistrationName>@razon_social</cbc:RegistrationName>
@@ -51,7 +51,7 @@ def generar_xml():
     <cac:AccountingCustomerParty>
         <cac:Party>
         <cac:PartyIdentification>
-            <cbc:ID schemeID="6" schemeName="SUNAT:Identificador de Documento de Identidad" schemeAgencyName="PE:SUNAT" schemeURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo06">@ruc1</cbc:ID>
+            <cbc:ID schemeID="6">@ruc1</cbc:ID>
         </cac:PartyIdentification>
         <cac:PartyLegalEntity>
             <cbc:RegistrationName>@razon_social1</cbc:RegistrationName>
@@ -95,39 +95,7 @@ def generar_xml():
     </cac:LegalMonetaryTotal>
     
     <!-- Línea de detalle -->
-    <cac:InvoiceLine>
-        <cbc:ID>1</cbc:ID>
-        <cbc:InvoicedQuantity unitCode="NIU">@cantidad</cbc:InvoicedQuantity>
-        <cbc:LineExtensionAmount currencyID="@tipo_moneda">@subtotal</cbc:LineExtensionAmount>
-        <cac:PricingReference>
-            <cac:AlternativeConditionPrice>
-                <cbc:PriceAmount currencyID="@tipo_moneda">@monto_total</cbc:PriceAmount>
-                <cbc:PriceTypeCode>01</cbc:PriceTypeCode>
-            </cac:AlternativeConditionPrice>
-        </cac:PricingReference>
-        <cac:TaxTotal>
-            <cbc:TaxAmount currencyID="@tipo_moneda">@monto_igv</cbc:TaxAmount>
-            <cac:TaxSubtotal>
-                <cbc:TaxableAmount currencyID="@tipo_moneda">@subtotal</cbc:TaxableAmount>
-                <cbc:TaxAmount currencyID="@tipo_moneda">@monto_igv</cbc:TaxAmount>
-                <cac:TaxCategory>
-                    <cbc:Percent>@porcentaje_igv</cbc:Percent>
-                    <cbc:TaxExemptionReasonCode>10</cbc:TaxExemptionReasonCode>
-                    <cac:TaxScheme>
-                        <cbc:ID>1000</cbc:ID>
-                        <cbc:Name>IGV</cbc:Name>
-                        <cbc:TaxTypeCode>VAT</cbc:TaxTypeCode>
-                    </cac:TaxScheme>
-                </cac:TaxCategory>
-            </cac:TaxSubtotal>
-        </cac:TaxTotal>
-        <cac:Item>
-            <cbc:Description>@descripcion</cbc:Description>
-        </cac:Item>
-        <cac:Price>
-            <cbc:PriceAmount currencyID="@tipo_moneda">@monto_total</cbc:PriceAmount>
-        </cac:Price>
-    </cac:InvoiceLine>
+    @detalle_productos
     </Invoice>  
 """
         return xml
@@ -269,10 +237,14 @@ def xml_boleta():
         print(e)
 
 
-def create_xml(xml_firmado,rb, nm_xml):
+def create_xml(xml_firmado,rb, nm_xml, flag_cdr=False):
     try:
         path_full = os.path.join(rb, nm_xml)
-
+        
+        print(f"Creating XML file at: {path_full}")
+        if flag_cdr:
+            print("Creating XML file for CDR")
+            print("path_full", path_full)
         if(os.path.exists(path_full)):
             os.remove(path_full)
         
@@ -280,10 +252,11 @@ def create_xml(xml_firmado,rb, nm_xml):
         with open(path_full, "w", encoding="utf-8") as f:
             f.write(xml_firmado)
     except Exception as e:
+        print(f"❌ Error creating XML 2 file: {e}")
         return {"error": str(e)}, 500
 
 
-def create_zip(xml_firmado,rb, nm_zip):
+def create_zip(xml_firmado, rb, nm_zip, flag_cdr=False):
     try:
         path_full_zip = os.path.join(rb, nm_zip)
         name_xml_change = nm_zip.replace(".zip", ".xml") # para tener nombre en XML
