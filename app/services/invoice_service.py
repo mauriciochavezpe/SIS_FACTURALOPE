@@ -9,6 +9,8 @@ from app.models.entities.MasterData import MasterData
 from app.schemas.invoice_detail_schema import InvoiceDetailSchema
 from app.schemas.custom_detail_by_invoice_schema import ComplexInvoiceSchema
 from datetime import datetime
+from app.utils.conexion_sunat import (send_to_sunat, complete_data_xml)
+
 
 def get_all_invoices():
     try:
@@ -181,10 +183,11 @@ def create_invoice_details():
 def create_invoice_detail_sunat():
     try:
         data = request.get_json()
-        
-        
+        xml_firmado, serie_number = complete_data_xml(data) # luego de completar los datos, se firma el XML
+        result = send_to_sunat(xml_firmado,serie_number,data)
+        return result, 200
     except Exception as e:
-        db.session.rollback()
+   
         return {"error": str(e)}, 500
     
 def crear_factura_standard(data):

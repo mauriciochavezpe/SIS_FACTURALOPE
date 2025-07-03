@@ -19,163 +19,11 @@ from enum import Enum
 from xml.etree import ElementTree as ET
 from app.services.serie_services import get_last_number
 from app import db
-from app.services.invoice_service import crear_factura_standard
+# from app.services.invoice_service import crear_factura_standard
 # Configurar logging para debug
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def conexion_sunat(path):
-    try:
-        # Validar que el archivo existe
-        if not os.path.exists(path):
-            return {"error": f"Archivo no encontrado: {path}"}, 404
-        
-        # Leer archivo ZIP
-        with open(path, 'rb') as f:
-            contenido_zip = base64.b64encode(f.read()).decode('utf-8')
-        
-       
-
-        
-        # print("zip_content", zip_content)
-        # Validar que el archivo no esté vacío
-        if not contenido_zip:
-            return {"error": "El archivo ZIP está vacío"}, 400
-
-        file_name = os.path.basename(path)
-        logger.info(f"Procesando archivo: {file_name}")
-
-        # Validar URL WSDL
-        url_sunat = os.getenv("sunat_qas")
-        print("url_sunat",url_sunat)
-        # if not url_sunat:
-        #     url_sunat = "app/wsdl/billService_beta.wsdl"
-
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        wsdl_path = os.path.join(base_dir,"wsdl", "billService_beta.wsdl")
-
-        # if not os.path.exists(wsdl_path):
-        #     return {"error": "WSDL local no encontrado"}, 500
-
-        # logger.info(f"URL SUNAT: {url_sunat}")
-
-        # Validar credenciales
-        usuario = os.getenv("SUNAT_RUC") +""+ os.getenv("SUNAT_USUARIO_DUMMY") 
-        password = os.getenv("SUNAT_PASS_DUMMY") 
-        
-        if not usuario or not password:
-            return {"error": "Credenciales SUNAT no configuradas"}, 500
-
-        data = {
-            "fileName": os.path.basename(path),
-            "contentFile": contenido_zip
-        }
-        
-        string_body = build_soap_envelope(data, usuario, password)   
-
-        session = Session()
-        # Configurar sesión con timeout y reintentos
-        print(f"string_body {string_body}")
-        # Headers adicionales que pueden ser necesarios
-        session.headers.update({
-             "User-Agent": "Mozilla/5.0 (compatible; Python/Zeep)",
-             "Content-Type": "text/xml; charset=utf-8",
-             "SOAPAction": "urn:sendBill"
-        })
-        ## configurar 
-        resp = session.post(url_sunat, data=string_body, timeout=60)
-
-        print("resp",resp)        
-        # Configurar transport con timeout
-        # transport = Transport(session=session, timeout=60)
-        # settings = Settings(strict=False, xml_huge_tree=True)
-        # wsse =  UsernameToken(usuario, password)
-
-        logger.info("minutos antes")
-        # client = Client(url_sunat, transport=transport, settings=settings, wsse=wsse)
-        print("HTTP status:", resp.status_code)
-        print("Response headers:", resp.headers)
-        print("Raw response body:\n", resp.text) 
-
-        logger.info("Cliente SOAP creado exitosamente")
-        # logger.info(f"Servicios disponibles: {[op.name for op in client.service._operations.values()]}")
-
-        # Convertir contenido a base64 si es necesario
-        # Algunos endpoints requieren base64, otros bytes directos
-        try:
-            print("client",resp)
-            # Intentar con bytes directos primero
-            # response = client.service.sendBill(file_name, contenido_zip)
-        except Exception as e1:
-            logger.warning(f"Falló con bytes directos, intentando con base64: {e1}")
-            try:
-                print("client",resp)
-                # Intentar con base64
-                # zip_base64 = base64.b64encode(contenido_zip).decode('utf-8')
-                # response = client.service.sendBill(file_name, zip_base64)
-            except Exception as e2:
-                logger.error(f"Falló también con base64: {e2}")
-                raise e1  # Lanzar el error original
-
-        logger.info("Respuesta recibida de SUNAT")
-
-        # Validar respuesta
-        # if not hasattr(response, 'applicationResponse'):
-        #     return {"error": "Respuesta inválida de SUNAT - sin applicationResponse"}, 500
-
-        # # Procesar CDR
-        # cdr_content = response.applicationResponse
-        # if not cdr_content:
-        #     return {"error": "CDR vacío en la respuesta"}, 500
-
-        # # Guardar CDR
-        # cdr_filename = f'{file_name.replace(".zip", "")}-CDR.zip'
-        
-        # # Si el CDR viene en base64, decodificarlo
-        # if isinstance(cdr_content, str):
-        #     try:
-        #         cdr_content = base64.b64decode(cdr_content)
-        #     except Exception:
-        #         # Si no es base64 válido, usar tal como viene
-        #         cdr_content = cdr_content.encode('utf-8')
-        
-        # with open(cdr_filename, 'wb') as f:
-        #     f.write(cdr_content)
-
-        # logger.info(f"CDR guardado como: {cdr_filename}")
-
-        # # Información adicional de la respuesta si está disponible
-        # response_info = {
-        #     "message": "Envío exitoso, revisa el CDR de respuesta.",
-        #     "cdr_file": cdr_filename,
-        #     "original_file": file_name
-        # }
-
-        # # Agregar información adicional si está disponible en la respuesta
-        # if hasattr(response, 'status'):
-        #     response_info["status"] = response.status
-        # if hasattr(response, 'statusMessage'):
-        #     response_info["status_message"] = response.statusMessage
-
-        # print("✅ Envío exitoso. Revisa el CDR.")
-        return resp, 200
-
-    except Exception as e:
-        error_msg = f"Error al enviar a SUNAT: {str(e)}"
-        logger.error(error_msg, exc_info=True)
-        print(f"❌ {error_msg}")
-        
-        # Información más detallada del error
-        error_response = {
-            "error": str(e),
-            "error_type": type(e).__name__,
-            "file": path if 'path' in locals() else "No especificado"
-        }
-        
-        return error_response, 500
-
-
- 
 def descargar_wsdl_local(url, ruta_local="app/wsdl/billService_beta.wsdl"):
     """Descarga el WSDL y lo guarda localmente para evitar problemas de conexión"""
     try:
@@ -322,7 +170,8 @@ def send_to_sunat(xml_string, info_xml,data, env = "qas"):
             ## agregar factura a la base de datos
             # agregamos los datos de la factura a la base de datos
             try:
-                crear_factura_standard(create_structure_invoice)
+                print("📥 Guardando factura en la base de datos...")
+                # crear_factura_standard(create_structure_invoice)
             except Exception as e:
                 print("❌ Error al crear la factura en la base de datos:", str(e))
                 raise(e)

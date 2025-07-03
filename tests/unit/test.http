@@ -116,15 +116,32 @@ Content-Type: application/json
 
 
 ####CREATE INVOICE
-POST http://127.0.0.1:5000/api/invoices
+POST http://127.0.0.1:5000/api/customers
 Content-Type: application/json
     
-    {
-        "user_id": 1,
-        "date": "2023-07-10",
-        "total": 1000,
-        "id_status": 1
-    }
+     {
+    "address": "Test Address 123",
+    "business_name": "Test Company",
+    "city": "Lima",
+    "commercial_name": "Test Brand",
+    "country": "Peru",
+    "createdAt": null,
+    "createdBy": null,
+    "document_number": "12345678",
+    "document_type": "1",
+    "email": "test@example.com",
+    "id": 1,
+    "ip": null,
+    "is_active": true,
+    "is_business": false,
+    "modifiedAt": null,
+    "modifiedBy": null,
+    "password": "SecurePass123!",
+    "phone": "1234567890",
+    "postal_code": null,
+    "province": "Lima",
+    "username": "testcustomer"
+  }
 
 
 #### CREATE CUSTOMER
@@ -132,19 +149,19 @@ POST http://127.0.0.1:5000/api/customers
 Content-Type: application/json
     
     {
-    "username": "usertest2025",
-    "email": "test2025@example.com",
+    "username": "userX2025",
+    "email": "userX2025@example.com",
     "password": "SecurePass123!",
     "phone": "1234567890",
-    "document_type": "1",
-    "document_number": "87654321",
-    "business_name": "Test Company",
-    "commercial_name": "Test Brand",
-    "address": "Test Address 123",
+    "document_type": "6",
+    "document_number": "20603786590",
+    "business_name": "PERU LOGISTIC ANDRES EDUARDO EIRL",
+    "commercial_name": "PERU LOGISTIC ANDRES EDUARDO EIRL",
+    "address": "AV. LIMA 123",
     "city": "Lima",
     "province": "Lima",
     "country": "Peru",
-    "is_business": false,
+    "is_business": true,
     "is_active": true  }
 
 #### UPDATE CUSTOMER

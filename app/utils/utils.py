@@ -94,3 +94,4 @@ def validate_document_serie(tipo_doc: str, serie: str) -> bool:
     except Exception as e:
         logger.error(f"❌ Error validando serie: {str(e)}")
         return False
+    
