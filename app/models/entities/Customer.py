@@ -12,7 +12,6 @@ class Customer(Auditoria):
     document_number = db.Column(db.String(21), unique=True, nullable=False)
 
     is_active = db.Column(db.Boolean, default=True)
-    
     is_business = db.Column(db.Boolean, default=False)
     commercial_name = db.Column(db.String(100), nullable=True) # Nombre comercial
     business_name = db.Column(db.String(100), nullable=False)  # Razón social o nombre
@@ -21,9 +20,10 @@ class Customer(Auditoria):
     province = db.Column(db.String(50), nullable=True)
     postal_code = db.Column(db.String(20), nullable=True)
     country = db.Column(db.String(50), nullable=True)
-
+    is_owner = db.Column(db.Boolean, default=False)
+    full_name = db.Column(db.String(100), nullable=True)
     document_type = db.Column(
-        db.String(1), 
+        db.String(2), 
         nullable=False, 
         default=DocumentType.DNI.code,
         comment='Tipo de documento según SUNAT'
