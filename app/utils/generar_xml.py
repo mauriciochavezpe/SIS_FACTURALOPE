@@ -30,40 +30,14 @@ def generar_xml():
     <!-- Datos del emisor -->
     <cac:AccountingSupplierParty>
         <cac:Party>
-        <cac:PartyIdentification>
-            <cbc:ID schemeID="6">@ruc</cbc:ID>
-        </cac:PartyIdentification>
-        <cac:PartyLegalEntity>
-            <cbc:RegistrationName>@razon_social</cbc:RegistrationName>
-            <cac:RegistrationAddress>
-                <cbc:AddressTypeCode>0000</cbc:AddressTypeCode>
-                <cbc:CityName>@provincia</cbc:CityName>
-                <cbc:District>@distrito</cbc:District>
-                <cac:AddressLine>
-                    <cbc:Line><![CDATA[@direccion]]></cbc:Line>
-                </cac:AddressLine>
-            </cac:RegistrationAddress>
-        </cac:PartyLegalEntity>
+        @DatosEmisor
         </cac:Party>
     </cac:AccountingSupplierParty>
 
     <!-- Datos del cliente -->
     <cac:AccountingCustomerParty>
         <cac:Party>
-        <cac:PartyIdentification>
-            <cbc:ID schemeID="6">@ruc1</cbc:ID>
-        </cac:PartyIdentification>
-        <cac:PartyLegalEntity>
-            <cbc:RegistrationName>@razon_social1</cbc:RegistrationName>
-             <cac:RegistrationAddress>
-                <cbc:AddressTypeCode>0000</cbc:AddressTypeCode>
-                <cbc:CityName>@provincia1</cbc:CityName>
-                <cbc:District>@distrito1</cbc:District>
-                <cac:AddressLine>
-                    <cbc:Line><![CDATA[@direccion1]]></cbc:Line>
-                </cac:AddressLine>
-            </cac:RegistrationAddress>
-        </cac:PartyLegalEntity>
+        @DatosCliente
         </cac:Party>
     </cac:AccountingCustomerParty>
 

@@ -73,3 +73,29 @@ def update_customers_by_id(user_id):
         return schema.dump(customer), 200
     except Exception as e:
         return {"error": str(e)}, 500
+    
+def get_all_customers_by_ruc(rucs):
+    
+    try:
+        for ruc in rucs:
+            if len(ruc) != 11:
+                return {"error": f"La longitud del RUC {ruc} debe ser de 11 dígitos"}, 400
+            else:
+                if not ruc.isdigit():
+                    return {"error": f"El RUC {ruc} debe contener solo dígitos"}, 400
+            
+        query = db.session.query(Customer)
+        
+        # Filtrar por todos los RUCs usando in_
+        if hasattr(Customer, "document_number"):
+            query = query.filter(getattr(Customer, "document_number").in_(rucs))
+        
+        results = query.all()
+        if not results:
+            return [], 200
+        
+        schema = CustomerSchema(session=db.session, many=True)
+        return schema.dump(results), 200
+
+    except Exception as e:
+        return {"error": str(e)}, 500

@@ -11,14 +11,13 @@ import time
 import os
 import zipfile
 import io
-from requests import Session
 from .generar_xml import create_xml, create_zip,generar_xml
 from .utils import get_sunat_response_code, get_sunat_response_xml
 from app.config.certificado import firmar_xml_con_placeholder
 from enum import Enum
 from xml.etree import ElementTree as ET
 from app.services.serie_services import get_last_number
-from app import db
+from app.services.customer_service import get_all_customers_by_ruc
 # from app.services.invoice_service import crear_factura_standard
 # Configurar logging para debug
 logging.basicConfig(level=logging.INFO)
@@ -316,8 +315,10 @@ def complete_data_xml(data):
     """
     try:
         xml_string = generar_xml()  # Aquí se obtiene el XML con placeholders
-        xml_string = agregar_datos_ruc_cliente(xml_string,data.get("ruc_cliente"))  # Agregar datos del RUC emisor
-        xml_string = agregar_datos_ruc(xml_string,os.getenv("SUNAT_RUC"))  # Agregar datos del RUC cliente
+        rucs = [os.getenv("SUNAT_RUC"), data.get("ruc_cliente")]
+        xml_string = complete_data_customers(xml_string, rucs)  # Completar datos del cliente
+        # xml_string = agregar_datos_ruc_cliente(xml_string,data.get("ruc_cliente"))  # Agregar datos del RUC emisor
+        # xml_string = agregar_datos_ruc(xml_string,os.getenv("SUNAT_RUC"))  # Agregar datos del RUC cliente
         xml_string = xml_string.replace("@fecha", datetime.now().strftime("%Y-%m-%d"))
         try:
            serie_number = get_last_number(data.get("tipo_documento"), data.get("documento").split("-")[0])
@@ -336,6 +337,55 @@ def complete_data_xml(data):
         print(f"❌ Error al completar el XML: {e}")
         return {"error": str(e)}, 500
     
+def complete_data_customers(xml_string, rucs):
+    """
+    Completa el XML con los datos del cliente.
+
+    Args:
+        xml_string (str): XML con placeholders, expected to contain tags for customer details.
+        rucs (list): List of RUCs (Registro Único de Contribuyente) as strings to validate and fetch customer data.
+
+    Returns:
+        str: XML string with customer details filled in, formatted according to the SUNAT specifications.
+    """
+    try:
+        payload_customers=get_all_customers_by_ruc(rucs)  # Validar que los RUCs existan en la base de datos
+        if len(payload_customers[0]) == 0:
+            raise ValueError("No se encontraron clientes con los RUCs proporcionados.")
+        xml_template ="""
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="6">@ruc</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyLegalEntity>
+                <cbc:RegistrationName>@razon_social</cbc:RegistrationName>
+                <cac:RegistrationAddress>
+                    <cbc:AddressTypeCode>0000</cbc:AddressTypeCode>
+                    <cbc:CityName>@provincia</cbc:CityName>
+                    <cbc:District>@distrito</cbc:District>
+                    <cac:AddressLine>
+                        <cbc:Line><![CDATA[@direccion]]></cbc:Line>
+                    </cac:AddressLine>
+                </cac:RegistrationAddress>
+            </cac:PartyLegalEntity>
+        """
+              
+        # print("client", len(payload_customers[0]))
+        for custormer in payload_customers[0]:
+            xml_customers = xml_template
+            xml_customers = xml_customers.replace("@ruc", custormer.get("document_number", ""))
+            xml_customers = xml_customers.replace("@razon_social", custormer.get("business_name"))
+            xml_customers = xml_customers.replace("@direccion", custormer.get("address", ""))
+            xml_customers = xml_customers.replace("@provincia", custormer.get("province", ""))
+            xml_customers = xml_customers.replace("@distrito", custormer.get("city", ""))  
+            if custormer.get("is_owner") is True:
+                xml_string = xml_string.replace("@DatosEmisor", xml_customers)
+            else:
+                xml_string = xml_string.replace("@DatosCliente", xml_customers)    
+            print("xml_string", xml_customers)
+        return xml_string
+    except Exception as e:
+        print(f"❌ Error al completar los datos del cliente: {e}")
+        return {"error": str(e)}, 500
     
 def complete_details_products(xml_string, productos):
     """

@@ -149,19 +149,19 @@ POST http://127.0.0.1:5000/api/customers
 Content-Type: application/json
     
     {
-    "username": "userX2025",
-    "email": "userX2025@example.com",
+    "username": "RONSOCO2025",
+    "email": "RONSOCO2025@example.com",
     "password": "SecurePass123!",
-    "phone": "1234567890",
+    "phone": "1234567891",
     "document_type": "6",
-    "document_number": "20603786590",
-    "business_name": "PERU LOGISTIC ANDRES EDUARDO EIRL",
-    "commercial_name": "PERU LOGISTIC ANDRES EDUARDO EIRL",
+    "document_number": "20612922773",
+    "business_name": "RONSOCO SAC",
+    "commercial_name": "RONSOCO SAC",
     "address": "AV. LIMA 123",
     "city": "Lima",
     "province": "Lima",
     "country": "Peru",
-    "is_business": true,
+    "is_business": false,
     "is_active": true  }
 
 #### UPDATE CUSTOMER
