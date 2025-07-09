@@ -363,10 +363,12 @@ POST http://127.0.0.1:5000/api/invoices/factura_dummy
 Content-Type: application/json
 
 {
-    "documento": "F001-00000001",
-    "tipo_documento": "01",
+    "document": "F001-00000169",
+    "type_document": "01",
     "monto_total": "1.18",
     "ruc_cliente": "20612922773",
+    "date": "2025-05-12T14:48:58.000Z",
+    "customer_id": 11,
     "subtotal": "1",
     "monto_igv": "18",
     "subtotal": "1",
@@ -376,8 +378,7 @@ Content-Type: application/json
         "product_id": "2",
         "quantity": "1",
         "subtotal": "1",
-        "total": "11.80",
-        "unit_price": "10.00",
+        "unit_price": "1",
         "description": "TEST 1",
         "monto_total": "1.18"
     }

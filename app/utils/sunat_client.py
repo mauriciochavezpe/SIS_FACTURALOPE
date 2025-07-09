@@ -25,33 +25,17 @@ def send_to_sunat(data, env = "qas"):
         #generacion de name del file
         ruc = os.getenv("SUNAT_RUC")
         tipo_doc = "01"
+        print("serie_number1", serie_number.get("serie"))
+        print("serie_number2", data.get("document"))
+        # if serie_number.get("serie") != data.get("document"):
+        #     raise ValueError("La serie del documento no coincide con la serie del invoice.")
+        
         name_file = f"{ruc}-{tipo_doc}-{serie_number.get('serie')}" # Ej: 20512345678-01-F001-00000001
         nombre_xml = f"{name_file}.xml"
         nombre_zip =  f"{name_file}.zip"
         RB = "assets" # ruta_base,
         tax = str(int(data.get("monto_igv")) / 100)
-        try:
-            create_structure_invoice = {
-                                        "date": datetime.now(),
-                                        "customer_id": data.get("customer_id", 1),  # Si no hay customer_id, usar 1 como dummy
-                                        "num_invoice": f"{serie_number.get('correlativo'):08d}",
-                                        "serie": serie_number.get("serie").split("-")[0],
-                                        "subtotal": data.get("subtotal"),
-                                        "total": data.get("monto_total"),
-                                        "details": [
-                                            {
-                                                "product_id": item.get("producto_id", 1),  # Si no hay producto_id, usar 1 como dummy
-                                                "quantity": item.get("quantity"),
-                                                "unit_price": item.get("monto_total"),
-                                                "discount": item.get("descuento", 0),
-                                                "subtotal": item.get("subtotal"),
-                                                "tax": tax,
-                                                "total": item.get("monto_total")
-                                            } for item in data.get("details", [])]
-                                        }
-            # print("create_structure_invoice",create_structure_invoice)
-        except Exception as e:
-            return {"error": f"Error al interpretar los datos del invoice {e}"}, 500
+
         
         # agregamos los items de la factura y procedemos a firmar el XML
         xml_string = complete_details_products(xml_string, data)
@@ -92,21 +76,12 @@ def send_to_sunat(data, env = "qas"):
             print("📤 Enviando comprobante a SUNAT...")
             payload = client.service.sendBill(**args)
             result = descomprimir_cdr(payload) #CDR es un documento que envia sunat
-            ## agregar factura a la base de datos
-            # agregamos los datos de la factura a la base de datos
-            try:
-                from app.services.invoice_service import crear_factura_standard
-                print("📥 Guardando factura en la base de datos...")
-                crear_factura_standard(create_structure_invoice)
-            except Exception as e:
-                print("❌ Error al crear la factura en la base de datos:", str(e))
-                raise(e)
-            
+         
             print("✅ Enviado correctamente. SUNAT respondió con CDR.")
-            return result
+            return result,200
         except Exception as e:
             print("❌ Error al enviar a SUNAT:", str(e))
-            raise
+            return {"error": str(e)}, 400
         
     except Exception as e:
         return {"error":"Error al enviar a SUNAT", "error_type": type(e).__name__, "full_error": str(e)}, 500
@@ -125,8 +100,9 @@ def descomprimir_cdr(zip_bytes):
             create_xml(xml_str, carpeta_cdr, nombre_xml,flag_cdr=True)
             # create_zip(xml_bytes, carpeta_cdr, nombre_xml,flag_cdr=True)
 
-            return read_xml_cdr(xml_bytes,nombre_xml)
-
+            payload_cdr = read_xml_cdr(xml_bytes,nombre_xml)
+            
+            return payload_cdr
     except zipfile.BadZipFile as e:
         print("❌ Error al descomprimir el CDR:", str(e))
         raise
@@ -154,9 +130,11 @@ def read_xml_cdr(xml_bytes, name):
         MENSAJE_SUNAT_XML = get_sunat_response_xml(description)
 
         contenido_xml = xml_bytes.decode("utf-8")
-
+     
+        
         payload = {
-            "estado": MESSAGE_SUNAT_RETURN,
+            "codigo_estado": response_code.text,
+            "estado_descripcion": MESSAGE_SUNAT_RETURN,
             "mensaje": MENSAJE_SUNAT_XML,
             "nombre_xml": name,
             "contenido_xml": contenido_xml,

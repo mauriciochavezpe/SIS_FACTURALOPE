@@ -1,6 +1,5 @@
 from app.models.entities.Serie import Serie
 
-from app import db  # asegúrate de importar tu instancia de db
 def get_last_number(tipo_comprobante, serie):
     from app import db
 

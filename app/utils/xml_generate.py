@@ -146,10 +146,11 @@ def complete_data_xml(data):
         xml_string = complete_data_customers(xml_string, rucs)  # Completar datos del cliente
         xml_string = xml_string.replace("@fecha", datetime.now().strftime("%Y-%m-%d"))
         try:
-           serie_number = get_last_number(data.get("tipo_documento"), data.get("documento").split("-")[0])
+           serie_number = get_last_number(data.get("type_document"), data.get("document").split("-")[0])
+        #    serie_number = data.get("documento")
         except Exception as e:
             raise ValueError(f"Error al obtener el tipo de documento. Asegúrate de que el campo 'documento' esté presente en los datos. {e}")
-        xml_string = xml_string.replace("@serie", serie_number.get("serie"))
+        xml_string = xml_string.replace("@serie", serie_number.get("serie", ""))
         xml_string = xml_string.replace("@tipo_moneda", "PEN")
         xml_string = xml_string.replace("@tipo", "01")
         xml_string = xml_string.replace("@monto_total", data.get("monto_total"))
