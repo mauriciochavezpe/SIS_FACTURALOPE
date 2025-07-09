@@ -5,7 +5,8 @@ from app.schemas.master_data_schema import MasterDataSchema
 from app.utils.generar_xml import generar_xml, crear_xml_y_zip
 from app.config.certificado import obtener_certificado, firmar_xml_con_placeholder
 from datetime import datetime
-from app.utils.conexion_sunat import (send_to_sunat, complete_data_xml)
+from app.utils.sunat_client import (send_to_sunat)
+from app.utils.xml_generate import (complete_data_xml)
 from dotenv import load_dotenv
 import requests
 import base64

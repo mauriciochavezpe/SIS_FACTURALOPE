@@ -230,6 +230,7 @@ def create_xml(xml_firmado,rb, nm_xml, flag_cdr=False):
         return {"error": str(e)}, 500
 
 
+## rb: ruta base
 def create_zip(xml_firmado, rb, nm_zip, flag_cdr=False):
     try:
         path_full_zip = os.path.join(rb, nm_zip)

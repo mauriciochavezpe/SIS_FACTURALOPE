@@ -5,7 +5,8 @@ from app.services.invoice_service import (
     update_invoice,
     delete_invoice,
     get_details_by_invoice,
-    create_invoice_details
+    create_invoice_details,
+    create_invoice_detail_sunat
 )
 
 invoice_blueprint = Blueprint('invoices', __name__)
@@ -60,5 +61,13 @@ def create_invoice_details_routes():
     try:
         invoice_details, status = create_invoice_details()
         return jsonify(invoice_details), status
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@invoice_blueprint.route('/factura_dummy', methods=['GET','POST'])
+def generacion_factura_dummy_routes():
+    try:
+        master_data, status = create_invoice_detail_sunat()
+        return jsonify(master_data), status
     except Exception as e:
         return jsonify({'error': str(e)}), 500
