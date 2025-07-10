@@ -29,16 +29,12 @@ def generar_xml():
 
     <!-- Datos del emisor -->
     <cac:AccountingSupplierParty>
-        <cac:Party>
         @DatosEmisor
-        </cac:Party>
     </cac:AccountingSupplierParty>
 
     <!-- Datos del cliente -->
     <cac:AccountingCustomerParty>
-        <cac:Party>
         @DatosCliente
-        </cac:Party>
     </cac:AccountingCustomerParty>
 
     <!-- Forma de pago -->
@@ -74,139 +70,6 @@ def generar_xml():
 """
         return xml
 
-    except Exception as e:
-        print(e)
-
-
-def xml_boleta():
-    try:
-        xml = """
-            <Invoice xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ccts="urn:un:unece:uncefact:documentation:2" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2" xmlns:qdt="urn:oasis:names:specification:ubl:schema:xsd:QualifiedDatatypes-2" xmlns:udt="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2">
-           
-            <ext:UBLExtensions>
-            <ext:UBLExtension>
-            <ext:ExtensionContent>
-            <ds:Signature Id="NubeFacTSign">
-            </ds:Signature>
-            </ext:ExtensionContent>
-            </ext:UBLExtension>
-            </ext:UBLExtensions>
-
-
-            <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
-            <cbc:CustomizationID>2.0</cbc:CustomizationID>
-            <cbc:ID>@serie</cbc:ID>
-            <cbc:IssueDate>@fecha</cbc:IssueDate>
-            <cbc:IssueTime>@hora</cbc:IssueTime>
-            <cbc:InvoiceTypeCode listID="0101" listAgencyName="PE:SUNAT" listName="Tipo de Documento" listURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo01" name="Tipo de Operacion" listSchemeURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo51">03</cbc:InvoiceTypeCode>
-            <cbc:Note languageLocaleID="1000"><![CDATA[@monto_total_letras]]></cbc:Note>
-            <cbc:DocumentCurrencyCode listID="ISO 4217 Alpha" listAgencyName="United Nations Economic Commission for Europe" listName="Currency">@tipo_moneda</cbc:DocumentCurrencyCode>
-            <cac:Signature>
-                <cbc:ID>-</cbc:ID>
-                <cac:SignatoryParty>
-                <cac:PartyIdentification>
-                    <cbc:ID schemaID="6">@ruc</cbc:ID>
-                </cac:PartyIdentification>
-                <cac:PartyName>
-                <cbc:Name><![CDATA[@razon_social]]></cbc:Name>
-                </cac:PartyName>
-                </cac:SignatoryParty>
-                <cac:DigitalSignatureAttachment>
-                <cac:ExternalReference>
-                <cbc:URI>@ruc</cbc:URI>
-                </cac:ExternalReference>
-                </cac:DigitalSignatureAttachment>
-            </cac:Signature>
-            <cac:AccountingSupplierParty>
-            <cac:Party>
-            <cac:PartyIdentification>
-            <cbc:ID schemeID="6" schemeName="Documento de Identidad" schemeAgencyName="PE:SUNAT" schemeURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo06">@ruc</cbc:ID>
-            </cac:PartyIdentification>
-            <cac:PartyName>
-            <cbc:Name><![CDATA[@razon_social]]></cbc:Name>
-            </cac:PartyName>
-            <cac:PartyLegalEntity>
-            <cbc:RegistrationName><![CDATA[@razon_social]]></cbc:RegistrationName>
-            <cac:RegistrationAddress>
-            <cbc:ID schemeName="Ubigeos" schemeAgencyName="PE:INEI">@ubigeo</cbc:ID>
-            <cbc:AddressTypeCode listAgencyName="PE:SUNAT" listName="Establecimientos anexos">0000</cbc:AddressTypeCode>
-            </cac:RegistrationAddress>
-            </cac:PartyLegalEntity>
-            </cac:Party>
-            </cac:AccountingSupplierParty>
-            <cac:AccountingCustomerParty>
-            <cac:Party>
-            <cac:PartyIdentification>
-            <cbc:ID schemeID="1" schemeName="Documento de Identidad" schemeAgencyName="PE:SUNAT" schemeURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo06">@DNI_cliente</cbc:ID>
-            </cac:PartyIdentification>
-            <cac:PartyLegalEntity>
-            <cbc:RegistrationName><![CDATA[@nombre_cliente]]></cbc:RegistrationName>
-            <cac:RegistrationAddress>
-            <cac:AddressLine>
-            <cbc:Line><![CDATA[@direccion_cliente]]></cbc:Line>
-            </cac:AddressLine>
-            </cac:RegistrationAddress>
-            </cac:PartyLegalEntity>
-            </cac:Party>
-            </cac:AccountingCustomerParty>
-            <cac:TaxTotal>
-            <cbc:TaxAmount currencyID="PEN">0.00</cbc:TaxAmount>
-            <cac:TaxSubtotal>
-            <cbc:TaxableAmount currencyID="PEN">21789.00</cbc:TaxableAmount>
-            <cbc:TaxAmount currencyID="PEN">0.00</cbc:TaxAmount>
-            <cac:TaxCategory>
-            <cac:TaxScheme>
-            <cbc:ID schemeName="Codigo de tributos" schemeAgencyName="PE:SUNAT" schemeURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo05">9998</cbc:ID>
-            <cbc:Name>INA</cbc:Name>
-            <cbc:TaxTypeCode>FRE</cbc:TaxTypeCode>
-            </cac:TaxScheme>
-            </cac:TaxCategory>
-            </cac:TaxSubtotal>
-            </cac:TaxTotal>
-            <cac:LegalMonetaryTotal>
-            <cbc:LineExtensionAmount currencyID="PEN">21789.00</cbc:LineExtensionAmount>
-            <cbc:TaxInclusiveAmount currencyID="PEN">21789.00</cbc:TaxInclusiveAmount>
-            <cbc:AllowanceTotalAmount currencyID="PEN">0.00</cbc:AllowanceTotalAmount>
-            <cbc:ChargeTotalAmount currencyID="PEN">0.00</cbc:ChargeTotalAmount>
-            <cbc:PrepaidAmount currencyID="PEN">0.00</cbc:PrepaidAmount>
-            <cbc:PayableAmount currencyID="PEN">21789.00</cbc:PayableAmount>
-            </cac:LegalMonetaryTotal>
-            <cac:InvoiceLine>
-                <cbc:ID>1</cbc:ID>
-                <cbc:InvoicedQuantity unitCode="ZZ" unitCodeListID="UN/ECE rec 20" unitCodeListAgencyName="United Nations Economic Commission for Europe">6000.0</cbc:InvoicedQuantity>
-                <cbc:LineExtensionAmount currencyID="PEN">21789.00</cbc:LineExtensionAmount>
-                <cac:PricingReference>
-                <cac:AlternativeConditionPrice>
-                <cbc:PriceAmount currencyID="PEN">3.6315</cbc:PriceAmount>
-                <cbc:PriceTypeCode listAgencyName="PE:SUNAT" listName="Tipo de Precio" listURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo16">01</cbc:PriceTypeCode>
-                </cac:AlternativeConditionPrice>
-                </cac:PricingReference>
-                <cac:TaxTotal>
-                    <cbc:TaxAmount currencyID="@tipo_moneda">@monto_igv</cbc:TaxAmount>
-                    <cac:TaxSubtotal>
-                        <cbc:TaxableAmount currencyID="@tipo_moneda">@monto_subtotal</cbc:TaxableAmount>
-                        <cbc:TaxAmount currencyID="@tipo_moneda">@monto_igv</cbc:TaxAmount>
-                        <cac:TaxCategory>
-                            <cbc:Percent>@valor_igv</cbc:Percent>
-                            <cbc:TaxExemptionReasonCode listAgencyName="PE:SUNAT" listName="Afectacion del IGV" listURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo07">10</cbc:TaxExemptionReasonCode>
-                            <cac:TaxScheme>
-                                <cbc:ID schemeName="Codigo de tributos" schemeAgencyName="PE:SUNAT" schemeURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo05">1000</cbc:ID>
-                                <cbc:Name>IGV</cbc:Name>
-                                <cbc:TaxTypeCode>VAT</cbc:TaxTypeCode>
-                            </cac:TaxScheme>
-                        </cac:TaxCategory>
-                    </cac:TaxSubtotal>
-                </cac:TaxTotal>
-                <cac:Item>
-                <cbc:Description>@descripcion</cbc:Description>
-                </cac:Item>
-                <cac:Price>
-                    <cbc:PriceAmount currencyID="@tipo_moneda">@valor_unitario</cbc:PriceAmount>
-                </cac:Price>
-            </cac:InvoiceLine>
-            </Invoice>
-        """
-        return xml
     except Exception as e:
         print(e)
 

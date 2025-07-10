@@ -5,7 +5,6 @@ from app.schemas.master_data_schema import MasterDataSchema
 from app.utils.generar_xml import generar_xml, crear_xml_y_zip
 from app.config.certificado import obtener_certificado, firmar_xml_con_placeholder
 from datetime import datetime
-from app.utils.sunat_client import (send_to_sunat)
 from app.utils.xml_generate import (complete_data_xml)
 from dotenv import load_dotenv
 import requests
@@ -29,11 +28,24 @@ def get_all_master_data():
         if not results:
             return [], 200
             
-        return [schema.dump(item) for item in results], 200
+        return schema.dump(results), 200
         
     except Exception as e:
         return {"error": str(e)}, 500
-
+    
+def get_master_data_by_catalog(NAME, CODE=""):
+    try:
+        print(f"NAME: {NAME}, CODE: {CODE}")
+        schema = MasterDataSchema(session=db.session)
+        results = db.session.query(MasterData).filter(MasterData.catalog_code == NAME, MasterData.code == CODE).first()
+        
+        if not results:
+            return {"message": "No data found for the given catalog code"}, 404
+            
+        return schema.dump(results), 200
+        
+    except Exception as e:
+        return {"error": str(e)}, 500
 def create_master_data():
     try:
         data = request.get_json()
@@ -99,9 +111,7 @@ def get_master_data_by_id(id):
 def generacion_factura_dummy():
     try:
         data = request.get_json()
-        xml_firmado, serie_number = complete_data_xml(data) # luego de completar los datos, se firma el XML
-        result = send_to_sunat(xml_firmado,serie_number,data)
-        return result, 200
+        return "result", 200
     except Exception as e:
         return {"error2": str(e)}, 500
 

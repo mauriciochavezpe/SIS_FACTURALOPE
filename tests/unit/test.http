@@ -132,17 +132,16 @@ POST http://127.0.0.1:5000/api/customers
 Content-Type: application/json
     
      {
-    "address": "Test Address 123",
-    "business_name": "Test Company",
+    "address": "",
+    "business_name": "",
     "city": "Lima",
-    "commercial_name": "Test Brand",
+    "commercial_name": "",
     "country": "Peru",
     "createdAt": null,
     "createdBy": null,
-    "document_number": "12345678",
+    "document_number": "73119100",
     "document_type": "1",
-    "email": "test@example.com",
-    "id": 1,
+    "email": "testDNI@example.com",
     "ip": null,
     "is_active": true,
     "is_business": false,
@@ -152,7 +151,7 @@ Content-Type: application/json
     "phone": "1234567890",
     "postal_code": null,
     "province": "Lima",
-    "username": "testcustomer"
+    "username": "testcustomerDNI"
   }
 
 
@@ -363,8 +362,8 @@ POST http://127.0.0.1:5000/api/invoices/factura_dummy
 Content-Type: application/json
 
 {
-    "document": "F001-00000169",
-    "type_document": "01",
+    "document": "B001-1",
+    "type_document": "03",
     "monto_total": "1.18",
     "ruc_cliente": "20612922773",
     "date": "2025-05-12T14:48:58.000Z",
@@ -373,6 +372,36 @@ Content-Type: application/json
     "monto_igv": "18",
     "subtotal": "1",
     "quantity": "1",
+    "details":[{
+        "discount": "0.00",
+        "product_id": "2",
+        "quantity": "1",
+        "subtotal": "1",
+        "unit_price": "1",
+        "description": "TEST 1",
+        "monto_total": "1.18"
+    }
+    ]
+}
+
+
+### GENERACION BOLETOS DUMMY X DATA
+POST http://127.0.0.1:5000/api/invoices/factura_dummy
+Content-Type: application/json
+
+{
+    "document": "B001-59",
+    "type_document": "03",
+    "monto_total": "1.18",
+    "ruc_cliente": "73119100",
+    "date": "2025-05-12T14:48:58.000Z",
+    "customer_id": 12,
+    "subtotal": "1",
+    "monto_igv": "18",
+    "metodo_pago": "01",
+    "subtotal": "1",
+    "quantity": "1",
+    "afecto_tributo":"10",
     "details":[{
         "discount": "0.00",
         "product_id": "2",

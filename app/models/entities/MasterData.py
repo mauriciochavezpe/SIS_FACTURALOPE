@@ -16,3 +16,5 @@ class MasterData(Auditoria):
     __table_args__ = (
         db.UniqueConstraint('catalog_code', 'code', name='uq_catalog_code_code'),
     )
+    
+    

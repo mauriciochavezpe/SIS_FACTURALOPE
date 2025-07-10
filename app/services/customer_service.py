@@ -77,23 +77,23 @@ def update_customers_by_id(user_id):
 def get_all_customers_by_ruc(rucs):
     
     try:
-        for ruc in rucs:
-            if len(ruc) != 11:
-                return {"error": f"La longitud del RUC {ruc} debe ser de 11 dígitos"}, 400
-            else:
-                if not ruc.isdigit():
-                    return {"error": f"El RUC {ruc} debe contener solo dígitos"}, 400
-            
-        query = db.session.query(Customer)
+        # for ruc in rucs:
+            # if len(ruc) != 11:
+            #     ""
+            #     # return {"error": f"La longitud del RUC {ruc} debe ser de 11 dígitos"}, 400
+            # else:
+            #     if not ruc.isdigit():
+            #         return {"error": f"El RUC {ruc} debe contener solo dígitos"}, 400
+        query = db.session.query(Customer).filter(Customer.document_number.in_(rucs))
         
         # Filtrar por todos los RUCs usando in_
-        if hasattr(Customer, "document_number"):
-            query = query.filter(getattr(Customer, "document_number").in_(rucs))
+        
         
         results = query.all()
         if not results:
             return [], 200
-        
+        print(f"results: {results}")
+        print(f"results ln: {len(results)}")
         schema = CustomerSchema(session=db.session, many=True)
         return schema.dump(results), 200
 

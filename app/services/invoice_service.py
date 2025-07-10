@@ -97,8 +97,10 @@ def update_invoice_status(documento,value):
                     break
         # else:
             # return {"error": "MasterData not found for T_ESTADO_SOLICITUD"}, 404
-        # 
-        invoice = Invoice.query.filter_by(serie=documento.split("-")[0], num_invoice=documento.split("-")[1]).first()
+        serie = documento.split("-")[0]
+        correlativo = int(documento.split("-")[1])
+        num_invoice = f"{correlativo:08d}"
+        invoice = Invoice.query.filter_by(serie=serie, num_invoice=num_invoice).first()
         if not invoice:
             return {"error": "Invoice not found"}, 404
             
@@ -225,7 +227,7 @@ def create_invoice_details():
         return {"error": str(e)}, 500
     
 
-
+#aqui
 def create_invoice_detail_sunat():
     try:
         data = request.get_json()
@@ -241,7 +243,6 @@ def create_invoice_detail_sunat():
 
         if status_sunat >= 200 and status_sunat < 300:
             codigo_estado = payload_sunat.get("codigo_estado")
-
             if codigo_estado:
                 # 3. Actualizar estado de la factura en BD
                 updated_payload = update_invoice_status(data["document"], codigo_estado)
@@ -256,10 +257,6 @@ def create_invoice_detail_sunat():
 
     except Exception as e:
         return {"error": str(e)}, 500
-
-
-from decimal import Decimal
-from flask import current_app
 
 def crear_factura_standard(data):
     try:
@@ -338,7 +335,7 @@ def crear_factura_standard(data):
 
     except Exception as e:
         db.session.rollback()
-        current_app.logger.error(f"❌ Error al crear factura: {e}")
+        # current_app.logger.error(f"❌ Error al crear factura: {e}")
         return {"error": "Error al crear la factura", "detalle": str(e)}, 500
 
 

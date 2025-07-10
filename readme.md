@@ -47,3 +47,6 @@ Catalogos [https://www.sunat.gob.pe/legislacion/superin/2015/anexoI-274-2015.pdf
 
 ## pendiente 1.1
 - agregar dinamismo a los items y products 
+
+## pendiente 1.2
+- avanzar con boletas
