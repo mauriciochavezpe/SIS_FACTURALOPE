@@ -24,7 +24,7 @@ def send_to_sunat(data, env = "qas"):
 
         #generacion de name del file
         ruc = os.getenv("SUNAT_RUC")
-        tipo_doc = data.get("type_document") # Ej: 01
+        tipo_doc = data.get("type_document") # Ej: 01,
         # print("serie_number1", serie_number.get("serie"))
         # print("serie_number2", data.get("document"))
         # if serie_number.get("serie") != data.get("document"):

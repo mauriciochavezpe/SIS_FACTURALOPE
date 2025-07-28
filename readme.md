@@ -49,4 +49,12 @@ Catalogos [https://www.sunat.gob.pe/legislacion/superin/2015/anexoI-274-2015.pdf
 - agregar dinamismo a los items y products 
 
 ## pendiente 1.2
-- avanzar con boletas
+- ver lo de NC y ND para mañana jueves y viernes
+- hacer pruebas en prd con los usuarios y conexiones
+- avanzar con el front
+- hacer pruebas de estres
+
+
+
+## APUNTES
+ - HACEMOS MATCH : flask db stamp head

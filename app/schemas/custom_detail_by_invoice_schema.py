@@ -15,7 +15,7 @@ class ComplexInvoiceSchema(SQLAlchemyAutoSchema):
     product_id = fields.Integer(required=True)
     date = fields.DateTime(required=True)
     customer_id = fields.Integer(required=True)
-    num_invoice = fields.String(required=True)
+    num_invoice = fields.String(required=False)
     subtotal = fields.Decimal(required=False)
     total = fields.Decimal(required=True)
     details = fields.List(fields.Nested(InvoiceDetailNestedSchema), required=True)

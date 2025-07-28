@@ -73,6 +73,113 @@ def generar_xml():
     except Exception as e:
         print(e)
 
+def generate_nc_xml():
+    try:
+        xml  ="""
+                <CreditNote xmlns="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+                <ext:UBLExtensions>
+                <ext:UBLExtension>
+                <ext:ExtensionContent></ext:ExtensionContent>
+                </ext:UBLExtension>
+                </ext:UBLExtensions>
+                <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+                <cbc:CustomizationID>2.0</cbc:CustomizationID>
+                <cbc:ID>@serie</cbc:ID>
+                <cbc:IssueDate>@fecha</cbc:IssueDate>
+                <cbc:IssueTime>@hora</cbc:IssueTime>
+                <cbc:Note languageLocaleID="1000"><![CDATA[@observacion]]></cbc:Note>
+                <cbc:Note>@nota</cbc:Note>
+                <cbc:DocumentCurrencyCode>@moneda</cbc:DocumentCurrencyCode>
+                <cac:DiscrepancyResponse>
+                <cbc:ResponseCode>@codigo_table_09</cbc:ResponseCode>
+                <cbc:Description>@descripcion_modificiacion</cbc:Description>
+                </cac:DiscrepancyResponse>
+                <cac:BillingReference>
+                <cac:InvoiceDocumentReference>
+                <cbc:ID>@documento_refenced</cbc:ID>
+                <cbc:DocumentTypeCode>@tipo_documento</cbc:DocumentTypeCode>
+                </cac:InvoiceDocumentReference>
+                </cac:BillingReference>
+                <cac:Signature>
+                <cbc:ID>-</cbc:ID>
+                <cac:SignatoryParty>
+                <cac:PartyIdentification>
+                <cbc:ID>@ruc</cbc:ID>
+                </cac:PartyIdentification>
+                <cac:PartyName>
+                <cbc:Name><![CDATA[@razon_social]]></cbc:Name>
+                </cac:PartyName>
+                </cac:SignatoryParty>
+                <cac:DigitalSignatureAttachment>
+                <cac:ExternalReference>
+                <cbc:URI></cbc:URI>
+                </cac:ExternalReference>
+                </cac:DigitalSignatureAttachment>
+                </cac:Signature>
+                <cac:AccountingSupplierParty>
+                    @DatosEmisor
+                </cac:AccountingSupplierParty>
+                <cac:AccountingCustomerParty>
+                    @DatosCliente
+                </cac:AccountingCustomerParty>
+                <cac:TaxTotal>
+                <cbc:TaxAmount currencyID="@tipo_moneda">0</cbc:TaxAmount>
+                <cac:TaxSubtotal>
+                    <cbc:TaxableAmount currencyID="@tipo_moneda">0</cbc:TaxableAmount>
+                    <cbc:TaxAmount currencyID="@tipo_moneda">0</cbc:TaxAmount>
+                    <cac:TaxCategory>
+                    <cac:TaxScheme>
+                    <cbc:ID>1000</cbc:ID>
+                    <cbc:Name>IGV</cbc:Name>
+                    <cbc:TaxTypeCode>VAT</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                    </cac:TaxCategory>
+                </cac:TaxSubtotal>
+                </cac:TaxTotal>
+                <cac:LegalMonetaryTotal>
+                <cbc:PayableAmount currencyID="@tipo_moneda">0</cbc:PayableAmount>
+                </cac:LegalMonetaryTotal>
+                <cac:CreditNoteLine>
+                    <cbc:ID>1</cbc:ID>
+                    <cbc:CreditedQuantity unitCode="NIU">1</cbc:CreditedQuantity>
+                    <cbc:LineExtensionAmount currencyID="@tipo_moneda">0</cbc:LineExtensionAmount>
+                        <cac:PricingReference>
+                        <cac:AlternativeConditionPrice>
+                        <cbc:PriceAmount currencyID="@tipo_moneda">0</cbc:PriceAmount>
+                        <cbc:PriceTypeCode>01</cbc:PriceTypeCode>
+                        </cac:AlternativeConditionPrice>
+                        </cac:PricingReference>
+                    <cac:TaxTotal>
+                        <cbc:TaxAmount currencyID="@tipo_moneda">0</cbc:TaxAmount>
+                        <cac:TaxSubtotal>
+                            <cbc:TaxableAmount currencyID="@tipo_moneda">0</cbc:TaxableAmount>
+                            <cbc:TaxAmount currencyID="@tipo_moneda">0</cbc:TaxAmount>
+                            <cac:TaxCategory>
+                            <cbc:Percent>18</cbc:Percent>
+                            <cbc:TaxExemptionReasonCode>10</cbc:TaxExemptionReasonCode>
+                            <cac:TaxScheme>
+                            <cbc:ID>1000</cbc:ID>
+                            <cbc:Name>IGV</cbc:Name>
+                            <cbc:TaxTypeCode>VAT</cbc:TaxTypeCode>
+                            </cac:TaxScheme>
+                            </cac:TaxCategory>
+                        </cac:TaxSubtotal>
+                    </cac:TaxTotal>
+                    <cac:Item>
+                        <cbc:Description>@descripcion</cbc:Description>
+                    </cac:Item>
+                    <cac:Price>
+                        <cbc:PriceAmount currencyID="@tipo_moneda">0</cbc:PriceAmount>
+                    </cac:Price>
+                </cac:CreditNoteLine>
+                </CreditNote>
+        
+        """
+        
+        
+    except Exception as e:
+        print(f"❌ Error generating NC XML: {e}")
+        return None
 
 def create_xml(xml_firmado,rb, nm_xml, flag_cdr=False):
     try:

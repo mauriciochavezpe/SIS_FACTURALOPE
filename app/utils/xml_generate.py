@@ -1,6 +1,6 @@
   
 from dotenv import load_dotenv
-from .generar_xml import create_xml, create_zip,generar_xml
+from .generar_xml import generar_xml, generate_nc_xml
 from app.services.serie_services import get_last_number
 import os
 from datetime import datetime
@@ -173,7 +173,12 @@ def complete_data_xml(data):
     """
     try:
         monto_igv = 0
-        xml_string = generar_xml()  # Aquí se obtiene el XML con placeholders
+        # validate of xml is required
+        if data.get("type_document") in ["01","03"]:
+            xml_string = generar_xml()  # Aquí se obtiene el XML con placeholders
+        else:
+            xml_string = generate_nc_xml()
+            
         rucs = [os.getenv("SUNAT_RUC"), data.get("ruc_cliente")]
         xml_string = complete_data_customers(xml_string, rucs)  # Completar datos del cliente
         xml_string = xml_string.replace("@fecha", datetime.now().strftime("%Y-%m-%d"))

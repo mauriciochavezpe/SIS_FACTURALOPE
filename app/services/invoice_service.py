@@ -275,6 +275,7 @@ def crear_factura_standard(data):
             customer_id=data.get("customer_id"),
             num_invoice=f"{correlativo:08d}",
             serie=serie,
+            document_type=data.get("type_document"),
             date=data.get("date"),
             id_status=25,  # Pendiente de envío a SUNAT
             subtotal=Decimal(data.get("subtotal", 0) or 0),

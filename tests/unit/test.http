@@ -413,3 +413,34 @@ Content-Type: application/json
     }
     ]
 }
+
+### nota de credito
+POST http://127.0.0.1:5000/api/invoices/factura_dummy
+Content-Type: application/json
+
+
+{
+      "document": "BC01-1",
+    "type_document": "07",
+    "monto_total": "1.18",
+    "ruc_cliente": "73119100",
+    "date": "2025-05-12T14:48:58.000Z",
+    "customer_id": 12,
+    "subtotal": "1",
+    "monto_igv": "18",
+    "metodo_pago": "01",
+    "subtotal": "1",
+    "quantity": "1",
+    "afecto_tributo":"10",
+    "details":[{
+        "discount": "0.00",
+        "product_id": "2",
+        "quantity": "1",
+        "subtotal": "1",
+        "unit_price": "1",
+        "description": "TEST 1",
+        "monto_total": "1.18"
+    }
+    ]
+
+}
