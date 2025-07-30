@@ -11,7 +11,8 @@ import time
 import os
 import zipfile
 import io
-from .generar_xml import create_xml, create_zip,generar_xml
+
+from app.utils.xml_utils.file_utils import FileUtils
 from .utils import get_sunat_response_code, get_sunat_response_xml
 from app.config.certificado import firmar_xml_con_placeholder
 from enum import Enum

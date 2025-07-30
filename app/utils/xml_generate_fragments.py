@@ -1,6 +1,6 @@
   
 from dotenv import load_dotenv
-from .generar_xml import generar_xml, generate_nc_xml,generate_nd_xml
+from app.utils.xml_utils.xml_templates import INVOICE_TEMPLATE, CREDIT_NOTE_TEMPLATE, DEBIT_NOTE_TEMPLATE
 from app.services.serie_services import get_last_number
 import os
 from datetime import datetime
@@ -101,13 +101,13 @@ def complete_details_products(xml_string, productos):
         from app.services.master_data_service import get_master_data_by_catalog
         
         xml_productos =[]
-        catalog_07= get_master_data_by_catalog(name_catalog,productos.get("afecto_tributo"))
-        if catalog_07[1] != 200:
+        catalog_07,status= get_master_data_by_catalog(name_catalog,productos.get("afecto_tributo"))
+        if status != 200:
             raise ValueError(f"No se encontró el catálogo {name_catalog} para el código de afectación tributaria {productos.get('afecto_tributo')}")
         xml_afecto_tributo = f"""
-                <cbc:TaxExemptionReasonCode>{catalog_07[0].get("code")}</cbc:TaxExemptionReasonCode>
+                <cbc:TaxExemptionReasonCode>{catalog_07.get("code")}</cbc:TaxExemptionReasonCode>
                         <cac:TaxScheme>
-                            <cbc:ID>{catalog_07[0].get("value")}</cbc:ID>
+                            <cbc:ID>{catalog_07.get("value")}</cbc:ID>
                             <cbc:Name>IGV</cbc:Name>
                             <cbc:TaxTypeCode>VAT</cbc:TaxTypeCode>
                         </cac:TaxScheme>
@@ -253,11 +253,11 @@ def complete_data_xml(data):
         document_type = data.get("document_type")  # Default to '01' if not provided
         # validate of xml is required
         if document_type in ["01","03"]:
-            xml_string = generar_xml()  # Aquí se obtiene el XML con placeholders
+            xml_string = INVOICE_TEMPLATE  # Aquí se obtiene el XML con placeholders
         elif document_type == "07":
-            xml_string = generate_nc_xml()
+            xml_string = CREDIT_NOTE_TEMPLATE
         else:
-            xml_string = generate_nd_xml()  # Default to '01' if not provided
+            xml_string = DEBIT_NOTE_TEMPLATE  # Default to '01' if not provided
         rucs = [os.getenv("SUNAT_RUC"), data.get("ruc_cliente")]
         xml_string = complete_data_customers(xml_string, rucs, document_type)  # Completar datos del cliente
         xml_string = xml_string.replace("@fecha", datetime.now().strftime("%Y-%m-%d"))

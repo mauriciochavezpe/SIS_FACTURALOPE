@@ -8,16 +8,17 @@ from xml.etree import ElementTree as ET
 
 from .xml_generate_fragments import (complete_details_products,complete_data_xml)
 from app.config.certificado import firmar_xml_con_placeholder
+from app.utils.xml_utils.file_utils import FileUtils
 from .utils import get_sunat_response_code, get_sunat_response_xml
 # obs 
-from .generar_xml import create_xml, create_zip,generar_xml
+
 
 def send_to_sunat(data, env = "qas"):
     try:
-        if env == "qas":
-            URL = os.getenv("sunat_qas")
-        elif env == "prod":
-            URL = os.getenv("sunat_prod")
+        # if env == "qas":
+        #     URL = os.getenv("sunat_qas")
+        # elif env == "prod":
+        #     URL = os.getenv("sunat_prod")
 
         # Generar el XML con los datos completos 01,03,07,08
         xml_string, serie_number = complete_data_xml(data) # luego de completar los datos, se firma el XML
@@ -35,11 +36,12 @@ def send_to_sunat(data, env = "qas"):
         # agregamos los items de la factura y procedemos a firmar el XML
         xml_string = complete_details_products(xml_string, data)
         xml_firmado = firmar_xml_con_placeholder(xml_string) # Firmar el XML
+        file_utils = FileUtils(RB)
         try:
             #guardamos el file en la carpeta assets
-            create_xml(xml_firmado,RB, nombre_xml,flag_cdr=False) # flag_cdr=False porque no es un CDR
-            payload_zip, status= create_zip(xml_firmado,RB, nombre_zip,flag_cdr=False) # flag_cdr=False porque no es un CDR
-            if status == 200:
+            file_utils.create_xml(xml_firmado, nombre_xml) # flag_cdr=False porque no es un CDR
+            payload_zip = file_utils.create_zip(xml_firmado, nombre_xml, nombre_zip) # flag_cdr=False porque no es un CDR
+            if payload_zip and payload_zip.get('content_base64'):
                 zip_base64 = payload_zip['content_base64']
             else:
                 raise Exception("Error al crear el ZIP")
@@ -92,8 +94,8 @@ def descomprimir_cdr(zip_bytes):
             xml_str = xml_bytes.decode("utf-8")
             # la ruta
             carpeta_cdr = "CDR"
-            create_xml(xml_str, carpeta_cdr, nombre_xml,flag_cdr=True)
-            # create_zip(xml_bytes, carpeta_cdr, nombre_xml,flag_cdr=True)
+            file_utils = FileUtils(carpeta_cdr)
+            file_utils.create_xml(xml_str, nombre_xml)
 
             payload_cdr = read_xml_cdr(xml_bytes,nombre_xml)
             

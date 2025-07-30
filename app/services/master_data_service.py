@@ -2,7 +2,7 @@ from flask import request
 from app import db
 from app.models.entities.MasterData import MasterData
 from app.schemas.master_data_schema import MasterDataSchema
-from app.utils.generar_xml import generar_xml, crear_xml_y_zip
+# from app.utils.generar_xml import generar_xml, crear_xml_y_zip
 from app.config.certificado import obtener_certificado, firmar_xml_con_placeholder
 from datetime import datetime
 from app.utils.xml_generate_fragments import (complete_data_xml)
