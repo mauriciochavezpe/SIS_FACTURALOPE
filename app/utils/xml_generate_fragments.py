@@ -1,20 +1,64 @@
-  
-from dotenv import load_dotenv
-from app.utils.xml_utils.xml_templates import INVOICE_TEMPLATE, CREDIT_NOTE_TEMPLATE, DEBIT_NOTE_TEMPLATE
-from app.services.serie_services import get_last_number
+
+"""
+Este módulo se encarga de generar fragmentos de XML y ensamblar el XML final
+para los documentos electrónicos de SUNAT. NO debe realizar llamadas a servicios.
+"""
+
 import os
 from datetime import datetime
-from app.utils.utils import build_note_amount_text
+from typing import Any, Dict, List, Optional, Tuple
 
-def build_party_xml(is_business,tipo, ruc, razon_social, direccion, provincia, distrito):
+from dotenv import load_dotenv
+
+from app.utils.utils import build_note_amount_text
+from app.utils.xml_utils.xml_templates import (
+    CREDIT_NOTE_TEMPLATE, DEBIT_NOTE_TEMPLATE, INVOICE_TEMPLATE)
+
+# Cargar variables de entorno
+load_dotenv()
+
+# --- Constants ---
+CURRENCY_PEN = "PEN"
+UNIT_CODE_NIU = "NIU"
+PRICE_TYPE_CODE_MAIN = "01"
+TAX_NAME_IGV = "IGV"
+TAX_TYPE_CODE_VAT = "VAT"
+CATALOG_07_IGV = "CAT_07_IGV"
+
+# --- XML Placeholders ---
+PLACEHOLDER_DATOS_EMISOR = "@DatosEmisor"
+PLACEHOLDER_DATA_RAZON_EMISOR = "@DataRazonEmisor"
+PLACEHOLDER_DATOS_CLIENTE = "@DatosCliente"
+PLACEHOLDER_DETALLE_PRODUCTOS = "@detalle_productos"
+PLACEHOLDER_DETALLE_PRODUCTOS_NC_ND = "@detalle_productos_nc_nd"
+PLACEHOLDER_FECHA = "@fecha"
+PLACEHOLDER_HORA = "@hora"
+PLACEHOLDER_SERIE = "@serie"
+PLACEHOLDER_TIPO_MONEDA = "@tipo_moneda"
+PLACEHOLDER_TIPO_DOCUMENTO = "@tipo"
+PLACEHOLDER_MONTO_TOTAL = "@monto_total"
+PLACEHOLDER_MONTO_IGV = "@monto_igv"
+PLACEHOLDER_SUBTOTAL = "@subtotal"
+PLACEHOLDER_OBSERVACION = "@observacion"
+PLACEHOLDER_CODIGO_TABLA = "@codigo_table"
+PLACEHOLDER_CODIGO_MENSAJE_TABLA = "@codigo_mensaje_table"
+PLACEHOLDER_DOCUMENTO_REFERENCIADO = "@document_refenced"
+PLACEHOLDER_TIPO_DOCUMENTO_REFERENCIADO = "@document_type_refenced"
+
+
+# --- XML Building Functions ---
+
+def _build_party_xml(is_business: bool, tipo: str, ruc: str, razon_social: str,
+                     direccion: str, provincia: str, distrito: str) -> str:
+    """Construye el fragmento XML para una parte (emisor o cliente)."""
     direccion_xml = ""
-    if is_business:  # RUC
-        direccion_xml = f"""
+    if is_business:
+        direccion_xml = f'''
             <cbc:CityName>{provincia}</cbc:CityName>
             <cbc:District>{distrito}</cbc:District>
-        """
+        '''
 
-    return f"""
+    return f'''
         <cac:Party>
             <cac:PartyIdentification>
                 <cbc:ID schemeID="{tipo}">{ruc}</cbc:ID>
@@ -27,281 +71,300 @@ def build_party_xml(is_business,tipo, ruc, razon_social, direccion, provincia, d
                     <cac:AddressLine>
                         <cbc:Line><![CDATA[{direccion}]]></cbc:Line>
                     </cac:AddressLine>
-            </cac:RegistrationAddress>
+                </cac:RegistrationAddress>
             </cac:PartyLegalEntity>
         </cac:Party>
-    """
-def build_data_razon_emisor(tipo,ruc, razon_social):
-    return f"""
+    '''
+
+
+def _build_data_razon_emisor_xml(tipo: str, ruc: str, razon_social: str) -> str:
+    """Construye el fragmento XML con los datos de la razón social del emisor."""
+    return f'''
         <cac:PartyIdentification>
             <cbc:ID schemeID="{tipo}">{ruc}</cbc:ID>
         </cac:PartyIdentification>
         <cac:PartyName>
             <cbc:Name><![CDATA[{razon_social}]]></cbc:Name>
         </cac:PartyName>
-    """
-def complete_data_customers(xml_string, rucs, type=""):
-    
-    """
-    Completa el XML con los datos del cliente.
-
-    Args:
-        xml_string (str): XML con placeholders, expected to contain tags for customer details.
-        rucs (list): List of RUCs (Registro Único de Contribuyente) as strings to validate and fetch customer data.
-
-    Returns:
-        str: XML string with customer details filled in, formatted according to the SUNAT specifications.
-    """
-    try:
-        try:
-            from app.services.customer_service import get_all_customers_by_ruc
-            payload_customers,status=get_all_customers_by_ruc(rucs)  # Validar que los RUCs existan en la base de datos
-            print(f"payload_customers: {len(payload_customers)}")
-        except Exception as e:
-            print(f"❌ Error al obtener los clientes: {e}")
-        
-        if len(payload_customers) == 0:
-            raise ValueError("No se encontraron clientes con los RUCs proporcionados.")
-        
-        
-       
-        
-        for index,customer in enumerate(payload_customers):
-            tipo =customer.get("document_type") # tipo de documento
-            is_business = customer.get("is_business")
-            ruc = customer.get("document_number", "")
-            razon_social = customer.get("business_name", "")
-            direccion = customer.get("address", "")
-            provincia = customer.get("province", "")
-            distrito = customer.get("city", "")
-            
-            party_xml = build_party_xml(is_business, tipo,ruc, razon_social, direccion, provincia, distrito)
-    
-        
-            if customer.get("is_owner") is True:
-                xml_string = xml_string.replace("@DatosEmisor", party_xml)
-                if(type in ["07","08"]):
-                    fragment_owner = build_data_razon_emisor(tipo,ruc, razon_social)
-                    xml_string = xml_string.replace("@DataRazonEmisor", fragment_owner)
-            else:
-                xml_string = xml_string.replace("@DatosCliente", party_xml)    
-        return xml_string
-    except Exception as e:
-        print(f"❌ Error al completar los datos del cliente: {e}")
-        return {"error": str(e)}, 500
+    '''
 
 
-def complete_details_products(xml_string, productos):
-    """
-    Agrega los detalles de los productos al XML.
-    """
-    #  tambien hay una tabla de los unitCode que se pueden usar
-    name_catalog = "CAT_07_IGV"
-    try:
-        from app.services.master_data_service import get_master_data_by_catalog
-        
-        xml_productos =[]
-        catalog_07,status= get_master_data_by_catalog(name_catalog,productos.get("afecto_tributo"))
-        if status != 200:
-            raise ValueError(f"No se encontró el catálogo {name_catalog} para el código de afectación tributaria {productos.get('afecto_tributo')}")
-        xml_afecto_tributo = f"""
-                <cbc:TaxExemptionReasonCode>{catalog_07.get("code")}</cbc:TaxExemptionReasonCode>
-                        <cac:TaxScheme>
-                            <cbc:ID>{catalog_07.get("value")}</cbc:ID>
-                            <cbc:Name>IGV</cbc:Name>
-                            <cbc:TaxTypeCode>VAT</cbc:TaxTypeCode>
-                        </cac:TaxScheme>
-            """
-            
-        fragmento_xml = """
-        <!-- Detalle de productos @index-->
+def _get_xml_template(document_type: str) -> str:
+    """Selecciona la plantilla XML adecuada según el tipo de documento."""
+    if document_type in ["01", "03"]:
+        return INVOICE_TEMPLATE
+    if document_type == "07":
+        return CREDIT_NOTE_TEMPLATE
+    if document_type == "08":
+        return DEBIT_NOTE_TEMPLATE
+    raise ValueError(f"Tipo de documento no válido: {document_type}")
+
+
+# --- Data Completion Functions ---
+
+def _complete_customer_data(xml_string: str, payload_customers: List[Dict[str, Any]], document_type: str) -> str:
+    """Completa el XML con los datos del emisor y cliente a partir de los datos proporcionados."""
+    if not payload_customers:
+        raise ValueError("No se proporcionaron datos de clientes.")
+
+    for customer in payload_customers:
+        party_xml = _build_party_xml(
+            is_business=customer.get("is_business"),
+            tipo=customer.get("document_type"),
+            ruc=customer.get("document_number", ""),
+            razon_social=customer.get("business_name", ""),
+            direccion=customer.get("address", ""),
+            provincia=customer.get("province", ""),
+            distrito=customer.get("city", "")
+        )
+
+        if customer.get("is_owner"):
+            xml_string = xml_string.replace(PLACEHOLDER_DATOS_EMISOR, party_xml)
+            if document_type in ["07", "08"]:
+                fragment_owner = _build_data_razon_emisor_xml(
+                    tipo=customer.get("document_type"),
+                    ruc=customer.get("document_number", ""),
+                    razon_social=customer.get("business_name", "")
+                )
+                xml_string = xml_string.replace(
+                    PLACEHOLDER_DATA_RAZON_EMISOR, fragment_owner)
+        else:
+            xml_string = xml_string.replace(PLACEHOLDER_DATOS_CLIENTE, party_xml)
+    return xml_string
+
+
+def _complete_product_details(xml_string: str, productos: Dict[str, Any], catalog_07: Dict[str, Any]) -> str:
+    """Agrega los detalles de los productos al XML de la factura."""
+    if not catalog_07:
+        raise ValueError(
+            f"No se proporcionaron datos del catálogo {CATALOG_07_IGV}")
+
+    xml_afecto_tributo = f'''
+        <cbc:TaxExemptionReasonCode>{catalog_07.get("code")}</cbc:TaxExemptionReasonCode>
+        <cac:TaxScheme>
+            <cbc:ID>{catalog_07.get("value")}</cbc:ID>
+            <cbc:Name>{TAX_NAME_IGV}</cbc:Name>
+            <cbc:TaxTypeCode>{TAX_TYPE_CODE_VAT}</cbc:TaxTypeCode>
+        </cac:TaxScheme>
+    '''
+
+    fragmento_xml_base = """
         <cac:InvoiceLine>
-            <cbc:ID>@id_producto</cbc:ID>
-            <cbc:InvoicedQuantity unitCode="NIU">@cantidad</cbc:InvoicedQuantity>
-            <cbc:LineExtensionAmount currencyID="@tipo_moneda">@subtotal</cbc:LineExtensionAmount>
+            <cbc:ID>{id_producto}</cbc:ID>
+            <cbc:InvoicedQuantity unitCode="{unit_code}">{cantidad}</cbc:InvoicedQuantity>
+            <cbc:LineExtensionAmount currencyID="{tipo_moneda}">{subtotal}</cbc:LineExtensionAmount>
             <cac:PricingReference>
                 <cac:AlternativeConditionPrice>
-                    <cbc:PriceAmount currencyID="@tipo_moneda">@monto_total</cbc:PriceAmount>
-                    <cbc:PriceTypeCode>01</cbc:PriceTypeCode>
+                    <cbc:PriceAmount currencyID="{tipo_moneda}">{monto_total}</cbc:PriceAmount>
+                    <cbc:PriceTypeCode>{price_type_code}</cbc:PriceTypeCode>
                 </cac:AlternativeConditionPrice>
             </cac:PricingReference>
             <cac:TaxTotal>
-                <cbc:TaxAmount currencyID="@tipo_moneda">@monto_igv</cbc:TaxAmount>
+                <cbc:TaxAmount currencyID="{tipo_moneda}">{monto_igv}</cbc:TaxAmount>
                 <cac:TaxSubtotal>
-                    <cbc:TaxableAmount currencyID="@tipo_moneda">@subtotal</cbc:TaxableAmount>
-                    <cbc:TaxAmount currencyID="@tipo_moneda">@monto_igv</cbc:TaxAmount>
+                    <cbc:TaxableAmount currencyID="{tipo_moneda}">{subtotal}</cbc:TaxableAmount>
+                    <cbc:TaxAmount currencyID="{tipo_moneda}">{monto_igv}</cbc:TaxAmount>
                     <cac:TaxCategory>
-                        <cbc:Percent>@tax_igv</cbc:Percent>
-                        @xml_afecto_tributo
+                        <cbc:Percent>{tax_igv_percent}</cbc:Percent>
+                        {xml_afecto_tributo}
                     </cac:TaxCategory>
                 </cac:TaxSubtotal>
             </cac:TaxTotal>
             <cac:Item>
-                <cbc:Description>@descripcion</cbc:Description>
+                <cbc:Description>{descripcion}</cbc:Description>
             </cac:Item>
             <cac:Price>
-                <cbc:PriceAmount currencyID="@tipo_moneda">@monto_total</cbc:PriceAmount>
+                <cbc:PriceAmount currencyID="{tipo_moneda}">{monto_total}</cbc:PriceAmount>
             </cac:Price>
         </cac:InvoiceLine>
-        
-        """
-        igv = productos.get("monto_igv", "0")
-        tax = str(int(float(igv)) / 100) #
-        print(f"igv: {igv}, tax: {tax}")
-        items = productos.get("details", [])
-        ## como rrecorrer el loop de productos
-        ln = len(items) # longitud de los detalles de productos
-        for i in range(ln):
-            producto = items[i]
-            xml_producto = (
-                fragmento_xml
-                .replace("@index", str(i + 1))  # Usar i+1 para que empiece desde 1
-                .replace("@id_producto", str(producto.get("product_id", "")))
-                .replace("@cantidad", str(producto.get("quantity", "")))
-                .replace("@tipo_moneda", "PEN")
-                .replace("@subtotal", str(producto.get("subtotal", "")))
-                .replace("@monto_total", str(producto.get("monto_total", "")))
-                .replace("@tax_igv", igv)
-                .replace("@monto_igv", tax)
-                .replace("@descripcion", producto.get("description", ""))
-                .replace("@xml_afecto_tributo", xml_afecto_tributo)
-            )
-            xml_productos.append(xml_producto)
-        xml_string = xml_string.replace("@detalle_productos", "".join(xml_productos))
-        return xml_string
-    except Exception as e:
-        print(f"❌ Error al agregar los detalles de los productos: {e}")
-        return {"error": str(e)}, 500
-    
-def complete_details_NC_ND(xml_string, data): # nota de credito <CreditNoteLime>  <DebitNoteLine>
-    try:
-        etag = "CreditNoteLine" if data.get("document_type") == "07" else "DebitNoteLine"
-        fragmento_xml = f"""
+    """
+
+    igv_percentage = productos.get("monto_igv", "0")
+    igv_decimal = float(igv_percentage) / 100
+    items = productos.get("details", [])
+    xml_productos = []
+
+    for i, producto in enumerate(items):
+        subtotal_val = float(producto.get("subtotal", 0))
+        xml_producto = fragmento_xml_base.format(
+            id_producto=i + 1,
+            cantidad=producto.get("quantity", ""),
+            subtotal=subtotal_val,
+            monto_total=producto.get("monto_total", ""),
+            descripcion=producto.get("description", ""),
+            unit_code=UNIT_CODE_NIU,
+            tipo_moneda=CURRENCY_PEN,
+            price_type_code=PRICE_TYPE_CODE_MAIN,
+            monto_igv=str(igv_decimal * subtotal_val),
+            tax_igv_percent=igv_percentage,
+            xml_afecto_tributo=xml_afecto_tributo
+        )
+        xml_productos.append(xml_producto)
+
+    return xml_string.replace(PLACEHOLDER_DETALLE_PRODUCTOS, "".join(xml_productos))
+
+
+def _complete_credit_debit_note_details(xml_string: str, data: Dict[str, Any]) -> str:
+    """Completa los detalles para una Nota de Crédito o Débito."""
+    etag = "CreditNoteLine" if data.get("document_type") == "07" else "DebitNoteLine"
+    etagQuantity = "CreditedQuantity" if data.get("document_type") == "07" else "DebitedQuantity"
+    fragmento_xml_base = f'''
         <cac:{etag}>
-                    <cbc:ID>@index</cbc:ID>
-                    <cbc:CreditedQuantity unitCode="NIU">@quantity</cbc:CreditedQuantity>
-                    <cbc:LineExtensionAmount currencyID="@tipo_moneda">@unit_price</cbc:LineExtensionAmount>
-                        <cac:PricingReference>
-                        <cac:AlternativeConditionPrice>
-                        <cbc:PriceAmount currencyID="@tipo_moneda">@monto_total</cbc:PriceAmount>
-                        <cbc:PriceTypeCode>01</cbc:PriceTypeCode>
-                        </cac:AlternativeConditionPrice>
-                        </cac:PricingReference>
-                    <cac:TaxTotal>
-                        <cbc:TaxAmount currencyID="@tipo_moneda">@monto_igv_dec</cbc:TaxAmount>
-                        <cac:TaxSubtotal>
-                            <cbc:TaxableAmount currencyID="@tipo_moneda">@unit_price</cbc:TaxableAmount>
-                            <cbc:TaxAmount currencyID="@tipo_moneda">@monto_igv_dec</cbc:TaxAmount>
-                            <cac:TaxCategory>
-                            <cbc:Percent>@monto_igv</cbc:Percent>
-                            <cbc:TaxExemptionReasonCode>10</cbc:TaxExemptionReasonCode>
-                            <cac:TaxScheme>
+            <cbc:ID>{{index}}</cbc:ID>
+            <cbc:{etagQuantity} unitCode="{UNIT_CODE_NIU}">{{quantity}}</cbc:{etagQuantity}>
+            <cbc:LineExtensionAmount currencyID="{CURRENCY_PEN}">{{unit_price}}</cbc:LineExtensionAmount>
+            <cac:PricingReference>
+                <cac:AlternativeConditionPrice>
+                    <cbc:PriceAmount currencyID="{CURRENCY_PEN}">{{monto_total}}</cbc:PriceAmount>
+                    <cbc:PriceTypeCode>{PRICE_TYPE_CODE_MAIN}</cbc:PriceTypeCode>
+                </cac:AlternativeConditionPrice>
+            </cac:PricingReference>
+            <cac:TaxTotal>
+                <cbc:TaxAmount currencyID="{CURRENCY_PEN}">{{monto_igv_dec}}</cbc:TaxAmount>
+                <cac:TaxSubtotal>
+                    <cbc:TaxableAmount currencyID="{CURRENCY_PEN}">{{unit_price}}</cbc:TaxableAmount>
+                    <cbc:TaxAmount currencyID="{CURRENCY_PEN}">{{monto_igv_dec}}</cbc:TaxAmount>
+                    <cac:TaxCategory>
+                        <cbc:Percent>{{monto_igv}}</cbc:Percent>
+                        <cbc:TaxExemptionReasonCode>10</cbc:TaxExemptionReasonCode>
+                        <cac:TaxScheme>
                             <cbc:ID>1000</cbc:ID>
-                            <cbc:Name>IGV</cbc:Name>
-                            <cbc:TaxTypeCode>VAT</cbc:TaxTypeCode>
-                            </cac:TaxScheme>
-                            </cac:TaxCategory>
-                        </cac:TaxSubtotal>
-                    </cac:TaxTotal>
-                    <cac:Item>
-                        <cbc:Description>@descripcion</cbc:Description>
-                    </cac:Item>
-                    <cac:Price>
-                        <cbc:PriceAmount currencyID="@tipo_moneda">@unit_price</cbc:PriceAmount>
-                    </cac:Price>
-                </cac:{etag}>"""
-                
-        if data.get("details") and len(data.get("details")) > 0:
-            items = data.get("details", [])
-            xml_productos = []
-            
-            igv_dec = str(int(data.get("monto_igv", "0")) / 100) # 0.18
-            for i, producto in enumerate(items):
-                xml_producto = (
-                    fragmento_xml
-                    .replace("@index", str(i+1))  # Usar i+1 para que empiece desde 1
-                    .replace("@monto_igv_dec", igv_dec)
-                    .replace("@monto_igv", data.get("monto_igv", "0"))
-                    .replace("@tipo_moneda", "PEN")
-                    .replace("@quantity", producto.get("quantity", ""))
-                    .replace("@unit_price", producto.get("unit_price", ""))
-                    .replace("@monto_total", producto.get("monto_total", ""))
-                    .replace("@descripcion", producto.get("description", ""))
-                )
-                xml_productos.append(xml_producto)
-            xml_string = xml_string.replace("@detalle_productos_nc_nd", "".join(xml_productos))
+                            <cbc:Name>{TAX_NAME_IGV}</cbc:Name>
+                            <cbc:TaxTypeCode>{TAX_TYPE_CODE_VAT}</cbc:TaxTypeCode>
+                        </cac:TaxScheme>
+                    </cac:TaxCategory>
+                </cac:TaxSubtotal>
+            </cac:TaxTotal>
+            <cac:Item>
+                <cbc:Description>{{descripcion}}</cbc:Description>
+            </cac:Item>
+            <cac:Price>
+                <cbc:PriceAmount currencyID="{CURRENCY_PEN}">{{unit_price}}</cbc:PriceAmount>
+            </cac:Price>
+        </cac:{etag}>
+    '''
+
+    items = data.get("details", [])
+    if not items:
         return xml_string
-    except Exception as e:
-        print(f"❌ Error al completar los detalles de la Nota de Crédito: {e}")
-        return {"error": str(e)}, 500
-        
-         
-def complete_data_xml(data):
-    load_dotenv()
+
+    xml_lines = []
+    igv_dec = float(data.get("monto_igv", "0")) / 100
+
+    for i, producto in enumerate(items):
+        unit_price_val = float(producto.get("unit_price", 0))
+        xml_line = fragmento_xml_base.format(
+            index=i + 1,
+            monto_igv_dec=str(igv_dec * unit_price_val),
+            monto_igv=data.get("monto_igv", "0"),
+            quantity=producto.get("quantity", ""),
+            unit_price=unit_price_val,
+            monto_total=producto.get("monto_total", ""),
+            descripcion=producto.get("description", "")
+        )
+        xml_lines.append(xml_line)
+
+    return xml_string.replace(PLACEHOLDER_DETALLE_PRODUCTOS_NC_ND, "".join(xml_lines))
+
+
+def _complete_note_specific_data(xml_string: str, data: Dict[str, Any], invoice_relative: Dict[str, Any]) -> str:
+    """Completa los campos específicos de las notas de crédito/débito."""
+    if not invoice_relative:
+        raise ValueError(
+            "Datos de la factura relacionada no fueron proporcionados para generar la nota.")
+
+    serie_num_relative = f"{invoice_relative.get('serie')}-{str(invoice_relative.get('num_invoice')).zfill(8)}"
+
+    replacements = {
+        PLACEHOLDER_OBSERVACION: build_note_amount_text(
+            data.get("monto_total", "0"), "SOLES"),
+        PLACEHOLDER_CODIGO_TABLA: data.get("codigo_table", ""),
+        PLACEHOLDER_CODIGO_MENSAJE_TABLA: data.get("codigo_mensaje_table", ""),
+        PLACEHOLDER_DOCUMENTO_REFERENCIADO: serie_num_relative,
+        PLACEHOLDER_TIPO_DOCUMENTO_REFERENCIADO: str(
+            invoice_relative.get("document_type", "")).zfill(2),
+    }
+
+    for placeholder, value in replacements.items():
+        xml_string = xml_string.replace(placeholder, value)
+
+    return _complete_credit_debit_note_details(xml_string, data)
+
+
+# --- Main Orchestration Function ---
+
+def complete_data_xml(
+    data: Dict[str, Any],
+    payload_customers: List[Dict[str, Any]],
+    catalog_07: Optional[Dict[str, Any]] = None,
+    invoice_relative: Optional[Dict[str, Any]] = None
+) -> Tuple[str, str]:
     """
-    Completa el XML con los datos proporcionados.
-    
+    Completa la plantilla XML con los datos proporcionados.
+
     Args:
-        xml_string (str): XML con placeholders.
-        data (dict): Datos a completar en el XML.
-        
+        data: Datos principales del documento.
+        payload_customers: Datos del emisor y cliente.
+        catalog_07: Datos del catálogo 07, requerido para facturas/boletas.
+        invoice_relative: Datos de la factura relacionada, requerido para notas.
+
     Returns:
-        str: XML completado.
+        El XML completado y el número de serie del documento.
     """
     try:
-        monto_igv = 0
-        document_type = data.get("document_type")  # Default to '01' if not provided
-        # validate of xml is required
-        if document_type in ["01","03"]:
-            xml_string = INVOICE_TEMPLATE  # Aquí se obtiene el XML con placeholders
-        elif document_type == "07":
-            xml_string = CREDIT_NOTE_TEMPLATE
-        else:
-            xml_string = DEBIT_NOTE_TEMPLATE  # Default to '01' if not provided
-        rucs = [os.getenv("SUNAT_RUC"), data.get("ruc_cliente")]
-        xml_string = complete_data_customers(xml_string, rucs, document_type)  # Completar datos del cliente
-        xml_string = xml_string.replace("@fecha", datetime.now().strftime("%Y-%m-%d"))
-        xml_string = xml_string.replace("@hora", datetime.now().strftime("%H:%M:%S"))
-        serie_num = data.get("document", "").split("-")
-        serie_num = f"{serie_num[0]}-{int(serie_num[1]):08d}"
-        
-        xml_string = xml_string.replace("@serie", serie_num)
-        xml_string = xml_string.replace("@tipo_moneda", "PEN")
-        xml_string = xml_string.replace("@tipo",document_type)  # Default to '01' if not provided
-        xml_string = xml_string.replace("@monto_total", data.get("monto_total"))
-        
-        if document_type in ["07","08"]:
-            
-            # buscar la factura por el tipo de serie y número
-            try:
-                from app.services.invoice_service import get_invoice_by_serie_num
-                invoice_relative,status = get_invoice_by_serie_num(data.get("relative_document"))
-                
-                if invoice_relative is None:
-                    raise ValueError({"error": "Factura relacionada no encontrada."})
-            except Exception as e:
-                print(f"❌ Error al obtener la factura relacionada: {e}")
-                return {"error": str(e)}, 400
-            
-            serie_num_relative = invoice_relative.get("serie") + "-" + str(invoice_relative.get("num_invoice")).zfill(8)
-            xml_string = complete_details_NC_ND(xml_string, data)
-            xml_string = xml_string.replace("@observacion", build_note_amount_text(data.get("monto_total", "0"), "SOLES"))
-            xml_string = xml_string.replace("@codigo_table", data.get("codigo_table", ""))
-            xml_string = xml_string.replace("@codigo_mensaje_table", data.get("codigo_mensaje_table", ""))
-            xml_string = xml_string.replace("@document_refenced", serie_num_relative)
-            xml_string = xml_string.replace("@document_type_refenced", str(invoice_relative.get("document_type", "")).zfill(2))
-        
-        
-        
-        if data.get("monto_igv") is None:
-            monto_igv = "0"
-        else:
-            monto_igv = str(int(data.get("monto_igv")) / 100)
-        xml_string = xml_string.replace("@monto_igv",monto_igv)
-        xml_string = xml_string.replace("@subtotal", data.get("subtotal"))
+        document_type = data.get("document_type")
+        if not document_type:
+            raise ValueError("El tipo de documento es requerido.")
+
+        xml_string = _get_xml_template(document_type)
+
+        # --- Completar datos de cliente y emisor ---
+        xml_string = _complete_customer_data(
+            xml_string, payload_customers, document_type)
+
+        # --- Completar datos generales ---
+        now = datetime.now()
+        serie_num_raw = data.get("document", "")
+        serie_parts = serie_num_raw.split("-")
+        serie_num = f"{serie_parts[0]}-{int(serie_parts[1]):08d}"
+
+        monto_igv = data.get("monto_igv", "0")
+        subtotal = data.get("subtotal", "0")
+        monto_total = data.get("monto_total", "0")
+
+        replacements = {
+            PLACEHOLDER_FECHA: now.strftime("%Y-%m-%d"),
+            PLACEHOLDER_HORA: now.strftime("%H:%M:%S"),
+            PLACEHOLDER_SERIE: serie_num,
+            PLACEHOLDER_TIPO_MONEDA: CURRENCY_PEN,
+            PLACEHOLDER_TIPO_DOCUMENTO: document_type,
+            PLACEHOLDER_MONTO_TOTAL: monto_total,
+            PLACEHOLDER_SUBTOTAL: subtotal,
+            PLACEHOLDER_MONTO_IGV: str(
+                float(monto_igv) / 100) if monto_igv else "0",
+        }
+
+        for placeholder, value in replacements.items():
+            xml_string = xml_string.replace(placeholder, value)
+
+        # --- Completar detalles específicos del documento ---
+        if document_type in ["01", "03"]:
+            if "details" in data: # details == products
+                if not catalog_07:
+                    raise ValueError(
+                        f"Datos del catálogo {CATALOG_07_IGV} son requeridos para este tipo de documento.")
+                xml_string = _complete_product_details(
+                    xml_string, data, catalog_07)
+        elif document_type in ["07", "08"]:
+            if not invoice_relative:
+                raise ValueError(
+                    "La información de la factura relacionada es requerida para notas.")
+            xml_string = _complete_note_specific_data(
+                xml_string, data, invoice_relative)
+
         return xml_string, serie_num
-        
-    except Exception as e:
-        print(f"❌ Error al completar el XML: {e}")
-        return {"error": str(e)}, 500
-    
+
+    except (ValueError, KeyError, TypeError) as e:
+        # Aquí se podría registrar el error con más detalle si se usara un logger
+        print(f"❌ Error al generar el XML: {e}")
+        raise  # Re-lanzar la excepción para que el llamador la maneje

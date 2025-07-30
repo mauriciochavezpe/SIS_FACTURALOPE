@@ -57,6 +57,7 @@ def get_sunat_response_xml(description) -> Optional[str]:
         str: Description text or None if error
     """
     try:
+        print(f"Descripción XML: {description}")
         if description is not None:
             content = description.text
             logger.info(f"SUNAT XML Response: {content}")

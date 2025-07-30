@@ -386,12 +386,12 @@ Content-Type: application/json
 
 
 ### GENERACION BOLETOS DUMMY X DATA
-POST http://127.0.0.1:5000/api/invoices/factura_dummy
+POST http://127.0.0.1:5000/api/invoices/send-to-sunat
 Content-Type: application/json
 
 {
-    "document": "B001-59",
-    "type_document": "03",
+    "document": "B001-82",
+    "document_type": "03",
     "monto_total": "1.18",
     "ruc_cliente": "73119100",
     "date": "2025-05-12T14:48:58.000Z",
@@ -415,7 +415,7 @@ Content-Type: application/json
 }
 
 ### nota de credito
-POST http://127.0.0.1:5000/api/invoices/factura_dummy
+POST http://127.0.0.1:5000/api/invoices/send-to-sunat
 Content-Type: application/json
 
 
@@ -423,11 +423,11 @@ Content-Type: application/json
     "document": "FC01-10",
     "document_type": "07",
     "monto_total": "1.18",
-    "ruc_cliente": "20100176450",
+    "ruc_cliente": "20612922773",
     "date": "2025-05-12T14:48:58.000Z",
     "relative_document": "F001-10",
-    "codigo_table_09": "01",
-    "codigo_table_09_mensaje": "ERROR EN LA OPERACION",
+    "codigo_table": "01",
+    "codigo_mensaje_table": "ERROR EN LA OPERACION",
     "customer_id": 12,
     "subtotal": "1",
     "monto_igv": "18",
@@ -451,7 +451,7 @@ Content-Type: application/json
 
 
 ### nota de debito
-POST http://127.0.0.1:5000/api/invoices/factura_dummy
+POST http://127.0.0.1:5000/api/invoices/send-to-sunat
 Content-Type: application/json
 
 
