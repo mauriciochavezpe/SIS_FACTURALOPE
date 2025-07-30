@@ -420,11 +420,14 @@ Content-Type: application/json
 
 
 {
-      "document": "BC01-1",
-    "type_document": "07",
+    "document": "BC01-10",
+    "document_type": "07",
     "monto_total": "1.18",
     "ruc_cliente": "73119100",
     "date": "2025-05-12T14:48:58.000Z",
+    "relative_document": "B001-59",
+    "codigo_table_09": "01",
+    "codigo_table_09_mensaje": "ERROR EN LA OPERACION",
     "customer_id": 12,
     "subtotal": "1",
     "monto_igv": "18",
@@ -432,6 +435,7 @@ Content-Type: application/json
     "subtotal": "1",
     "quantity": "1",
     "afecto_tributo":"10",
+    
     "details":[{
         "discount": "0.00",
         "product_id": "2",

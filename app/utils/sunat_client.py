@@ -6,7 +6,7 @@ import zipfile
 import io
 from xml.etree import ElementTree as ET
 
-from .xml_generate import (complete_details_products,complete_data_xml)
+from .xml_generate_fragments import (complete_details_products,complete_data_xml)
 from app.config.certificado import firmar_xml_con_placeholder
 from .utils import get_sunat_response_code, get_sunat_response_xml
 # obs 
@@ -21,20 +21,16 @@ def send_to_sunat(data, env = "qas"):
 
         # Generar el XML con los datos completos
         xml_string, serie_number = complete_data_xml(data) # luego de completar los datos, se firma el XML
-
+        print("xml_string2", xml_string)
         #generacion de name del file
         ruc = os.getenv("SUNAT_RUC")
-        tipo_doc = data.get("type_document") # Ej: 01,
-        # print("serie_number1", serie_number.get("serie"))
-        # print("serie_number2", data.get("document"))
-        # if serie_number.get("serie") != data.get("document"):
-        #     raise ValueError("La serie del documento no coincide con la serie del invoice.")
-        
-        name_file = f"{ruc}-{tipo_doc}-{serie_number.get('serie')}" # Ej: 20512345678-01-F001-00000001
+        tipo_doc = data.get("document_type") # Ej: 01,03,07,08
+         
+        name_file = f"{ruc}-{tipo_doc}-{serie_number}" # Ej: 20512345678-01-F001-00000001
+        # name_file = f"{ruc}-{tipo_doc}-{serie_number.get('serie')}" # Ej: 20512345678-01-F001-00000001
         nombre_xml = f"{name_file}.xml"
         nombre_zip =  f"{name_file}.zip"
         RB = "assets" # ruta_base,
-        tax = str(int(data.get("monto_igv")) / 100)
 
         
         # agregamos los items de la factura y procedemos a firmar el XML

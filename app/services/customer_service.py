@@ -92,8 +92,8 @@ def get_all_customers_by_ruc(rucs):
         results = query.all()
         if not results:
             return [], 200
-        print(f"results: {results}")
-        print(f"results ln: {len(results)}")
+        # print(f"results: {results}")
+        # print(f"results ln: {len(results)}")
         schema = CustomerSchema(session=db.session, many=True)
         return schema.dump(results), 200
 

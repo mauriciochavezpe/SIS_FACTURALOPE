@@ -75,8 +75,8 @@ def generar_xml():
 
 def generate_nc_xml():
     try:
-        xml  ="""
-                <CreditNote xmlns="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+        return """
+            <CreditNote xmlns="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
                 <ext:UBLExtensions>
                 <ext:UBLExtension>
                 <ext:ExtensionContent></ext:ExtensionContent>
@@ -88,27 +88,21 @@ def generate_nc_xml():
                 <cbc:IssueDate>@fecha</cbc:IssueDate>
                 <cbc:IssueTime>@hora</cbc:IssueTime>
                 <cbc:Note languageLocaleID="1000"><![CDATA[@observacion]]></cbc:Note>
-                <cbc:Note>@nota</cbc:Note>
-                <cbc:DocumentCurrencyCode>@moneda</cbc:DocumentCurrencyCode>
+                <cbc:DocumentCurrencyCode>@tipo_moneda</cbc:DocumentCurrencyCode>
                 <cac:DiscrepancyResponse>
-                <cbc:ResponseCode>@codigo_table_09</cbc:ResponseCode>
-                <cbc:Description>@descripcion_modificiacion</cbc:Description>
+                    <cbc:ResponseCode>@codigo_table_09</cbc:ResponseCode>
+                    <cbc:Description>@descripcion_modificiacion</cbc:Description>
                 </cac:DiscrepancyResponse>
                 <cac:BillingReference>
                 <cac:InvoiceDocumentReference>
                 <cbc:ID>@documento_refenced</cbc:ID>
-                <cbc:DocumentTypeCode>@tipo_documento</cbc:DocumentTypeCode>
+                <cbc:DocumentTypeCode>@documento_type_refenced</cbc:DocumentTypeCode>
                 </cac:InvoiceDocumentReference>
                 </cac:BillingReference>
                 <cac:Signature>
                 <cbc:ID>-</cbc:ID>
                 <cac:SignatoryParty>
-                <cac:PartyIdentification>
-                <cbc:ID>@ruc</cbc:ID>
-                </cac:PartyIdentification>
-                <cac:PartyName>
-                <cbc:Name><![CDATA[@razon_social]]></cbc:Name>
-                </cac:PartyName>
+                    @DataRazonEmisor
                 </cac:SignatoryParty>
                 <cac:DigitalSignatureAttachment>
                 <cac:ExternalReference>
@@ -123,57 +117,24 @@ def generate_nc_xml():
                     @DatosCliente
                 </cac:AccountingCustomerParty>
                 <cac:TaxTotal>
-                <cbc:TaxAmount currencyID="@tipo_moneda">0</cbc:TaxAmount>
-                <cac:TaxSubtotal>
-                    <cbc:TaxableAmount currencyID="@tipo_moneda">0</cbc:TaxableAmount>
-                    <cbc:TaxAmount currencyID="@tipo_moneda">0</cbc:TaxAmount>
-                    <cac:TaxCategory>
-                    <cac:TaxScheme>
-                    <cbc:ID>1000</cbc:ID>
-                    <cbc:Name>IGV</cbc:Name>
-                    <cbc:TaxTypeCode>VAT</cbc:TaxTypeCode>
-                    </cac:TaxScheme>
-                    </cac:TaxCategory>
-                </cac:TaxSubtotal>
+                    <cbc:TaxAmount currencyID="@tipo_moneda">@monto_igv</cbc:TaxAmount>
+                    <cac:TaxSubtotal>
+                        <cbc:TaxableAmount currencyID="@tipo_moneda">@subtotal</cbc:TaxableAmount>
+                        <cbc:TaxAmount currencyID="@tipo_moneda">@monto_igv</cbc:TaxAmount>
+                        <cac:TaxCategory>
+                        <cac:TaxScheme>
+                        <cbc:ID>1000</cbc:ID>
+                        <cbc:Name>IGV</cbc:Name>
+                        <cbc:TaxTypeCode>VAT</cbc:TaxTypeCode>
+                        </cac:TaxScheme>
+                        </cac:TaxCategory>
+                    </cac:TaxSubtotal>
                 </cac:TaxTotal>
                 <cac:LegalMonetaryTotal>
-                <cbc:PayableAmount currencyID="@tipo_moneda">0</cbc:PayableAmount>
+                <cbc:PayableAmount currencyID="@tipo_moneda">@monto_total</cbc:PayableAmount>
                 </cac:LegalMonetaryTotal>
-                <cac:CreditNoteLine>
-                    <cbc:ID>1</cbc:ID>
-                    <cbc:CreditedQuantity unitCode="NIU">1</cbc:CreditedQuantity>
-                    <cbc:LineExtensionAmount currencyID="@tipo_moneda">0</cbc:LineExtensionAmount>
-                        <cac:PricingReference>
-                        <cac:AlternativeConditionPrice>
-                        <cbc:PriceAmount currencyID="@tipo_moneda">0</cbc:PriceAmount>
-                        <cbc:PriceTypeCode>01</cbc:PriceTypeCode>
-                        </cac:AlternativeConditionPrice>
-                        </cac:PricingReference>
-                    <cac:TaxTotal>
-                        <cbc:TaxAmount currencyID="@tipo_moneda">0</cbc:TaxAmount>
-                        <cac:TaxSubtotal>
-                            <cbc:TaxableAmount currencyID="@tipo_moneda">0</cbc:TaxableAmount>
-                            <cbc:TaxAmount currencyID="@tipo_moneda">0</cbc:TaxAmount>
-                            <cac:TaxCategory>
-                            <cbc:Percent>18</cbc:Percent>
-                            <cbc:TaxExemptionReasonCode>10</cbc:TaxExemptionReasonCode>
-                            <cac:TaxScheme>
-                            <cbc:ID>1000</cbc:ID>
-                            <cbc:Name>IGV</cbc:Name>
-                            <cbc:TaxTypeCode>VAT</cbc:TaxTypeCode>
-                            </cac:TaxScheme>
-                            </cac:TaxCategory>
-                        </cac:TaxSubtotal>
-                    </cac:TaxTotal>
-                    <cac:Item>
-                        <cbc:Description>@descripcion</cbc:Description>
-                    </cac:Item>
-                    <cac:Price>
-                        <cbc:PriceAmount currencyID="@tipo_moneda">0</cbc:PriceAmount>
-                    </cac:Price>
-                </cac:CreditNoteLine>
-                </CreditNote>
-        
+                @detalle_productos_nc
+            </CreditNote>
         """
         
         

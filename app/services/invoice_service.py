@@ -134,6 +134,24 @@ def delete_invoice(id):
         db.session.rollback()
         return {"error": str(e)}, 500
 
+# create function to get invoice with serie and num_invoice
+def get_invoice_by_serie_num(serie_num):
+    try:
+        if "-" not in serie_num:
+            return {"error": "Invalid format. Expected 'SERIE-NUMERO'"}, 400
+            
+        serie, numero_str = serie_num.split("-")
+        correlativo = int(numero_str)
+        
+        invoice = Invoice.query.filter_by(serie=serie, num_invoice=f"{correlativo:08d}").first()
+        if not invoice:
+            return {"error": "Invoice not found"}, 404
+            
+        schema = InvoiceSchema(session=db.session)
+        return schema.dump(invoice), 200
+        
+    except Exception as e:
+        return {"error": str(e)}, 500
 
 def get_details_by_invoice(id):
     try:
@@ -233,10 +251,10 @@ def create_invoice_detail_sunat():
         data = request.get_json()
 
         # 1. Crear la factura localmente
-        payload, status = crear_factura_standard(data)
+        # payload, status = crear_factura_standard(data)
 
-        if isinstance(payload, dict) and "error" in payload:
-            return payload, status  # Error al crear factura, termina el flujo
+        # if isinstance(payload, dict) and "error" in payload:
+        #     return payload, status  # Error al crear factura, termina el flujo
 
         # 2. Enviar a SUNAT
         payload_sunat, status_sunat = send_to_sunat(data)
@@ -269,12 +287,22 @@ def crear_factura_standard(data):
 
         serie, numero_str = documento.split("-")
         correlativo = int(numero_str)
-
+        # validar si la serie y correlativo existen en la tabla serie
+        # if not serie or correlativo <= 0:
+        #     return {"error": "Serie o correlativo inválido."}, 400
+        # correlativo += 1
+        # Obtener el último número de serie
+        # from app.services.serie_services import get_last_number
+        # serie_number = get_last_number(data.get("type_document"), serie)
+        # if serie_number.get("serie") != f"{serie}-{correlativo:08d}":
+            # return {"error": f"Serie o correlativo inválido., se esperaba la serie {serie_number.get('serie')}"}, 400
+         
         # Crear factura base
         invoice = Invoice(
             customer_id=data.get("customer_id"),
             num_invoice=f"{correlativo:08d}",
             serie=serie,
+            related_invoice_id=data.get("related_invoice_id"),
             document_type=data.get("type_document"),
             date=data.get("date"),
             id_status=25,  # Pendiente de envío a SUNAT
