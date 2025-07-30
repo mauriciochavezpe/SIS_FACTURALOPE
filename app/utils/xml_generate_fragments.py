@@ -1,6 +1,6 @@
   
 from dotenv import load_dotenv
-from .generar_xml import generar_xml, generate_nc_xml
+from .generar_xml import generar_xml, generate_nc_xml,generate_nd_xml
 from app.services.serie_services import get_last_number
 import os
 from datetime import datetime
@@ -55,17 +55,18 @@ def complete_data_customers(xml_string, rucs, type=""):
     try:
         try:
             from app.services.customer_service import get_all_customers_by_ruc
-            payload_customers=get_all_customers_by_ruc(rucs)  # Validar que los RUCs existan en la base de datos
+            payload_customers,status=get_all_customers_by_ruc(rucs)  # Validar que los RUCs existan en la base de datos
+            print(f"payload_customers: {len(payload_customers)}")
         except Exception as e:
             print(f"❌ Error al obtener los clientes: {e}")
         
-        if not payload_customers and len(payload_customers[0]) == 0:
+        if len(payload_customers) == 0:
             raise ValueError("No se encontraron clientes con los RUCs proporcionados.")
         
         
        
         
-        for customer in payload_customers[0]:
+        for index,customer in enumerate(payload_customers):
             tipo =customer.get("document_type") # tipo de documento
             is_business = customer.get("is_business")
             ruc = customer.get("document_number", "")
@@ -79,7 +80,7 @@ def complete_data_customers(xml_string, rucs, type=""):
         
             if customer.get("is_owner") is True:
                 xml_string = xml_string.replace("@DatosEmisor", party_xml)
-                if(type == "07"):
+                if(type in ["07","08"]):
                     fragment_owner = build_data_razon_emisor(tipo,ruc, razon_social)
                     xml_string = xml_string.replace("@DataRazonEmisor", fragment_owner)
             else:
@@ -172,10 +173,11 @@ def complete_details_products(xml_string, productos):
         print(f"❌ Error al agregar los detalles de los productos: {e}")
         return {"error": str(e)}, 500
     
-def complete_details_NC(xml_string, data): # nota de credito <CreditNoteLime> 
+def complete_details_NC_ND(xml_string, data): # nota de credito <CreditNoteLime>  <DebitNoteLine>
     try:
-        fragmento_xml = """
-        <cac:CreditNoteLine>
+        etag = "CreditNoteLine" if data.get("document_type") == "07" else "DebitNoteLine"
+        fragmento_xml = f"""
+        <cac:{etag}>
                     <cbc:ID>@index</cbc:ID>
                     <cbc:CreditedQuantity unitCode="NIU">@quantity</cbc:CreditedQuantity>
                     <cbc:LineExtensionAmount currencyID="@tipo_moneda">@unit_price</cbc:LineExtensionAmount>
@@ -207,7 +209,7 @@ def complete_details_NC(xml_string, data): # nota de credito <CreditNoteLime>
                     <cac:Price>
                         <cbc:PriceAmount currencyID="@tipo_moneda">@unit_price</cbc:PriceAmount>
                     </cac:Price>
-                </cac:CreditNoteLine>"""
+                </cac:{etag}>"""
                 
         if data.get("details") and len(data.get("details")) > 0:
             items = data.get("details", [])
@@ -227,7 +229,7 @@ def complete_details_NC(xml_string, data): # nota de credito <CreditNoteLime>
                     .replace("@descripcion", producto.get("description", ""))
                 )
                 xml_productos.append(xml_producto)
-            xml_string = xml_string.replace("@detalle_productos_nc", "".join(xml_productos))
+            xml_string = xml_string.replace("@detalle_productos_nc_nd", "".join(xml_productos))
         return xml_string
     except Exception as e:
         print(f"❌ Error al completar los detalles de la Nota de Crédito: {e}")
@@ -252,8 +254,10 @@ def complete_data_xml(data):
         # validate of xml is required
         if document_type in ["01","03"]:
             xml_string = generar_xml()  # Aquí se obtiene el XML con placeholders
-        else:
+        elif document_type == "07":
             xml_string = generate_nc_xml()
+        else:
+            xml_string = generate_nd_xml()  # Default to '01' if not provided
         rucs = [os.getenv("SUNAT_RUC"), data.get("ruc_cliente")]
         xml_string = complete_data_customers(xml_string, rucs, document_type)  # Completar datos del cliente
         xml_string = xml_string.replace("@fecha", datetime.now().strftime("%Y-%m-%d"))
@@ -266,7 +270,7 @@ def complete_data_xml(data):
         xml_string = xml_string.replace("@tipo",document_type)  # Default to '01' if not provided
         xml_string = xml_string.replace("@monto_total", data.get("monto_total"))
         
-        if document_type == "07":
+        if document_type in ["07","08"]:
             
             # buscar la factura por el tipo de serie y número
             try:
@@ -280,13 +284,12 @@ def complete_data_xml(data):
                 return {"error": str(e)}, 400
             
             serie_num_relative = invoice_relative.get("serie") + "-" + str(invoice_relative.get("num_invoice")).zfill(8)
-            print(f"serie_num_relative: {document_type}")
-            xml_string = complete_details_NC(xml_string, data)
+            xml_string = complete_details_NC_ND(xml_string, data)
             xml_string = xml_string.replace("@observacion", build_note_amount_text(data.get("monto_total", "0"), "SOLES"))
-            xml_string = xml_string.replace("@codigo_table_09", data.get("codigo_table_09", ""))
-            xml_string = xml_string.replace("@descripcion_modificiacion", data.get("codigo_table_09_mensaje", ""))
-            xml_string = xml_string.replace("@documento_refenced", serie_num_relative)
-            xml_string = xml_string.replace("@documento_type_refenced", str(invoice_relative.get("document_type", "")).zfill(2))
+            xml_string = xml_string.replace("@codigo_table", data.get("codigo_table", ""))
+            xml_string = xml_string.replace("@codigo_mensaje_table", data.get("codigo_mensaje_table", ""))
+            xml_string = xml_string.replace("@document_refenced", serie_num_relative)
+            xml_string = xml_string.replace("@document_type_refenced", str(invoice_relative.get("document_type", "")).zfill(2))
         
         
         

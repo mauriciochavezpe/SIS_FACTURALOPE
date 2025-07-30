@@ -420,12 +420,12 @@ Content-Type: application/json
 
 
 {
-    "document": "BC01-10",
+    "document": "FC01-10",
     "document_type": "07",
     "monto_total": "1.18",
-    "ruc_cliente": "73119100",
+    "ruc_cliente": "20100176450",
     "date": "2025-05-12T14:48:58.000Z",
-    "relative_document": "B001-59",
+    "relative_document": "F001-10",
     "codigo_table_09": "01",
     "codigo_table_09_mensaje": "ERROR EN LA OPERACION",
     "customer_id": 12,
@@ -444,6 +444,42 @@ Content-Type: application/json
         "unit_price": "1",
         "description": "TEST 1",
         "monto_total": "1.18"
+    }
+    ]
+
+}
+
+
+### nota de debito
+POST http://127.0.0.1:5000/api/invoices/factura_dummy
+Content-Type: application/json
+
+
+{
+    "document": "FD01-1",
+    "document_type": "08",
+    "monto_total": "1.77",
+    "ruc_cliente": "20612922773",
+    "date": "2025-05-12T14:48:58.000Z",
+    "relative_document": "F001-10",
+    "codigo_table": "02",
+    "codigo_mensaje_table": "Aumento en el valor",
+    "customer_id": 12,
+    "subtotal": "1",
+    "monto_igv": "18",
+    "metodo_pago": "01",
+    "subtotal": "1",
+    "quantity": "1",
+    "afecto_tributo":"10",
+    
+    "details":[{
+        "discount": "0.00",
+        "product_id": "2",
+        "quantity": "1",
+        "subtotal": "1.5",
+        "unit_price": "1.5",
+        "description": "TEST 1",
+        "monto_total": "1.77"
     }
     ]
 

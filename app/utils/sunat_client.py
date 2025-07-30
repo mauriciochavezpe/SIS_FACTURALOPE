@@ -19,9 +19,8 @@ def send_to_sunat(data, env = "qas"):
         elif env == "prod":
             URL = os.getenv("sunat_prod")
 
-        # Generar el XML con los datos completos
+        # Generar el XML con los datos completos 01,03,07,08
         xml_string, serie_number = complete_data_xml(data) # luego de completar los datos, se firma el XML
-        print("xml_string2", xml_string)
         #generacion de name del file
         ruc = os.getenv("SUNAT_RUC")
         tipo_doc = data.get("document_type") # Ej: 01,03,07,08

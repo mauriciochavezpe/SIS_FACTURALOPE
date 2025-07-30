@@ -90,13 +90,13 @@ def generate_nc_xml():
                 <cbc:Note languageLocaleID="1000"><![CDATA[@observacion]]></cbc:Note>
                 <cbc:DocumentCurrencyCode>@tipo_moneda</cbc:DocumentCurrencyCode>
                 <cac:DiscrepancyResponse>
-                    <cbc:ResponseCode>@codigo_table_09</cbc:ResponseCode>
-                    <cbc:Description>@descripcion_modificiacion</cbc:Description>
+                    <cbc:ResponseCode>@codigo_table</cbc:ResponseCode>
+                    <cbc:Description>@codigo_mensaje_table</cbc:Description>
                 </cac:DiscrepancyResponse>
                 <cac:BillingReference>
                 <cac:InvoiceDocumentReference>
-                <cbc:ID>@documento_refenced</cbc:ID>
-                <cbc:DocumentTypeCode>@documento_type_refenced</cbc:DocumentTypeCode>
+                <cbc:ID>@document_refenced</cbc:ID>
+                <cbc:DocumentTypeCode>@document_type_refenced</cbc:DocumentTypeCode>
                 </cac:InvoiceDocumentReference>
                 </cac:BillingReference>
                 <cac:Signature>
@@ -133,7 +133,7 @@ def generate_nc_xml():
                 <cac:LegalMonetaryTotal>
                 <cbc:PayableAmount currencyID="@tipo_moneda">@monto_total</cbc:PayableAmount>
                 </cac:LegalMonetaryTotal>
-                @detalle_productos_nc
+                @detalle_productos_nc_nd
             </CreditNote>
         """
         
@@ -142,6 +142,77 @@ def generate_nc_xml():
         print(f"❌ Error generating NC XML: {e}")
         return None
 
+
+
+def generate_nd_xml():
+    try:
+        xml_fragment= """
+        <DebitNote xmlns="urn:oasis:names:specification:ubl:schema:xsd:DebitNote-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+            <ext:UBLExtensions>
+            <ext:UBLExtension>
+            <ext:ExtensionContent>
+            </ext:ExtensionContent>
+            </ext:UBLExtension>
+            </ext:UBLExtensions>
+            <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+            <cbc:CustomizationID>2.0</cbc:CustomizationID>
+            <cbc:ID>@serie</cbc:ID>
+            <cbc:IssueDate>@fecha</cbc:IssueDate>
+            <cbc:IssueTime>@hora</cbc:IssueTime>
+            <cbc:Note languageLocaleID="1000"><![CDATA[@observacion]]></cbc:Note>
+            <cbc:DocumentCurrencyCode>@tipo_moneda</cbc:DocumentCurrencyCode>
+            <cac:DiscrepancyResponse>
+                <cbc:ResponseCode>@codigo_table</cbc:ResponseCode>
+                <cbc:Description>@codigo_mensaje_table</cbc:Description>
+            </cac:DiscrepancyResponse>
+            <cac:BillingReference>
+            <cac:InvoiceDocumentReference>
+            <cbc:ID>@document_refenced</cbc:ID>
+            <cbc:DocumentTypeCode>@document_type_refenced</cbc:DocumentTypeCode>
+            </cac:InvoiceDocumentReference>
+            </cac:BillingReference>
+            <cac:Signature>
+            <cbc:ID>-</cbc:ID>
+            <cac:SignatoryParty>
+                @DataRazonEmisor
+            </cac:SignatoryParty>
+            <cac:DigitalSignatureAttachment>
+            <cac:ExternalReference>
+            <cbc:URI></cbc:URI>
+            </cac:ExternalReference>
+            </cac:DigitalSignatureAttachment>
+            </cac:Signature>
+            <cac:AccountingSupplierParty>
+            @DatosEmisor
+            </cac:AccountingSupplierParty>
+            <cac:AccountingCustomerParty>
+            @DatosCliente
+            </cac:AccountingCustomerParty>
+            <cac:TaxTotal>
+                <cbc:TaxAmount currencyID="PEN">@monto_igv</cbc:TaxAmount>
+                <cac:TaxSubtotal>
+                    <cbc:TaxableAmount currencyID="@tipo_moneda">@subtotal</cbc:TaxableAmount>
+                    <cbc:TaxAmount currencyID="@tipo_moneda">@monto_igv</cbc:TaxAmount>
+                    <cac:TaxCategory>
+                    <cac:TaxScheme>
+                    <cbc:ID>1000</cbc:ID>
+                    <cbc:Name>IGV</cbc:Name>
+                    <cbc:TaxTypeCode>VAT</cbc:TaxTypeCode>
+                    </cac:TaxScheme>
+                    </cac:TaxCategory>
+                </cac:TaxSubtotal>
+            </cac:TaxTotal>
+                <cac:RequestedMonetaryTotal>
+                <cbc:PayableAmount currencyID="@tipo_moneda">@monto_total</cbc:PayableAmount>
+                </cac:RequestedMonetaryTotal>
+            @detalle_productos_nc_nd
+        </DebitNote>
+        """
+        return xml_fragment
+    except Exception as e:
+        print(f"❌ Error generating ND XML: {e}")
+        return None
+    
 def create_xml(xml_firmado,rb, nm_xml, flag_cdr=False):
     try:
         path_full = os.path.join(rb, nm_xml)
