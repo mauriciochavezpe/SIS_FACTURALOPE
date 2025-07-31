@@ -1,4 +1,5 @@
-from flask import Blueprint, jsonify, send_file
+from flask_restx import Namespace, Resource, fields
+from flask import send_file
 from app.services.storage_service import (
     get_all_storage,
     create_storage,
@@ -6,40 +7,41 @@ from app.services.storage_service import (
     delete_storage
 )
 
-storage_blueprint = Blueprint('storage', __name__)
+storage_blueprint = Namespace('storage', description='Storage operations')
 
-@storage_blueprint.route('/', methods=['GET'])
-def get_all_storage_routes():
-    try:
+storage_model = storage_blueprint.model('StorageModel', {
+    'file': fields.Raw(type='file', required=True, description='The file to upload')
+})
+
+@storage_blueprint.route('/')
+class StorageList(Resource):
+    def get(self):
         storage_items, status = get_all_storage()
-        return jsonify({
-            'status': 'success',
-            'data': storage_items,
-            'count': len(storage_items)
-        }), status
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return storage_items, status
 
-@storage_blueprint.route('/', methods=['POST'])
-def create_storage_routes():
-    try:
+    @storage_blueprint.expect(storage_model)
+    def post(self):
         storage, status = create_storage()
-        return jsonify(storage), status
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return storage, status
 
-@storage_blueprint.route('/<int:id>', methods=['PUT'])
-def update_storage_routes(id):
-    try:
+@storage_blueprint.route('/<int:id>')
+class Storage(Resource):
+    @storage_blueprint.expect(storage_model)
+    def put(self, id):
         storage, status = update_storage(id)
-        return jsonify(storage), status
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return storage, status
 
-@storage_blueprint.route('/<int:id>', methods=['DELETE'])
-def delete_storage_routes(id):
-    try:
+    def delete(self, id):
         result, status = delete_storage(id)
-        return jsonify(result), status
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return result, status
+
+@storage_blueprint.route('/download/<string:file_type>/<string:file_name>')
+class StorageDownload(Resource):
+    def get(self, file_type, file_name):
+        try:
+            file_path = f"app/{file_type}/{file_name}"
+            return send_file(file_path, as_attachment=True)
+        except FileNotFoundError:
+            return {"error": "Archivo no encontrado"}, 404
+        except Exception as e:
+            return {"error": str(e)}, 500

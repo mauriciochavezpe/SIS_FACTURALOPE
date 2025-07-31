@@ -1,54 +1,50 @@
-from flask import Blueprint, jsonify, request
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from app.services.user_service import get_all_users, create_user,update_user,get_user_by_id,login_user,logout_user #  , update_user, delete_user, login_user
-# from app.auth.jwt_handler import generate_jwt,decode_jwt
-user_blueprint = Blueprint('users', __name__)
+from flask_restx import Namespace, Resource, fields
+from app.services.user_service import get_all_users, create_user,update_user,get_user_by_id,login_user,logout_user
 
-@user_blueprint.route('/', methods=['GET'])
-def get_all_users_routes():
-    try:
+user_blueprint = Namespace('users', description='User operations')
+
+user_model = user_blueprint.model('UserModel', {
+    'username': fields.String(required=True, description='The user name'),
+    'email': fields.String(required=True, description='The user email'),
+    'password_hash': fields.String(required=True, description='The user password'),
+    'document_number': fields.String(required=True, description='The user document number'),
+    "is_admin": fields.Boolean(required=False, description='Is the user an admin?')
+})
+
+@user_blueprint.route('/')
+class UserList(Resource):
+    def get(self):
         users,status = get_all_users()
-        return jsonify(users), status
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return users, status
 
-@user_blueprint.route('/', methods=['POST'])
-def create_user_routes():
-    try:
+    @user_blueprint.expect(user_model)
+    def post(self):
         users,status = create_user()
-        return jsonify(users), status
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return users, status
 
-#obteener un usuario por id
-@user_blueprint.route('/<int:user_id>', methods=['GET'])
-def get_user_by_id_routes(user_id):
-    try:
+@user_blueprint.route('/<int:user_id>')
+class User(Resource):
+    def get(self, user_id):
         users,status = get_user_by_id(user_id)
         return users, status
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
 
-@user_blueprint.route('/<int:user_id>', methods=['PUT'])
-def update_user_routes(user_id):
-    try:
+    @user_blueprint.expect(user_model)
+    def put(self, user_id):
         users,status = update_user(user_id)
-        return jsonify(users), status
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return users, status
 
-@user_blueprint.route('/login', methods=['POST'])
-def login_user_routes():
-    try:
+@user_blueprint.route('/login')
+class UserLogin(Resource):
+    @user_blueprint.expect(user_blueprint.model('LoginModel', {
+    'email': fields.String(required=True, description='The user email'),
+    'password': fields.String(required=True, description='The user password')
+    }))
+    def post(self):
         users,status = login_user()
-        return jsonify(users), status
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return users, status
 
-@user_blueprint.route('/logout', methods=['POST'])        
-def logout_user_routes():
-    try:
+@user_blueprint.route('/logout')
+class UserLogout(Resource):
+    def post(self):
         users,status = logout_user()
-        return jsonify(users), status
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return users, status

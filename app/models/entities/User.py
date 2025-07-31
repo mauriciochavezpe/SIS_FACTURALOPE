@@ -9,7 +9,7 @@ class User(Auditoria):
     password_hash = db.Column(db.String(255), nullable=False)
     is_active = db.Column(db.Boolean, default=True)
     is_admin = db.Column(db.Boolean, default=False)
-    id_status = db.Column(db.Integer, nullable=False)
+    id_status = db.Column(db.Integer, nullable=True)
     document_number = db.Column(db.String(20), unique=True, nullable=False)
 
     def set_password(self, password):

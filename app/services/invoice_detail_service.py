@@ -6,14 +6,14 @@ from decimal import Decimal
 
 def get_invoice_details_all(invoice_id=None):
     try:
-        schema = InvoiceDetailSchema(session=db.session)
+        schema = InvoiceDetailSchema(session=db.session, many=True)
         query = InvoiceDetail.query
         
         if invoice_id:
             query = query.filter_by(invoice_id=invoice_id)
             
         results = query.all()
-        return [schema.dump(item) for item in results], 200
+        return schema.dump(results), 200
     except Exception as e:
         return {"error": str(e)}, 500
 
@@ -22,21 +22,18 @@ def create_invoice_detail():
         data = request.get_json()
         schema = InvoiceDetailSchema(session=db.session)
         
-        # Validate data
         errors = schema.validate(data)
         if errors:
             return {"errors": errors}, 400
             
-        # Calculate totals
         quantity = Decimal(str(data['quantity']))
         unit_price = Decimal(str(data['unit_price']))
         discount = Decimal(str(data.get('discount', 0)))
         
         subtotal = quantity * unit_price - discount
-        tax = subtotal * Decimal('0.18')  # IGV 18%
+        tax = subtotal * Decimal('0.18')
         total = subtotal + tax
         
-        # Add calculated fields
         data.update({
             'subtotal': float(subtotal),
             'tax': float(tax),
@@ -61,7 +58,6 @@ def update_invoice_detail(id):
         if not detail:
             return {"error": "Detail not found"}, 404
             
-        # Update fields and recalculate totals
         for key, value in data.items():
             setattr(detail, key, value)
             
@@ -69,13 +65,9 @@ def update_invoice_detail(id):
             discount = detail.discount or 0
             quantity = detail.quantity
             unit_price = detail.unit_price
-            print(quantity, unit_price, discount)
             detail.subtotal = float(quantity * unit_price - discount)
-            print(detail.subtotal)
             detail.tax = float(detail.subtotal * 0.18)
-            print(detail.tax)
             detail.total = float(detail.subtotal + detail.tax)
-            # print(detail.total)        
         db.session.commit()
         return schema.dump(detail), 200
     except Exception as e:

@@ -20,10 +20,10 @@ POST http://127.0.0.1:5000/api/users/
 Content-Type: application/json
 
 {
-    "username": "@mchp2025TLV!.",
+    "username": "Xrj45",
     "email": "test@example.com",
     "password": "SecurePass123!",
-    "document_number": "12345678",
+    "document_number": "0000001",
     "is_admin": false,
     "id_status": 1
 }

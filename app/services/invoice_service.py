@@ -51,9 +51,8 @@ def get_invoice_by_serie_num(serie_num: str) -> Dict[str, Any]:
         serie=serie, num_invoice=num_invoice_padded).first()
     if not invoice:
         raise InvoiceNotFoundError(f"Factura no encontrada: {serie_num}")
-    print(f"Factura encontrada: {invoice}")
     schema = InvoiceSchema(session=db.session)
-    return schema.dump(invoice),200
+    return schema.dump(invoice)
 
 
 def get_details_by_invoice(invoice_id: int) -> Dict[str, Any]:

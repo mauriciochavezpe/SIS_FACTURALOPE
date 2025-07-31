@@ -11,7 +11,10 @@ from flask import request
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = set(FileType.get_allowed_extensions())
 
-def create_storage2():
+
+
+
+def create_storage():
     try:
         if 'file' not in request.files:
             return {"error": "No file provided"}, 400
@@ -35,7 +38,7 @@ def create_storage2():
             file_path=file_path,
             file_type=file.content_type,
             file_size=os.path.getsize(file_path),
-            eid_status=1  # Active status
+            id_status=1  # Active status
         )
         
         db.session.add(storage)
@@ -49,52 +52,7 @@ def create_storage2():
         db.session.rollback()
         return {"error": str(e)}, 500
 
-
-def create_storage():
-    try:
-        data = request.get_json()
-        schema = StorageSchema(session=db.session)
-        
-        # Validate data
-        errors = schema.validate(data)
-        if errors:
-            return {"errors": errors}, 400
-            
-        # Create storage
-        storage = Storage(**data)
-        db.session.add(storage)
-        db.session.commit()
-        
-        return schema.dump(storage), 201
-    except Exception as e:
-        db.session.rollback()
-        return {"error": str(e)}, 500
-
 def update_storage(id):
-    try:
-        data = request.get_json()
-        schema = StorageSchema(session=db.session)
-        
-        # Validate data
-        errors = schema.validate(data)
-        if errors:
-            return {"errors": errors}, 400
-            
-        # Update storage
-        storage = Storage.query.get(id)
-        if not storage:
-            return {"error": "Storage not found"}, 404
-        
-        for key, value in data.items():
-            setattr(storage, key, value)
-        
-        db.session.commit()
-        
-        return schema.dump(storage), 200
-    except Exception as e:
-        db.session.rollback()
-        return {"error": str(e)}, 500
-def update_storage2(id):
     try:
         storage = Storage.query.get(id)
         if not storage:
@@ -123,6 +81,7 @@ def update_storage2(id):
     except Exception as e:
         db.session.rollback()
         return {"error": str(e)}, 500
+
 
 def delete_storage(id):
     try:

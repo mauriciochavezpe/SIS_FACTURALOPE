@@ -1,56 +1,45 @@
-from flask import Blueprint, jsonify, request
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_restx import Namespace, Resource, fields
 from app.services.customer_service import (get_all_customers,
 create_customer, get_customers_by_id, update_customers_by_id)
-# from app.auth.jwt_handler import generate_jwt,decode_jwt
-customer_blueprint = Blueprint('customers', __name__)
-@customer_blueprint.route('/', methods=['GET'])
-def get_all_customers_routes():
-    try:
-        customers,status = get_all_customers()
-        return jsonify(customers), status
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
 
-@customer_blueprint.route('/', methods=['POST'])
-def create_user_routes():
-    try:
+customer_blueprint = Namespace('customers', description='Customer operations')
+
+customer_model = customer_blueprint.model('CustomerModel', {
+    'username': fields.String(required=True, description='The customer username'),
+    'email': fields.String(required=True, description='The customer email'),
+    'password_hash': fields.String(required=True, description='The customer password'),
+    'phone': fields.String(description='The customer phone number'),
+    'document_number': fields.String(required=True, description='The customer document number'),
+    'is_business': fields.Boolean(description='Is the customer a business?'),
+    'commercial_name': fields.String(description='The customer commercial name'),
+    'business_name': fields.String(required=True, description='The customer business name'),
+    'address': fields.String(description='The customer address'),
+    'city': fields.String(description='The customer city'),
+    'province': fields.String(description='The customer province'),
+    'postal_code': fields.String(description='The customer postal code'),
+    'country': fields.String(description='The customer country'),
+    'full_name': fields.String(description='The customer full name'),
+    'document_type': fields.String(required=True, description='The customer document type')
+})
+
+@customer_blueprint.route('/')
+class CustomerList(Resource):
+    def get(self):
+        customers,status = get_all_customers()
+        return customers, status
+
+    @customer_blueprint.expect(customer_model)
+    def post(self):
         customers,status = create_customer()
-        return jsonify(customers), status
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-#obteener un usuario por id
-@customer_blueprint.route('/<int:user_id>', methods=['GET'])
-def get_user_by_id_routes(user_id):
-    try:
+        return customers, status
+
+@customer_blueprint.route('/<int:user_id>')
+class Customer(Resource):
+    def get(self, user_id):
         users,status = get_customers_by_id(user_id)
         return users, status
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
 
-@customer_blueprint.route('/<int:user_id>', methods=['PUT'])
-def update_user_routes(user_id):
-    try:
+    @customer_blueprint.expect(customer_model)
+    def put(self, user_id):
         users,status = update_customers_by_id(user_id)
-        return jsonify(users), status
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-'''
-
-
-@customer_blueprint.route('/login', methods=['POST'])
-def login_user_routes():
-    try:
-        users,status = login_user()
-        return jsonify(users), status
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@customer_blueprint.route('/logout', methods=['POST'])        
-def logout_user_routes():
-    try:
-        users,status = logout_user()
-        return jsonify(users), status
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-'''
+        return users, status

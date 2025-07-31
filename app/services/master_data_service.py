@@ -2,32 +2,19 @@ from flask import request
 from app import db
 from app.models.entities.MasterData import MasterData
 from app.schemas.master_data_schema import MasterDataSchema
-# from app.utils.generar_xml import generar_xml, crear_xml_y_zip
-from app.config.certificado import obtener_certificado, firmar_xml_con_placeholder
-from datetime import datetime
-from app.utils.xml_generate_fragments import (complete_data_xml)
-from dotenv import load_dotenv
-import requests
-import base64
-import time
-import os
-
 
 def get_all_master_data():
     try:
-        schema = MasterDataSchema(session=db.session)
-        filter = request.args.to_dict()
+        schema = MasterDataSchema(session=db.session, many=True)
+        filter_data = request.args.to_dict()
         query = db.session.query(MasterData)
         
-        if filter:
-            for key, value in filter.items():
+        if filter_data:
+            for key, value in filter_data.items():
                 if hasattr(MasterData, key) and value.strip("'") != '':
                     query = query.filter(getattr(MasterData, key) == value.strip("'"))
         
         results = query.all()
-        if not results:
-            return [], 200
-            
         return schema.dump(results), 200
         
     except Exception as e:
@@ -35,7 +22,6 @@ def get_all_master_data():
     
 def get_master_data_by_catalog(NAME, CODE=""):
     try:
-        print(f"NAME: {NAME}, CODE: {CODE}")
         schema = MasterDataSchema(session=db.session)
         results = db.session.query(MasterData).filter(MasterData.catalog_code == NAME, MasterData.code == CODE).first()
         
@@ -46,6 +32,7 @@ def get_master_data_by_catalog(NAME, CODE=""):
         
     except Exception as e:
         return {"error": str(e)}, 500
+
 def create_master_data():
     try:
         data = request.get_json()

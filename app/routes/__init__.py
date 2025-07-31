@@ -1,15 +1,18 @@
-from app.routes import (user_routes, product_routes, category_routes,
-                        invoice_routes,invoice_detail_routes,
-                        customer_routes,storage_routes, master_data_routes,invoice_routes)
-# from app.routes.product_routes import product_blueprint
+from app.swagger import api
+from app.routes.user_routes import user_blueprint
+from app.routes.product_routes import product_blueprint
+from app.routes.category_routes import category_blueprint
+from app.routes.storage_routes import storage_blueprint
+from app.routes.customer_routes import customer_blueprint
+from app.routes.master_data_routes import master_data_blueprint
+from app.routes.invoice_routes import invoice_blueprint
+from app.routes.invoice_detail_routes import invoice_detail_blueprint
 
-
-def register_blueprints(app):     
-    app.register_blueprint(user_routes.user_blueprint, url_prefix='/api/users')
-    app.register_blueprint(product_routes.product_blueprint, url_prefix='/api/products')
-    app.register_blueprint(category_routes.category_blueprint, url_prefix='/api/categories')
-    app.register_blueprint(storage_routes.storage_blueprint, url_prefix='/api/storages')
-    app.register_blueprint(customer_routes.customer_blueprint, url_prefix='/api/customers')
-    app.register_blueprint(master_data_routes.master_data_blueprint, url_prefix='/api/master_data')
-    app.register_blueprint(invoice_routes.invoice_blueprint, url_prefix='/api/invoices')
-    app.register_blueprint(invoice_detail_routes.invoice_detail_blueprint, url_prefix='/api/invoices_details')
+api.add_namespace(user_blueprint, path='/api/users')
+api.add_namespace(product_blueprint, path='/api/products')
+api.add_namespace(category_blueprint, path='/api/categories')
+api.add_namespace(storage_blueprint, path='/api/storages')
+api.add_namespace(customer_blueprint, path='/api/customers')
+api.add_namespace(master_data_blueprint, path='/api/master_data')
+api.add_namespace(invoice_blueprint, path='/api/invoices')
+api.add_namespace(invoice_detail_blueprint, path='/api/invoices_details')

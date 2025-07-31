@@ -1,41 +1,33 @@
 
-from flask import Blueprint, jsonify, request
+from flask_restx import Namespace, Resource, fields
 from app.services.category_service import create_category, get_all_categories,update_category,delete_category
-category_blueprint = Blueprint('category', __name__)
 
-@category_blueprint.route('/', methods=['POST'])
-def create_category_route():
-    try:
-        # category_data = request.get_json()
-        category, status = create_category()
-        return jsonify(category), status
-    
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-    
-@category_blueprint.route('/', methods=['GET'])
-def get_all_categories_route():
-    try:
+category_blueprint = Namespace('category', description='Category operations')
+
+category_model = category_blueprint.model('CategoryModel', {
+    'name': fields.String(required=True, description='The category name'),
+    'description': fields.String(required=True, description='The category description'),
+    'id_status': fields.Integer(required=True, description='The category status')
+})
+
+@category_blueprint.route('/')
+class CategoryList(Resource):
+    def get(self):
         categories,status = get_all_categories()
-        return jsonify(categories),status
-    
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return categories,status
 
-@category_blueprint.route('/<int:category_id>', methods=['PUT'])
-def update_category_route(category_id):
-    try:
+    @category_blueprint.expect(category_model)
+    def post(self):
+        category, status = create_category()
+        return category, status
+
+@category_blueprint.route('/<int:category_id>')
+class Category(Resource):
+    @category_blueprint.expect(category_model)
+    def put(self, category_id):
         category,status = update_category(category_id)
-        return jsonify(category),status
-    
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return category,status
 
-@category_blueprint.route('/<int:category_id>', methods=['DELETE'])
-def delete_category_route(category_id):
-    try:
+    def delete(self, category_id):
         status = delete_category(category_id)
-        return jsonify({'message': 'Category deleted successfully'}), status
-    
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return {'message': 'Category deleted successfully'}, status

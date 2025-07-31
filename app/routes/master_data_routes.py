@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify
+from flask_restx import Namespace, Resource, fields
 from app.services.master_data_service import (
     get_all_master_data,
     create_master_data,
@@ -8,54 +8,51 @@ from app.services.master_data_service import (
     generacion_factura_dummy
 )
 
-master_data_blueprint = Blueprint('master_data', __name__)
+master_data_blueprint = Namespace('master_data', description='Master data operations')
 
-@master_data_blueprint.route('/', methods=['GET'])
-def get_all_master_data_routes():
-    try:
+master_data_model = master_data_blueprint.model('MasterDataModel', {
+    'catalog_code': fields.String(required=True, description='The catalog code'),
+    'code': fields.String(required=True, description='The code'),
+    'value': fields.String(required=True, description='The value'),
+    'description': fields.String(description='The description'),
+    'is_active': fields.Boolean(description='Is active?'),
+    'status_id': fields.Integer(description='The status ID'),
+    'extra': fields.String(description='Extra field'),
+    'extra2': fields.String(description='Extra field 2'),
+    'extra3': fields.String(description='Extra field 3')
+})
+
+@master_data_blueprint.route('/')
+class MasterDataList(Resource):
+    def get(self):
         master_data, status = get_all_master_data()
-        return jsonify(master_data), status
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return master_data, status
 
-
-@master_data_blueprint.route('/<int:id>', methods=['GET'])
-def get_master_data_by_id_routes(id):
-    try:
-        master_data, status = get_master_data_by_id(id)
-        return jsonify(master_data), status
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@master_data_blueprint.route('/', methods=['POST'])
-def create_master_data_routes():
-    try:
+    @master_data_blueprint.expect(master_data_model)
+    def post(self):
         master_data, status = create_master_data()
-        return jsonify(master_data), status
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return master_data, status
 
-@master_data_blueprint.route('/<int:id>', methods=['PUT'])
-def update_master_data_routes(id):
-    try:
+@master_data_blueprint.route('/<int:id>')
+class MasterData(Resource):
+    def get(self, id):
+        master_data, status = get_master_data_by_id(id)
+        return master_data, status
+
+    @master_data_blueprint.expect(master_data_model)
+    def put(self, id):
         master_data, status = update_master_data(id)
-        return jsonify(master_data), status
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return master_data, status
 
-@master_data_blueprint.route('/<int:id>', methods=['DELETE'])
-def delete_master_data_routes(id):
-    try:
+    def delete(self, id):
         result, status = delete_master_data(id)
-        return jsonify(result), status
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return result, status
 
-
-@master_data_blueprint.route('/factura_dummy', methods=['GET','POST'])
-def generacion_factura_dummy_routes():
-    try:
+@master_data_blueprint.route('/factura_dummy')
+class MasterDataDummy(Resource):
+    def get(self):
         master_data, status = generacion_factura_dummy()
-        return jsonify(master_data), status
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return master_data, status
+    def post(self):
+        master_data, status = generacion_factura_dummy()
+        return master_data, status
