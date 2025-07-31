@@ -2,10 +2,19 @@ from flask import Flask
 from app.config.config import Config
 from app.extension import db, migrate, bcrypt
 from app.swagger import api
+from decimal import Decimal
+import json
+
+class CustomJSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            return float(obj)
+        return super(CustomJSONEncoder, self).default(obj)
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+    app.config['RESTX_JSON'] = {'cls': CustomJSONEncoder}
     
     # Initialize extensions
     db.init_app(app)

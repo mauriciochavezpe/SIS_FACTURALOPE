@@ -10,21 +10,26 @@ from app.utils.sunat_client import SunatClientError, send_invoice_data_to_sunat
 invoice_blueprint = Namespace('invoices', description='Invoice operations')
 
 invoice_model = invoice_blueprint.model('InvoiceModel', {
-    'customer_id': fields.Integer(required=True, description='The customer ID'),
     'document': fields.String(required=True, description='The document number (SERIE-NUMERO)'),
     'document_type': fields.Integer(required=True, description='The document type'),
+    'ruc_cliente': fields.String(required=True, description='The customer RUC'),
     'date': fields.DateTime(required=True, description='The invoice date'),
-    'related_invoice_id': fields.Integer(description='The related invoice ID'),
+    'relative_document': fields.String(description='The related invoice ID'),
+    'codigo_table': fields.String(description='The related invoice ID'),
+    'codigo_mensaje_table': fields.String(description='The related invoice ID'),
+    'customer_id': fields.Integer(required=True, description='The product ID'),
     'subtotal': fields.Float(required=True, description='The subtotal'),
-    'monto_total': fields.Float(required=True, description='The total amount'),
-    'monto_igv': fields.Float(required=True, description='The IGV amount'),
+    'monto_igv': fields.Integer(required=True, description='The total amount'),
+    'metodo_pago': fields.String(required=True, description='The total amount'),
+    'quantity': fields.Integer(required=True, description='The total amount'),
+    'afecto_tributo': fields.String(required=True, description='The total amount'),
     'details': fields.List(fields.Nested(invoice_blueprint.model('InvoiceDetailModel', {
+        'discount': fields.Float(description='The discount'),
         'product_id': fields.Integer(required=True, description='The product ID'),
         'quantity': fields.Integer(required=True, description='The quantity'),
-        'unit_price': fields.Float(required=True, description='The unit price'),
-        'discount': fields.Float(description='The discount'),
         'subtotal': fields.Float(required=True, description='The subtotal'),
-        'tax': fields.Float(required=True, description='The tax'),
+        'unit_price': fields.Float(required=True, description='The unit price'),
+        'description':fields.String(required=False, description='The description'),
         'monto_total': fields.Float(required=True, description='The total amount')
     })))
 })
@@ -35,7 +40,6 @@ class InvoiceList(Resource):
         filters = request.args.to_dict()
         invoices = get_all_invoices(filters)
         return invoices, 200
-
 @invoice_blueprint.route('/details/<int:id>')
 class InvoiceDetails(Resource):
     def get(self, id):
@@ -45,6 +49,19 @@ class InvoiceDetails(Resource):
         except InvoiceNotFoundError as e:
             return {'error': str(e)}, 404
 
+# @invoice_blueprint.route('/<int:id>')
+# class InvoiceAllDetails(Resource):
+#     def get(self, id):
+#         try:
+#             invoice = get_details_by_invoice(id)
+#             if not invoice:
+#                 return {'error': 'Invoice not found'}, 404
+            
+#             details = get_details_by_invoice(id)
+#             return details, 200
+#         except Exception as e:
+#             return {'error': str(e)}, 500
+     
 @invoice_blueprint.route('/send-to-sunat')
 class InvoiceSend(Resource):
     @invoice_blueprint.expect(invoice_model)

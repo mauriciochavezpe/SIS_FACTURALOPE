@@ -7,7 +7,8 @@ from app import db
 from app.models.entities.Invoice import Invoice
 from app.models.entities.InvoiceDetails import InvoiceDetail
 from app.models.entities.MasterData import MasterData
-from app.schemas.invoice_schema import InvoiceSchema
+from app.schemas.custom_detail_by_invoice_schema import InvoiceWithDetailsSchema
+from app.schemas.custom_detail_by_invoice_schema import ComplexInvoiceSchema
 from datetime import datetime
 from flask import request
 
@@ -34,6 +35,7 @@ def get_all_invoices(filters: Dict[str, Any]) -> List[Dict[str, Any]]:
     return schema.dump(results)
 
 
+ 
 def get_invoice_by_serie_num(serie_num: str) -> Dict[str, Any]:
     """Obtiene una factura por su serie y número."""
     if "-" not in serie_num:
@@ -46,7 +48,7 @@ def get_invoice_by_serie_num(serie_num: str) -> Dict[str, Any]:
         serie=serie, num_invoice=num_invoice_padded).first()
     if not invoice:
         raise InvoiceNotFoundError(f"Factura no encontrada: {serie_num}")
-    schema = InvoiceSchema(session=db.session)
+    schema = InvoiceWithDetailsSchema(session=db.session)
     return schema.dump(invoice)
 
 
@@ -57,7 +59,7 @@ def get_details_by_invoice(invoice_id: int) -> Dict[str, Any]:
     if not invoice:
         raise InvoiceNotFoundError(f"Factura con ID {invoice_id} no encontrada.")
 
-    schema = InvoiceSchema(session=db.session)
+    schema = InvoiceWithDetailsSchema(session=db.session)
     result = schema.dump(invoice)
     return result
 

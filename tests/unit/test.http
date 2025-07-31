@@ -123,7 +123,7 @@ Content-Type: application/json
 
 
 #### GET INVOICES BY ID
-GET http://127.0.0.1:5000/api/invoices/1
+GET http://127.0.0.1:5000/api/invoices/
 Content-Type: application/json
 
 
