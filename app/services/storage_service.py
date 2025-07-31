@@ -4,15 +4,11 @@ import os
 from app import db
 from app.models.entities.Storage import Storage
 from app.schemas.storage_schema import StorageSchema
-
-#importar request
 from flask import request
+from datetime import datetime
 
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = set(FileType.get_allowed_extensions())
-
-
-
 
 def create_storage():
     try:
@@ -38,7 +34,10 @@ def create_storage():
             file_path=file_path,
             file_type=file.content_type,
             file_size=os.path.getsize(file_path),
-            id_status=1  # Active status
+            id_status=1,  # Active status
+            createdAt = datetime.now(),
+            createdBy = data.get("user","SYSTEM"),
+            ip = request.remote_addr
         )
         
         db.session.add(storage)
@@ -75,13 +74,16 @@ def update_storage(id):
                 storage.file_type = file.content_type
                 storage.file_size = os.path.getsize(file_path)
         
+        storage.modifiedAt = datetime.now()
+        storage.modifiedBy = data.get("user","SYSTEM")
+        storage.ip = request.remote_addr
+
         db.session.commit()
         schema = StorageSchema(session=db.session)
         return schema.dump(storage), 200
     except Exception as e:
         db.session.rollback()
         return {"error": str(e)}, 500
-
 
 def delete_storage(id):
     try:
@@ -102,8 +104,8 @@ def delete_storage(id):
 
 def get_all_storage():
     try:
-        schema = StorageSchema(session=db.session)
+        schema = StorageSchema(session=db.session, many=True)
         storages = db.session.query(Storage).all()
-        return schema.dump(storages, many=True), 200
+        return schema.dump(storages), 200
     except Exception as e:
         return {"error": str(e)}, 500

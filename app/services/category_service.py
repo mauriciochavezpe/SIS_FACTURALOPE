@@ -2,6 +2,7 @@ from flask import request
 from app.models.entities.Category import Category
 from app.schemas.category_schema import CategorySchema
 from app.extension import db
+from datetime import datetime
 
 def get_all_categories():
     schema = CategorySchema(session=db.session, many=True)
@@ -28,8 +29,11 @@ def create_category():
         errors = schema.validate(data)
         if errors:
             return {"errors": errors}, 400
-        
+        print(request)
         new_category = Category(**data)
+        new_category.createdAt = datetime.now()
+        new_category.createdBy = data.get("user","SYSTEM")
+        new_category.ip = request.remote_addr
         
         db.session.add(new_category)
         db.session.commit()
@@ -54,6 +58,10 @@ def update_category(id):
         for key, value in data.items():
             setattr(category, key, value)
         
+        category.modifiedAt = datetime.now()
+        category.modifiedBy = data.get("user","SYSTEM")
+        category.ip = request.remote_addr
+
         db.session.commit()
         
         return schema.dump(category), 200

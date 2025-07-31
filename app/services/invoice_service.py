@@ -1,9 +1,3 @@
-"""
-Este módulo se encarga exclusivamente de la lógica de negocio y la persistencia
-de las facturas en la base de datos. No debe contener lógica de comunicación
-con servicios externos como SUNAT.
-"""
-
 from decimal import Decimal
 from typing import Any, Dict, List
 
@@ -14,7 +8,8 @@ from app.models.entities.Invoice import Invoice
 from app.models.entities.InvoiceDetails import InvoiceDetail
 from app.models.entities.MasterData import MasterData
 from app.schemas.invoice_schema import InvoiceSchema
-
+from datetime import datetime
+from flask import request
 
 class InvoiceCreationError(Exception):
     """Excepción personalizada para errores durante la creación de facturas."""
@@ -92,7 +87,10 @@ def create_invoice_in_db(data: Dict[str, Any]) -> Invoice:
             id_status=25,  # Estado inicial: Pendiente de envío
             subtotal=Decimal(data.get("subtotal", 0) or 0),
             total=Decimal(data.get("monto_total", 0) or 0),
-            tax=Decimal(data.get("monto_igv", 0) or 0)
+            tax=Decimal(data.get("monto_igv", 0) or 0),
+            createdAt = datetime.now(),
+            createdBy = data.get("user","SYSTEM"),
+            ip = request.remote_addr
         )
         db.session.add(invoice)
         db.session.flush()  # Para obtener el ID de la factura para los detalles
@@ -112,14 +110,15 @@ def create_invoice_in_db(data: Dict[str, Any]) -> Invoice:
                 discount=Decimal(item.get("discount", 0)),
                 subtotal=Decimal(item.get("subtotal", 0)),
                 tax=Decimal(item.get("tax", 0)),
-                total=Decimal(item.get("monto_total", 0))
+                total=Decimal(item.get("monto_total", 0)),
+                createdAt = datetime.now(),
+                createdBy = data.get("user","SYSTEM"),
+                ip = request.remote_addr
             )
             db.session.add(detalle)
-        # print(f"Factura creada en BD: {invoice.id}")
         return invoice
 
     except (KeyError, TypeError, ValueError) as e:
-        # Captura errores de datos faltantes o incorrectos y los re-lanza
         raise InvoiceCreationError(f"Datos de factura inválidos: {e}")
 
 
@@ -136,20 +135,19 @@ def update_invoice_status(documento: str, status_value: str, cdr_data: Dict[str,
     if not invoice:
         raise InvoiceNotFoundError(f"Factura no encontrada: {documento}")
 
-    # Buscar el código de estado en MasterData
     status_entry = db.session.query(MasterData).filter_by(
         catalog_code='T_ESTADO_SOLICITUD', value=status_value).first()
 
     if not status_entry:
-        # Si no se encuentra un estado, se podría usar un valor por defecto o lanzar un error
-        # Por ahora, simplemente no actualizamos el estado si no es válido.
         print(f"Advertencia: Valor de estado '{status_value}' no encontrado en MasterData.")
     else:
         invoice.id_status = status_entry.code
 
-    # Opcionalmente, guardar información del CDR si se proporciona
     if cdr_data:
-        invoice.sunat_response = cdr_data  # Asumiendo que tienes un campo para esto
+        invoice.sunat_response = cdr_data
+    
+    invoice.modifiedAt = datetime.now()
+    invoice.modifiedBy = data.get("user","SYSTEM")
+    invoice.ip = request.remote_addr
 
-    # El commit se maneja en la capa de rutas
     return invoice

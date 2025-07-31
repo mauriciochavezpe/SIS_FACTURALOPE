@@ -2,6 +2,7 @@ from flask import request
 from app import db
 from app.models.entities.MasterData import MasterData
 from app.schemas.master_data_schema import MasterDataSchema
+from datetime import datetime
 
 def get_all_master_data():
     try:
@@ -43,6 +44,10 @@ def create_master_data():
             return {"errors": errors}, 400
             
         new_master_data = MasterData(**data)
+        new_master_data.createdAt = datetime.now()
+        new_master_data.createdBy = data.get("user","SYSTEM")
+        new_master_data.ip = request.remote_addr
+
         db.session.add(new_master_data)
         db.session.commit()
         
@@ -63,6 +68,10 @@ def update_master_data(id):
             
         for key, value in data.items():
             setattr(master_data, key, value)
+        
+        master_data.modifiedAt = datetime.now()
+        master_data.modifiedBy = data.get("user","SYSTEM")
+        master_data.ip = request.remote_addr
             
         db.session.commit()
         return schema.dump(master_data), 200

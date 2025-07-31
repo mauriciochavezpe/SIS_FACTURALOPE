@@ -2,6 +2,7 @@ from flask import request
 from app.models.entities.Product import Product
 from app.schemas.product_schema import ProductSchema
 from app.extension import db
+from datetime import datetime
 
 def get_all_products():
     schema = ProductSchema(session=db.session, many=True)
@@ -30,6 +31,9 @@ def create_product():
             return {"errors": errors}, 400
         
         new_product = Product(**data)
+        new_product.createdAt = datetime.now()
+        new_product.createdBy = data.get("user","SYSTEM")
+        new_product.ip = request.remote_addr
         
         db.session.add(new_product)
         db.session.commit()
@@ -53,6 +57,10 @@ def update_product(id):
         
         for key, value in data.items():
             setattr(product, key, value)
+        
+        product.modifiedAt = datetime.now()
+        product.modifiedBy = data.get("user","SYSTEM")
+        product.ip = request.remote_addr
            
         db.session.commit()
         
@@ -66,6 +74,9 @@ def delete_product(id):
         if not product:
             return {"error": "Producto no encontrado"}, 404
         product.id_status = 25
+        product.modifiedAt = datetime.now()
+        product.modifiedBy = data.get("user","SYSTEM")
+        product.ip = request.remote_addr
         db.session.commit()
         
         return {"message": "Producto eliminado"}, 200

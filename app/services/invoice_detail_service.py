@@ -3,6 +3,7 @@ from app import db
 from app.models.entities.InvoiceDetails import InvoiceDetail
 from app.schemas.invoice_detail_schema import InvoiceDetailSchema
 from decimal import Decimal
+from datetime import datetime
 
 def get_invoice_details_all(invoice_id=None):
     try:
@@ -41,6 +42,10 @@ def create_invoice_detail():
         })
         
         detail = InvoiceDetail(**data)
+        detail.createdAt = datetime.now()
+        detail.createdBy = data.get("user","SYSTEM")
+        detail.ip = request.remote_addr
+
         db.session.add(detail)
         db.session.commit()
         
@@ -68,6 +73,11 @@ def update_invoice_detail(id):
             detail.subtotal = float(quantity * unit_price - discount)
             detail.tax = float(detail.subtotal * 0.18)
             detail.total = float(detail.subtotal + detail.tax)
+        
+        detail.modifiedAt = datetime.now()
+        detail.modifiedBy = data.get("user","SYSTEM")
+        detail.ip = request.remote_addr
+
         db.session.commit()
         return schema.dump(detail), 200
     except Exception as e:

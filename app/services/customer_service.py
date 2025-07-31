@@ -2,8 +2,9 @@ from app.models.enums.document_types import DocumentType
 from app.schemas.customer_schema import CustomerSchema
 from app.extension import db
 from app.models.entities.Customer import Customer
-from flask import request, jsonify
-from sqlalchemy import Boolean
+from flask import request
+from datetime import datetime
+
 def create_customer():
     try:
         data = request.get_json()
@@ -19,6 +20,9 @@ def create_customer():
         schema = CustomerSchema(session=db.session, exclude=['password_hash'])
         new_customer = schema.load(data)
         new_customer.set_password(password)
+        new_customer.createdAt = datetime.now()
+        new_customer.createdBy = data.get("user","SYSTEM")
+        new_customer.ip = request.remote_addr
 
         db.session.add(new_customer)
         db.session.commit()
@@ -69,6 +73,11 @@ def update_customers_by_id(user_id):
 
         for key, value in data.items():
             setattr(customer, key, value)
+        
+        customer.modifiedAt = datetime.now()
+        customer.modifiedBy = data.get("user","SYSTEM")
+        customer.ip = request.remote_addr
+
         db.session.commit()
         schema = CustomerSchema(session=db.session)
         return schema.dump(customer), 200
@@ -78,23 +87,11 @@ def update_customers_by_id(user_id):
 def get_all_customers_by_ruc(rucs):
     
     try:
-        # for ruc in rucs:
-            # if len(ruc) != 11:
-            #     ""
-            #     # return {"error": f"La longitud del RUC {ruc} debe ser de 11 dígitos"}, 400
-            # else:
-            #     if not ruc.isdigit():
-            #         return {"error": f"El RUC {ruc} debe contener solo dígitos"}, 400
         query = db.session.query(Customer).filter(Customer.document_number.in_(rucs))
-        
-        # Filtrar por todos los RUCs usando in_
-        
         
         results = query.all()
         if not results:
             return [], 200
-        # print(f"results: {results}")
-        # print(f"results ln: {len(results)}")
         schema = CustomerSchema(session=db.session, many=True)
         return schema.dump(results), 200
 
