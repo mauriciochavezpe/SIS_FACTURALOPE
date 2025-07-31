@@ -49,19 +49,7 @@ class InvoiceDetails(Resource):
         except InvoiceNotFoundError as e:
             return {'error': str(e)}, 404
 
-# @invoice_blueprint.route('/<int:id>')
-# class InvoiceAllDetails(Resource):
-#     def get(self, id):
-#         try:
-#             invoice = get_details_by_invoice(id)
-#             if not invoice:
-#                 return {'error': 'Invoice not found'}, 404
-            
-#             details = get_details_by_invoice(id)
-#             return details, 200
-#         except Exception as e:
-#             return {'error': str(e)}, 500
-     
+
 @invoice_blueprint.route('/send-to-sunat')
 class InvoiceSend(Resource):
     @invoice_blueprint.expect(invoice_model)

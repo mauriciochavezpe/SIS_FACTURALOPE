@@ -9,4 +9,5 @@ class CategorySchema(SQLAlchemyAutoSchema):
         model = Category
         load_instance = True
         include_fk = True
+        exclude = ('products',)
         

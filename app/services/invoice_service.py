@@ -5,6 +5,7 @@ from sqlalchemy.orm import joinedload
 
 from app import db
 from app.models.entities.Invoice import Invoice
+from app.models.entities.Product import Product
 from app.models.entities.InvoiceDetails import InvoiceDetail
 from app.models.entities.MasterData import MasterData
 from app.schemas.custom_detail_by_invoice_schema import InvoiceWithDetailsSchema
@@ -54,7 +55,7 @@ def get_invoice_by_serie_num(serie_num: str) -> Dict[str, Any]:
 
 def get_details_by_invoice(invoice_id: int) -> Dict[str, Any]:
     """Obtiene los detalles completos de una factura, incluyendo sus productos."""
-    invoice = db.session.query(Invoice).options(joinedload(Invoice.invoice_details).joinedload(InvoiceDetail.product)).filter(Invoice.id == invoice_id).first()
+    invoice = db.session.query(Invoice).options(joinedload(Invoice.invoice_details).joinedload(InvoiceDetail.product).joinedload(Product.category)).filter(Invoice.id == invoice_id).first()
 
     if not invoice:
         raise InvoiceNotFoundError(f"Factura con ID {invoice_id} no encontrada.")

@@ -9,11 +9,13 @@ from app.services.invoice_detail_service import (
 invoice_detail_blueprint = Namespace('invoice_details', description='Invoice detail operations')
 
 invoice_detail_model = invoice_detail_blueprint.model('InvoiceDetailModel', {
-    'invoice_id': fields.Integer(required=True, description='The invoice ID'),
+    'discount': fields.Float(description='The discount'),
     'product_id': fields.Integer(required=True, description='The product ID'),
     'quantity': fields.Integer(required=True, description='The quantity'),
+    'subtotal': fields.Float(required=True, description='The subtotal'),
     'unit_price': fields.Float(required=True, description='The unit price'),
-    'discount': fields.Float(description='The discount')
+    'description':fields.String(required=False, description='The description'),
+    'monto_total': fields.Float(required=True, description='The total amount')
 })
 
 @invoice_detail_blueprint.route('/')
