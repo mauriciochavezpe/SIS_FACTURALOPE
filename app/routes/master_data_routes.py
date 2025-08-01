@@ -4,8 +4,7 @@ from app.services.master_data_service import (
     create_master_data,
     update_master_data,
     delete_master_data,
-    get_master_data_by_id,
-    generacion_factura_dummy
+    get_master_data_by_id
 )
 
 master_data_blueprint = Namespace('master_data', description='Master data operations')
@@ -24,6 +23,7 @@ master_data_model = master_data_blueprint.model('MasterDataModel', {
 
 @master_data_blueprint.route('/')
 class MasterDataList(Resource):
+    @master_data_blueprint.doc(params={'catalog_code': 'Filter by catalog code'})
     def get(self):
         master_data, status = get_all_master_data()
         return master_data, status
@@ -48,11 +48,11 @@ class MasterData(Resource):
         result, status = delete_master_data(id)
         return result, status
 
-@master_data_blueprint.route('/factura_dummy')
-class MasterDataDummy(Resource):
-    def get(self):
-        master_data, status = generacion_factura_dummy()
-        return master_data, status
-    def post(self):
-        master_data, status = generacion_factura_dummy()
-        return master_data, status
+# @master_data_blueprint.route('/factura_dummy')
+# class MasterDataDummy(Resource):
+#     def get(self):
+#         master_data, status = generacion_factura_dummy()
+#         return master_data, status
+#     def post(self):
+#         master_data, status = generacion_factura_dummy()
+#         return master_data, status

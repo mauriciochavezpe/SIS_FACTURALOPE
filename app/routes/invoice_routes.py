@@ -59,7 +59,7 @@ class InvoiceSend(Resource):
             return {"error": "No se proporcionaron datos en la solicitud."}, 400
 
         try:
-            invoice_obj = create_invoice_in_db(data)
+            # invoice_obj = create_invoice_in_db(data)
             cdr_response = send_invoice_data_to_sunat(data)
             status_value = cdr_response.get("codigo_estado", "-1")
             update_invoice_status(data["document"], status_value, cdr_response)
@@ -68,7 +68,7 @@ class InvoiceSend(Resource):
             return {
                 "status": "success",
                 "message": "Factura creada y enviada a SUNAT exitosamente.",
-                "invoice_id": invoice_obj.id,
+                "invoice_id": "invoice_obj.id",
                 "sunat_response": cdr_response
             }, 201
 

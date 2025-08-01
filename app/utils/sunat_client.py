@@ -19,10 +19,9 @@ from app.services.invoice_service import get_invoice_by_serie_num
 from app.services.master_data_service import get_master_data_by_catalog
 from app.utils.utils import get_sunat_response_code, get_sunat_response_xml
 from app.utils.xml_generate_fragments import (
-    CATALOG_07_IGV, complete_data_xml)
+     complete_data_xml)
 from app.utils.xml_utils.file_utils import FileUtils
-
-
+from app.utils.utils_constantes import Constantes
 class SunatClientError(Exception):
     """Excepción base para errores relacionados con el cliente de SUNAT."""
     pass
@@ -47,9 +46,11 @@ def send_invoice_data_to_sunat(data: Dict[str, Any]):
                 f"Error al obtener datos de clientes: {payload_customers}")
         invoice_relative, catalog_07 = None, None
 
+        ## obtenemos la factura relativa
         if document_type in ["07", "08"]:
             invoice_relative, status_inv = get_invoice_by_serie_num(
                 data.get("relative_document"))
+            
             if status_inv != 200:
                 raise SunatClientError(
                     f"Error al obtener factura relacionada: {invoice_relative}")
@@ -57,10 +58,10 @@ def send_invoice_data_to_sunat(data: Dict[str, Any]):
         if document_type in ["01", "03"]:
             afecto_tributo = data.get("afecto_tributo")
             catalog_07, status_cat = get_master_data_by_catalog(
-                CATALOG_07_IGV, afecto_tributo)
+                Constantes.CATALOG_07_IGV, afecto_tributo)
             if status_cat != 200:
                 raise SunatClientError(
-                    f"Error al obtener catálogo {CATALOG_07_IGV}: {catalog_07}")
+                    f"Error al obtener catálogo {Constantes.CATALOG_07_IGV}: {catalog_07}")
         # print(f"Datos obtenidos: {payload_customers}, {catalog_07}, {invoice_relative}")
         # 2. Generar el XML
         xml_string, serie_number = complete_data_xml(

@@ -104,12 +104,6 @@ def get_master_data_by_id(id):
     except Exception as e:
         return {"error": str(e)}, 500
 
-def generacion_factura_dummy():
-    try:
-        data = request.get_json()
-        return "result", 200
-    except Exception as e:
-        return {"error2": str(e)}, 500
 
 
 

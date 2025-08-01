@@ -3,7 +3,8 @@ from app.models.entities.User import User
 from app.schemas.user_schema import UserSchema
 from app.extension import db
 from datetime import datetime
-
+from app.utils.catalog_manager import catalog_manager
+from app.utils.utils_constantes import Constantes
 def get_all_users():
     schema = UserSchema(session=db.session, many=True)
     filter_data = request.args.to_dict()
@@ -14,7 +15,9 @@ def get_all_users():
                 if hasattr(User, key) and value.strip("'") != '':
                     query = query.filter(getattr(User, key) == value.strip("'"))
                  
-        query = query.filter(User.id_status == 23)
+        active_status_id = catalog_manager.get_id(Constantes.CATALOG_STATUS, Constantes.STATUS_ACTIVE)
+        if active_status_id:
+            query = query.filter(User.id_status == active_status_id)
         
         results = query.all()
         return schema.dump(results), 200
@@ -31,9 +34,13 @@ def create_user():
         schema = UserSchema(session=db.session, exclude=['password_hash'])
         user = schema.load(user_data, session=db.session)
         user.set_password(password)
-        user.id_status = 1
+        
+        pending_status_id = catalog_manager.get_id(Constantes.CATALOG_USER_STATUS, Constantes.STATUS_PENDING)
+        if pending_status_id:
+            user.id_status = pending_status_id
+
         user.createdAt = datetime.now()
-        user.createdBy = data.get("user","SYSTEM")
+        user.createdBy = request.headers.get("user", "system")
         user.ip = request.remote_addr
 
         db.session.add(user)
@@ -73,7 +80,7 @@ def update_user(user_id):
                 setattr(user, key, value)
         
         user.modifiedAt = datetime.now()
-        user.modifiedBy = data.get("user","SYSTEM")
+        user.modifiedBy = request.headers.get("user", "system")
         user.ip = request.remote_addr
                 
         db.session.commit()

@@ -3,6 +3,8 @@ from app.models.entities.Product import Product
 from app.schemas.product_schema import ProductSchema
 from app.extension import db
 from datetime import datetime
+from app.utils.catalog_manager import catalog_manager
+from app.utils import utils_constantes as constants
 
 def get_all_products():
     schema = ProductSchema(session=db.session, many=True)
@@ -14,7 +16,9 @@ def get_all_products():
                 if hasattr(Product, key) and value.strip("'") != '':
                     query = query.filter(getattr(Product, key) == value.strip("'"))
                     
-        query = query.filter(Product.id_status == 23)
+        active_status_id = catalog_manager.get_id(constants.CATALOG_STATUS, constants.STATUS_ACTIVE)
+        if active_status_id:
+            query = query.filter(Product.id_status == active_status_id)
         
         results = query.all()
         return schema.dump(results), 200
@@ -32,7 +36,7 @@ def create_product():
         
         new_product = Product(**data)
         new_product.createdAt = datetime.now()
-        new_product.createdBy = data.get("user","SYSTEM")
+        new_product.createdBy = request.headers.get("user", "system")
         new_product.ip = request.remote_addr
         
         db.session.add(new_product)
@@ -59,7 +63,7 @@ def update_product(id):
             setattr(product, key, value)
         
         product.modifiedAt = datetime.now()
-        product.modifiedBy = data.get("user","SYSTEM")
+        product.modifiedBy = request.headers.get("user", "system")
         product.ip = request.remote_addr
            
         db.session.commit()
@@ -73,12 +77,17 @@ def delete_product(id):
         product = Product.query.get(id)
         if not product:
             return {"error": "Producto no encontrado"}, 404
-        product.id_status = 25
+        
+        deleted_status_id = catalog_manager.get_id(constants.CATALOG_PRODUCT_STATUS, constants.STATUS_DELETED)
+        if deleted_status_id:
+            product.id_status = deleted_status_id
+
         product.modifiedAt = datetime.now()
-        product.modifiedBy = data.get("user","SYSTEM")
+        product.modifiedBy = request.headers.get("user", "system")
         product.ip = request.remote_addr
         db.session.commit()
         
         return {"message": "Producto eliminado"}, 200
     except Exception as e:
         return {"error": str(e)}, 500
+

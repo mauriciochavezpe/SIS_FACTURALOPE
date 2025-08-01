@@ -2,18 +2,19 @@ from app.models.entities.Serie import Serie
 from app.extension import db
 from flask import request
 from datetime import datetime
-
+from app.schemas.serie_schema import SerieSchema
 def get_all_series():
     try:
-        series = Serie.query.all()
-        return [s.to_dict() for s in series], 200
+        schema = SerieSchema(session=db.session, many=True)
+        query = db.session.query(Serie)
+        result = query.all()
+        return schema.dump(result), 200
     except Exception as e:
         return {"error": str(e)}, 500
 
 def create_serie():
     try:
         data = request.get_json()
-        
         new_serie = Serie(
             tipo_comprobante=data['tipo_comprobante'],
             serie=data['serie'],

@@ -4,7 +4,8 @@ from app.extension import db
 from app.models.entities.Customer import Customer
 from flask import request
 from datetime import datetime
-
+from app.utils.catalog_manager import catalog_manager
+from app.utils.utils_constantes import Constantes
 def create_customer():
     try:
         data = request.get_json()
@@ -23,7 +24,7 @@ def create_customer():
         new_customer.createdAt = datetime.now()
         new_customer.createdBy = data.get("user","SYSTEM")
         new_customer.ip = request.remote_addr
-
+        new_customer.id_status = catalog_manager.get_id(Constantes.CATALOG_USER_STATUS,Constantes.STATUS_ACTIVE)  # Default to active status
         db.session.add(new_customer)
         db.session.commit()
         return schema.dump(new_customer), 201

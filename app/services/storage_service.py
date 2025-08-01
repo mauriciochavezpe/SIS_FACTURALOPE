@@ -6,6 +6,7 @@ from app.models.entities.Storage import Storage
 from app.schemas.storage_schema import StorageSchema
 from flask import request
 from datetime import datetime
+from app.utils.catalog_manager import catalog_manager
 
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = set(FileType.get_allowed_extensions())
@@ -29,14 +30,16 @@ def create_storage():
         file_path = os.path.join(UPLOAD_FOLDER, filename)
         file.save(file_path)
         
+        active_status_id = catalog_manager.get_id('T_ESTADO_STORAGE', 'ACTIVO')
+
         storage = Storage(
             file_name=filename,
             file_path=file_path,
             file_type=file.content_type,
             file_size=os.path.getsize(file_path),
-            id_status=1,  # Active status
+            id_status=active_status_id if active_status_id else 1,  # Fallback to 1 if not found
             createdAt = datetime.now(),
-            createdBy = data.get("user","SYSTEM"),
+            createdBy = request.headers.get("user", "system"),
             ip = request.remote_addr
         )
         
