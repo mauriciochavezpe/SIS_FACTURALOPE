@@ -1,6 +1,6 @@
 from flask_restx import Namespace, Resource, fields
 from app.services.customer_service import (get_all_customers,
-create_customer, get_customers_by_id, update_customers_by_id)
+create_customer, get_customers_by_id, update_customers_by_id,get_customer_validate_by_ruc)
 
 customer_blueprint = Namespace('customers', description='Customer operations')
 
@@ -36,6 +36,9 @@ class CustomerList(Resource):
 @customer_blueprint.route('/<int:user_id>')
 class Customer(Resource):
     def get(self, user_id):
+        """
+        Validates a RUC if valid.
+        """
         users,status = get_customers_by_id(user_id)
         return users, status
 
@@ -43,3 +46,17 @@ class Customer(Resource):
     def put(self, user_id):
         users,status = update_customers_by_id(user_id)
         return users, status
+
+@customer_blueprint.route('/validate_ruc/<string:ruc>')
+class ValidateRUC(Resource):
+    def get(self, ruc):
+        """
+        Validates a RUC number and returns customer data if valid.
+        """
+        try:
+            customer_data = get_customer_validate_by_ruc(ruc)
+            if isinstance(customer_data, dict) and "error" in customer_data:
+                return customer_data, 500
+            return customer_data, 200
+        except Exception as e:
+            return {"error": str(e)}, 500

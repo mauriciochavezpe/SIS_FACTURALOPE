@@ -4,19 +4,20 @@ from app.schemas.product_schema import ProductSchema
 from app.extension import db
 from datetime import datetime
 from app.utils.catalog_manager import catalog_manager
-from app.utils import utils_constantes as constants
+from app.utils.utils_constantes import (CATALOG_STATUS,STATUS_ACTIVE)
 
 def get_all_products():
     schema = ProductSchema(session=db.session, many=True)
     filter_data = request.args.to_dict()
     query = db.session.query(Product)
+    
     try:
         if filter_data:
             for key, value in filter_data.items():
                 if hasattr(Product, key) and value.strip("'") != '':
                     query = query.filter(getattr(Product, key) == value.strip("'"))
                     
-        active_status_id = catalog_manager.get_id(constants.CATALOG_STATUS, constants.STATUS_ACTIVE)
+        active_status_id = catalog_manager.get_id(CATALOG_STATUS, STATUS_ACTIVE)
         if active_status_id:
             query = query.filter(Product.id_status == active_status_id)
         
@@ -78,9 +79,9 @@ def delete_product(id):
         if not product:
             return {"error": "Producto no encontrado"}, 404
         
-        deleted_status_id = catalog_manager.get_id(constants.CATALOG_PRODUCT_STATUS, constants.STATUS_DELETED)
-        if deleted_status_id:
-            product.id_status = deleted_status_id
+        # deleted_status_id = catalog_manager.get_id(Constantes.CATALOG_PRODUCT_STATUS, Constantes.STATUS_DELETED)
+        # if deleted_status_id:
+        #     product.id_status = deleted_status_id
 
         product.modifiedAt = datetime.now()
         product.modifiedBy = request.headers.get("user", "system")

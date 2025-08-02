@@ -14,7 +14,15 @@ from app.utils.utils import build_note_amount_text
 from app.utils.xml_utils.xml_templates import (
     CREDIT_NOTE_TEMPLATE, DEBIT_NOTE_TEMPLATE, INVOICE_TEMPLATE)
 
-from app.utils.utils_constantes import Constantes as CONSTANTES
+from app.utils.utils_constantes import (UNIT_CODE_NIU,
+PRICE_TYPE_CODE_MAIN,PLACEHOLDER_OBSERVACION,
+CURRENCY_PEN,TAX_NAME_IGV,TAX_TYPE_CODE_VAT,PLACEHOLDER_DATOS_EMISOR,PLACEHOLDER_DETALLE_PRODUCTOS,PLACEHOLDER_DETALLE_PRODUCTOS_NC_ND,
+                                        PLACEHOLDER_DATA_RAZON_EMISOR,PLACEHOLDER_DATOS_CLIENTE,
+                                        CATALOG_07_IGV,PLACEHOLDER_FECHA,PLACEHOLDER_HORA,
+                                        PLACEHOLDER_SERIE,PLACEHOLDER_TIPO_MONEDA,PLACEHOLDER_TIPO_DOCUMENTO,
+                                        PLACEHOLDER_MONTO_TOTAL,PLACEHOLDER_SUBTOTAL,PLACEHOLDER_MONTO_IGV,
+                                        PLACEHOLDER_CODIGO_TABLA,PLACEHOLDER_CODIGO_MENSAJE_TABLA,PLACEHOLDER_DOCUMENTO_REFERENCIADO,
+                                        PLACEHOLDER_TIPO_DOCUMENTO_REFERENCIADO)
 # Cargar variables de entorno
 load_dotenv()
 
@@ -92,7 +100,7 @@ def _complete_customer_data(xml_string: str, payload_customers: List[Dict[str, A
         )
 
         if customer.get("is_owner"):
-            xml_string = xml_string.replace(CONSTANTES.PLACEHOLDER_DATOS_EMISOR, party_xml)
+            xml_string = xml_string.replace(PLACEHOLDER_DATOS_EMISOR, party_xml)
             if document_type in ["07", "08"]:
                 fragment_owner = _build_data_razon_emisor_xml(
                     tipo=customer.get("document_type"),
@@ -100,9 +108,9 @@ def _complete_customer_data(xml_string: str, payload_customers: List[Dict[str, A
                     razon_social=customer.get("business_name", "")
                 )
                 xml_string = xml_string.replace(
-                    CONSTANTES.PLACEHOLDER_DATA_RAZON_EMISOR, fragment_owner)
+                    PLACEHOLDER_DATA_RAZON_EMISOR, fragment_owner)
         else:
-            xml_string = xml_string.replace(CONSTANTES.PLACEHOLDER_DATOS_CLIENTE, party_xml)
+            xml_string = xml_string.replace(PLACEHOLDER_DATOS_CLIENTE, party_xml)
     return xml_string
 
 
@@ -110,14 +118,14 @@ def _complete_product_details(xml_string: str, productos: Dict[str, Any], catalo
     """Agrega los detalles de los productos al XML de la factura."""
     if not catalog_07:
         raise ValueError(
-            f"No se proporcionaron datos del catálogo {CONSTANTES.CATALOG_07_IGV}")
+            f"No se proporcionaron datos del catálogo {CATALOG_07_IGV}")
 
     xml_afecto_tributo = f'''
         <cbc:TaxExemptionReasonCode>{catalog_07.get("code")}</cbc:TaxExemptionReasonCode>
         <cac:TaxScheme>
             <cbc:ID>{catalog_07.get("value")}</cbc:ID>
-            <cbc:Name>{CONSTANTES.TAX_NAME_IGV}</cbc:Name>
-            <cbc:TaxTypeCode>{CONSTANTES.TAX_TYPE_CODE_VAT}</cbc:TaxTypeCode>
+            <cbc:Name>{TAX_NAME_IGV}</cbc:Name>
+            <cbc:TaxTypeCode>{TAX_TYPE_CODE_VAT}</cbc:TaxTypeCode>
         </cac:TaxScheme>
     '''
 
@@ -165,16 +173,16 @@ def _complete_product_details(xml_string: str, productos: Dict[str, Any], catalo
             subtotal=subtotal_val,
             monto_total=producto.get("monto_total", ""),
             descripcion=producto.get("description", ""),
-            unit_code=CONSTANTES.UNIT_CODE_NIU,
-            tipo_moneda=CONSTANTES.CURRENCY_PEN,
-            price_type_code=CONSTANTES.PRICE_TYPE_CODE_MAIN,
+            unit_code=UNIT_CODE_NIU,
+            tipo_moneda=CURRENCY_PEN,
+            price_type_code=PRICE_TYPE_CODE_MAIN,
             monto_igv=str(igv_decimal * subtotal_val),
             tax_igv_percent=igv_percentage,
             xml_afecto_tributo=xml_afecto_tributo
         )
         xml_productos.append(xml_producto)
 
-    return xml_string.replace(CONSTANTES.PLACEHOLDER_DETALLE_PRODUCTOS, "".join(xml_productos))
+    return xml_string.replace(PLACEHOLDER_DETALLE_PRODUCTOS, "".join(xml_productos))
 
 
 def _complete_credit_debit_note_details(xml_string: str, data: Dict[str, Any]) -> str:
@@ -184,26 +192,26 @@ def _complete_credit_debit_note_details(xml_string: str, data: Dict[str, Any]) -
     fragmento_xml_base = f'''
         <cac:{etag}>
             <cbc:ID>{{index}}</cbc:ID>
-            <cbc:{etagQuantity} unitCode="{CONSTANTES.UNIT_CODE_NIU}">{{quantity}}</cbc:{etagQuantity}>
-            <cbc:LineExtensionAmount currencyID="{CONSTANTES.CURRENCY_PEN}">{{unit_price}}</cbc:LineExtensionAmount>
+            <cbc:{etagQuantity} unitCode="{UNIT_CODE_NIU}">{{quantity}}</cbc:{etagQuantity}>
+            <cbc:LineExtensionAmount currencyID="{CURRENCY_PEN}">{{unit_price}}</cbc:LineExtensionAmount>
             <cac:PricingReference>
                 <cac:AlternativeConditionPrice>
-                    <cbc:PriceAmount currencyID="{CONSTANTES.CURRENCY_PEN}">{{monto_total}}</cbc:PriceAmount>
-                    <cbc:PriceTypeCode>{CONSTANTES.PRICE_TYPE_CODE_MAIN}</cbc:PriceTypeCode>
+                    <cbc:PriceAmount currencyID="{CURRENCY_PEN}">{{monto_total}}</cbc:PriceAmount>
+                    <cbc:PriceTypeCode>{PRICE_TYPE_CODE_MAIN}</cbc:PriceTypeCode>
                 </cac:AlternativeConditionPrice>
             </cac:PricingReference>
             <cac:TaxTotal>
-                <cbc:TaxAmount currencyID="{CONSTANTES.CURRENCY_PEN}">{{monto_igv_dec}}</cbc:TaxAmount>
+                <cbc:TaxAmount currencyID="{CURRENCY_PEN}">{{monto_igv_dec}}</cbc:TaxAmount>
                 <cac:TaxSubtotal>
-                    <cbc:TaxableAmount currencyID="{CONSTANTES.CURRENCY_PEN}">{{unit_price}}</cbc:TaxableAmount>
-                    <cbc:TaxAmount currencyID="{CONSTANTES.CURRENCY_PEN}">{{monto_igv_dec}}</cbc:TaxAmount>
+                    <cbc:TaxableAmount currencyID="{CURRENCY_PEN}">{{unit_price}}</cbc:TaxableAmount>
+                    <cbc:TaxAmount currencyID="{CURRENCY_PEN}">{{monto_igv_dec}}</cbc:TaxAmount>
                     <cac:TaxCategory>
                         <cbc:Percent>{{monto_igv}}</cbc:Percent>
                         <cbc:TaxExemptionReasonCode>10</cbc:TaxExemptionReasonCode>
                         <cac:TaxScheme>
                             <cbc:ID>1000</cbc:ID>
-                            <cbc:Name>{CONSTANTES.TAX_NAME_IGV}</cbc:Name>
-                            <cbc:TaxTypeCode>{CONSTANTES.TAX_TYPE_CODE_VAT}</cbc:TaxTypeCode>
+                            <cbc:Name>{TAX_NAME_IGV}</cbc:Name>
+                            <cbc:TaxTypeCode>{TAX_TYPE_CODE_VAT}</cbc:TaxTypeCode>
                         </cac:TaxScheme>
                     </cac:TaxCategory>
                 </cac:TaxSubtotal>
@@ -212,7 +220,7 @@ def _complete_credit_debit_note_details(xml_string: str, data: Dict[str, Any]) -
                 <cbc:Description>{{descripcion}}</cbc:Description>
             </cac:Item>
             <cac:Price>
-                <cbc:PriceAmount currencyID="{CONSTANTES.CURRENCY_PEN}">{{unit_price}}</cbc:PriceAmount>
+                <cbc:PriceAmount currencyID="{CURRENCY_PEN}">{{unit_price}}</cbc:PriceAmount>
             </cac:Price>
         </cac:{etag}>
     '''
@@ -237,7 +245,7 @@ def _complete_credit_debit_note_details(xml_string: str, data: Dict[str, Any]) -
         )
         xml_lines.append(xml_line)
 
-    return xml_string.replace(CONSTANTES.PLACEHOLDER_DETALLE_PRODUCTOS_NC_ND, "".join(xml_lines))
+    return xml_string.replace(PLACEHOLDER_DETALLE_PRODUCTOS_NC_ND, "".join(xml_lines))
 
 
 def _complete_note_specific_data(xml_string: str, data: Dict[str, Any], invoice_relative: Dict[str, Any]) -> str:
@@ -249,12 +257,12 @@ def _complete_note_specific_data(xml_string: str, data: Dict[str, Any], invoice_
     serie_num_relative = f"{invoice_relative.get('serie')}-{str(invoice_relative.get('num_invoice')).zfill(8)}"
 
     replacements = {
-        CONSTANTES.PLACEHOLDER_OBSERVACION: build_note_amount_text(
+        PLACEHOLDER_OBSERVACION: build_note_amount_text(
             data.get("monto_total", "0"), "SOLES"),
-        CONSTANTES.PLACEHOLDER_CODIGO_TABLA: data.get("codigo_table", ""),
-        CONSTANTES.PLACEHOLDER_CODIGO_MENSAJE_TABLA: data.get("codigo_mensaje_table", ""),
-        CONSTANTES.PLACEHOLDER_DOCUMENTO_REFERENCIADO: serie_num_relative,
-        CONSTANTES.PLACEHOLDER_TIPO_DOCUMENTO_REFERENCIADO: str(
+        PLACEHOLDER_CODIGO_TABLA: data.get("codigo_table", ""),
+        PLACEHOLDER_CODIGO_MENSAJE_TABLA: data.get("codigo_mensaje_table", ""),
+        PLACEHOLDER_DOCUMENTO_REFERENCIADO: serie_num_relative,
+        PLACEHOLDER_TIPO_DOCUMENTO_REFERENCIADO: str(
             invoice_relative.get("document_type", "")).zfill(2),
     }
 
@@ -302,21 +310,22 @@ def complete_data_xml(
         serie_num = f"{serie_parts[0]}-{int(serie_parts[1]):08d}"
 
         monto_igv = data.get("monto_igv", "0")
-        subtotal = data.get("subtotal", "0")
+        subtotal = str(data.get("subtotal", "0"))
         monto_total = data.get("monto_total", "0")
 
         replacements = {
-            CONSTANTES.PLACEHOLDER_FECHA: now.strftime("%Y-%m-%d"),
-            CONSTANTES.PLACEHOLDER_HORA: now.strftime("%H:%M:%S"),
-            CONSTANTES.PLACEHOLDER_SERIE: serie_num,
-            CONSTANTES.PLACEHOLDER_TIPO_MONEDA: CONSTANTES.CURRENCY_PEN,
-            CONSTANTES.PLACEHOLDER_TIPO_DOCUMENTO: document_type,
-            CONSTANTES.PLACEHOLDER_MONTO_TOTAL: monto_total,
-            CONSTANTES.PLACEHOLDER_SUBTOTAL: subtotal,
-            CONSTANTES.PLACEHOLDER_MONTO_IGV: str(
+            PLACEHOLDER_FECHA: now.strftime("%Y-%m-%d"),
+            PLACEHOLDER_HORA: now.strftime("%H:%M:%S"),
+            PLACEHOLDER_SERIE: serie_num,
+            PLACEHOLDER_TIPO_MONEDA: CURRENCY_PEN,
+            PLACEHOLDER_TIPO_DOCUMENTO: document_type,
+            PLACEHOLDER_MONTO_TOTAL: monto_total,
+            PLACEHOLDER_SUBTOTAL: subtotal,
+            PLACEHOLDER_MONTO_IGV: str(
                 float(monto_igv) / 100) if monto_igv else "0",
         }
 
+        # print(f"Reemplazos: {replacements}")
         for placeholder, value in replacements.items():
             xml_string = xml_string.replace(placeholder, value)
 
@@ -325,7 +334,7 @@ def complete_data_xml(
             if "details" in data: # details == products
                 if not catalog_07:
                     raise ValueError(
-                        f"Datos del catálogo {CONSTANTES.CATALOG_07_IGV} son requeridos para este tipo de documento.")
+                        f"Datos del catálogo {CATALOG_07_IGV} son requeridos para este tipo de documento.")
                 xml_string = _complete_product_details(
                     xml_string, data, catalog_07)
         elif document_type in ["07", "08"]:
@@ -334,7 +343,7 @@ def complete_data_xml(
                     "La información de la factura relacionada es requerida para notas.")
             xml_string = _complete_note_specific_data(
                 xml_string, data, invoice_relative)
-
+        print(f"XML generado: {xml_string}...")  # Log the first 100 characters for debugging
         return xml_string, serie_num
 
     except (ValueError, KeyError, TypeError) as e:

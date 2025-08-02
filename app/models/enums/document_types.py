@@ -5,10 +5,10 @@ class DocumentType(Enum):
     Tipos de documentos según SUNAT
     Ref: https://cpe.sunat.gob.pe/informacion_general/tipos_sistemas
     """
-    DNI = ('1', 'DNI - Documento Nacional de Identidad')
-    CE = ('4', 'CE - Carnet de Extranjería')
-    RUC = ('6', 'RUC - Registro Único de Contribuyentes')
-    PASSPORT = ('7', 'PASAPORTE')
+    DNI = ('01', 'DNI - Documento Nacional de Identidad')
+    CE = ('04', 'CE - Carnet de Extranjería')
+    RUC = ('06', 'RUC - Registro Único de Contribuyentes')
+    PASSPORT = ('07', 'PASAPORTE')
     CDI = ('A', 'CDI - Cédula Diplomática de Identidad')
     
     def __init__(self, code, description):

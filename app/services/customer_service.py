@@ -5,11 +5,13 @@ from app.models.entities.Customer import Customer
 from flask import request
 from datetime import datetime
 from app.utils.catalog_manager import catalog_manager
-from app.utils.utils_constantes import Constantes
+# from app.utils.utils_constantes import Constantes
+from app.utils.validators import validar_ruc
+from app.utils.data_parser import parse_customer_data
 def create_customer():
     try:
         data = request.get_json()
-        password = data.pop('password', None)
+        password = data.pop('password_hash', None)
         if not password:
             return {"error": "Password is required"}, 400
 
@@ -24,7 +26,7 @@ def create_customer():
         new_customer.createdAt = datetime.now()
         new_customer.createdBy = data.get("user","SYSTEM")
         new_customer.ip = request.remote_addr
-        new_customer.id_status = catalog_manager.get_id(Constantes.CATALOG_USER_STATUS,Constantes.STATUS_ACTIVE)  # Default to active status
+        # new_customer.id_status = catalog_manager.get_id(Constantes.CATALOG_USER_STATUS,Constantes.STATUS_ACTIVE)  # Default to active status
         db.session.add(new_customer)
         db.session.commit()
         return schema.dump(new_customer), 201
@@ -96,5 +98,23 @@ def get_all_customers_by_ruc(rucs):
         schema = CustomerSchema(session=db.session, many=True)
         return schema.dump(results), 200
 
+    except Exception as e:
+        return {"error": str(e)}, 500
+
+## vamos a buscar un cliente por si no existe en VALIDAR_RUC_SUNAT
+def get_customer_validate_by_ruc(ruc):
+    try:
+        customer = db.session.query(Customer).filter_by(document_number=ruc).first()
+        if not customer:
+            customer_data_ext=validar_ruc(ruc)  # Esto lanzará una excepción si el RUC no es válido
+            customer= parse_customer_data(customer_data_ext)
+            if isinstance(customer, dict) and "error" in customer:
+                return {"error": "Customer not found"}, 404
+            else:
+                customer['document_number'] = ruc
+                
+        print("customer", customer)
+        schema = CustomerSchema(session=db.session)
+        return schema.dump(customer), 200
     except Exception as e:
         return {"error": str(e)}, 500

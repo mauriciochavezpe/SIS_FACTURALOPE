@@ -131,28 +131,23 @@ Content-Type: application/json
 POST http://127.0.0.1:5000/api/customers
 Content-Type: application/json
     
-     {
-    "address": "",
-    "business_name": "",
-    "city": "Lima",
-    "commercial_name": "",
-    "country": "Peru",
-    "createdAt": null,
-    "createdBy": null,
-    "document_number": "73119100",
-    "document_type": "1",
-    "email": "testDNI@example.com",
-    "ip": null,
-    "is_active": true,
-    "is_business": false,
-    "modifiedAt": null,
-    "modifiedBy": null,
-    "password": "SecurePass123!",
-    "phone": "1234567890",
-    "postal_code": null,
-    "province": "Lima",
-    "username": "testcustomerDNI"
-  }
+    {
+  "username": "RC_CASH",
+  "email": "RC_CASH@GMAIL.COM",
+  "password_hash": "RC_CASH123",
+  "phone": "999999999",
+  "document_number": "20611639059",
+  "is_business": true,
+  "commercial_name": "RC CASH E.I.R.L.",
+  "business_name": "RC CASH E.I.R.L.",
+  "address": "AV. LOS VIRREYES - Nro: 2800  - INT.: 1  - URBANIZACION TILDA  - Dpto: 1  - ATE",
+  "city": "ATE",
+  "province": "LIMA",
+  "postal_code": "",
+  "country": "PERU",
+  "full_name": "",
+  "document_type": "6"
+}
 
 
 #### CREATE CUSTOMER
@@ -352,36 +347,37 @@ Content-Type: application/json
     }
 
 
-### GENERACION FACTURA DUMMY
-GET http://127.0.0.1:5000/api/master_data/factura_dummy
-Content-Type: application/json
 
-
-### GENERACION FACTURA DUMMY X DATA
-POST http://127.0.0.1:5000/api/invoices/factura_dummy
+### GENERACION FACTURA DUMMY X DATA REAL
+POST http://127.0.0.1:5000/api/invoices/send-to-sunat
 Content-Type: application/json
 
 {
-    "document": "B001-1",
-    "type_document": "03",
-    "monto_total": "1.18",
-    "ruc_cliente": "20612922773",
-    "date": "2025-05-12T14:48:58.000Z",
-    "customer_id": 11,
-    "subtotal": "1",
-    "monto_igv": "18",
-    "subtotal": "1",
-    "quantity": "1",
-    "details":[{
-        "discount": "0.00",
-        "product_id": "2",
-        "quantity": "1",
-        "subtotal": "1",
-        "unit_price": "1",
-        "description": "TEST 1",
-        "monto_total": "1.18"
+  "document": "F001-124",
+  "document_type": "01",
+  "ruc_cliente": "20611639059",
+  "date": "2025-08-01T23:10:37.225Z",
+  "relative_document": "",
+  "codigo_table": "",
+  "codigo_mensaje_table": "",
+  "customer_id": 13,
+  "subtotal": 1,
+  "monto_igv": 18,
+  "metodo_pago": "01",
+  "quantity":1,
+  "afecto_tributo": "10",
+  "monto_total": "1.18",
+  "details": [
+    {
+      "discount": 0,
+      "product_id": 7,
+      "quantity": 1,
+      "subtotal": 1,
+      "unit_price": 1,
+      "description": "MICA PARA LAPTOP",
+      "monto_total": "1.18"
     }
-    ]
+  ]
 }
 
 

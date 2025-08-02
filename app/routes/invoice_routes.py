@@ -59,8 +59,12 @@ class InvoiceSend(Resource):
             return {"error": "No se proporcionaron datos en la solicitud."}, 400
 
         try:
-            # invoice_obj = create_invoice_in_db(data)
+            print("---")
+            invoice_obj, status_code = create_invoice_in_db(data)
+            # print(f"Factura creada con ID: {invoice_obj.id}")
+
             cdr_response = send_invoice_data_to_sunat(data)
+            # print(f"Factura creada con ID: {cdr_response}")
             status_value = cdr_response.get("codigo_estado", "-1")
             update_invoice_status(data["document"], status_value, cdr_response)
             db.session.commit()
@@ -68,7 +72,7 @@ class InvoiceSend(Resource):
             return {
                 "status": "success",
                 "message": "Factura creada y enviada a SUNAT exitosamente.",
-                "invoice_id": "invoice_obj.id",
+                "invoice_id": invoice_obj.id,
                 "sunat_response": cdr_response
             }, 201
 
@@ -78,4 +82,4 @@ class InvoiceSend(Resource):
 
         except Exception as e:
             db.session.rollback()
-            return {"error": "Ocurrió un error interno inesperado."}, 500
+            return {"error": f"Ocurrió un error interno inesperado.{e}"}, 500

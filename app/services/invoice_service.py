@@ -11,7 +11,7 @@ from app.schemas.invoice_schema import InvoiceSchema
 from datetime import datetime
 from flask import request
 from app.utils.catalog_manager import catalog_manager
-from app.utils.utils_constantes import Constantes
+from app.utils.utils_constantes import (CATALOG_INVOICE_STATUS, STATUS_CREATED_INVOICE,STATUS_RESPONSE_INVOICE)
 
 class InvoiceCreationError(Exception):
     """Excepción personalizada para errores durante la creación de facturas."""
@@ -88,27 +88,25 @@ def create_invoice_in_db(data: Dict[str, Any]) -> Invoice:
 
         serie, numero_str = documento.split("-")
         correlativo = int(numero_str)
-
-        pending_status_id = catalog_manager.get_id(Constantes.CATALOG_CATEGORY_STATUS, Constantes.STATUS_PENDING)
+        pending_status_id = catalog_manager.get_id(
+            CATALOG_INVOICE_STATUS, STATUS_CREATED_INVOICE)
 
         # Crear la cabecera de la factura
         invoice = Invoice(
             customer_id=data.get("customer_id"),
             num_invoice=f"{correlativo:08d}",
             serie=serie,
-            related_invoice_id=data.get("related_invoice_id",None),
+            related_invoice_id=data.get("related_invoice_id", None),
             document_type=data.get("document_type"),
             date=data.get("date"),
             id_status=pending_status_id,
             subtotal=Decimal(data.get("subtotal", 0) or 0),
             total=Decimal(data.get("monto_total", 0) or 0),
             tax=Decimal(data.get("monto_igv", 0) or 0),
-            createdAt = datetime.now(),
-            createdBy = request.headers.get("user", "system"),
-            ip = request.remote_addr
+            createdAt=datetime.now(),
+            createdBy=request.headers.get("user", "system"),
+            ip=request.remote_addr
         )
-        db.session.add(invoice)
-        db.session.flush()  # Para obtener el ID de la factura para los detalles
 
         # Crear los detalles de la factura
         detalles_data = data.get("details", [])
@@ -117,25 +115,32 @@ def create_invoice_in_db(data: Dict[str, Any]) -> Invoice:
                 "Debe proporcionar al menos un detalle de factura.")
 
         for item in detalles_data:
-            detalle = InvoiceDetail(
-                invoice_id=invoice.id,
-                product_id=item["product_id"],
+            detail = InvoiceDetail(
+                
+                product_id=item.get("product_id"),
                 quantity=Decimal(item.get("quantity", 1)),
                 unit_price=Decimal(item.get("unit_price", 0)),
                 discount=Decimal(item.get("discount", 0)),
                 subtotal=Decimal(item.get("subtotal", 0)),
                 tax=Decimal(item.get("tax", 0)),
-                total=Decimal(item.get("monto_total", 0)),
-                createdAt = datetime.now(),
-                createdBy = request.headers.get("user", "system"),
-                ip = request.remote_addr
+                total=Decimal(item.get("total", 0)),
+                createdAt=datetime.now(),
+                createdBy="SYSTEM",
+                ip=request.remote_addr
             )
-            db.session.add(detalle)
-        return invoice
+            invoice.invoice_details.append(detail)
+
+        db.session.add(invoice)
+        db.session.flush()
+        return invoice, 200
 
     except (KeyError, TypeError, ValueError) as e:
+        db.session.rollback()
         raise InvoiceCreationError(f"Datos de factura inválidos: {e}")
-
+    except Exception as e:
+        db.session.rollback()
+        raise InvoiceCreationError(
+            f"Ocurrió un error al crear la factura: {e}")
 
 def update_invoice_status(documento: str, status_value: str, cdr_data: Dict[str, Any] = None):
     """
@@ -150,7 +155,7 @@ def update_invoice_status(documento: str, status_value: str, cdr_data: Dict[str,
     if not invoice:
         raise InvoiceNotFoundError(f"Factura no encontrada: {documento}")
 
-    status_id = catalog_manager.get_id(Constantes.CATALOG_INVOICE_STATUS, Constantes.STATUS_SENT_SUNAT)
+    status_id =catalog_manager.get_id(CATALOG_INVOICE_STATUS, STATUS_RESPONSE_INVOICE)
 
     if not status_id:
         print(f"Advertencia: Valor de estado '{status_value}' no encontrado en MasterData.")

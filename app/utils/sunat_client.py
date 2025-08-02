@@ -21,7 +21,7 @@ from app.utils.utils import get_sunat_response_code, get_sunat_response_xml
 from app.utils.xml_generate_fragments import (
      complete_data_xml)
 from app.utils.xml_utils.file_utils import FileUtils
-from app.utils.utils_constantes import Constantes
+from app.utils.utils_constantes import (CATALOG_07_IGV,)
 class SunatClientError(Exception):
     """Excepción base para errores relacionados con el cliente de SUNAT."""
     pass
@@ -40,7 +40,10 @@ def send_invoice_data_to_sunat(data: Dict[str, Any]):
                 "La variable de entorno SUNAT_RUC no está configurada.")
 
         rucs = [sunat_ruc, data.get("ruc_cliente")]
+        print(f"Datos de clientes obtenidos: {rucs}")
+        
         payload_customers, status_cust = get_all_customers_by_ruc(rucs)
+        # print(f"Datos de clientes obtenidos: {status_cust}")
         if status_cust != 200:
             raise SunatClientError(
                 f"Error al obtener datos de clientes: {payload_customers}")
@@ -58,12 +61,13 @@ def send_invoice_data_to_sunat(data: Dict[str, Any]):
         if document_type in ["01", "03"]:
             afecto_tributo = data.get("afecto_tributo")
             catalog_07, status_cat = get_master_data_by_catalog(
-                Constantes.CATALOG_07_IGV, afecto_tributo)
+                CATALOG_07_IGV, afecto_tributo)
             if status_cat != 200:
                 raise SunatClientError(
-                    f"Error al obtener catálogo {Constantes.CATALOG_07_IGV}: {catalog_07}")
+                    f"Error al obtener catálogo {CATALOG_07_IGV}: {catalog_07}")
         # print(f"Datos obtenidos: {payload_customers}, {catalog_07}, {invoice_relative}")
         # 2. Generar el XML
+        # print("Generando XML...")
         xml_string, serie_number = complete_data_xml(
             data=data,
             payload_customers=payload_customers,
