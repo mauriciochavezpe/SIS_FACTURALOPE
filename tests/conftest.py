@@ -31,20 +31,7 @@ def db_session(app):
     """Create a fresh database for each test."""
     with app.app_context():
         db.create_all()
-        
-        # Add any initial test data here
-         # Create test data
-        test_product = Product(
-            name="Test Product",
-            price=100.0,
-            stock_inicial=10,
-            stock_actual=10,
-            id_status=23
-        )
-        db.session.add(test_product)
-        db.session.commit()
-        yield db
-        
+        yield db.session
         db.session.remove()
         db.drop_all()
 

@@ -59,7 +59,6 @@ class InvoiceSend(Resource):
             return {"error": "No se proporcionaron datos en la solicitud."}, 400
 
         try:
-            print("---")
             invoice_obj, status_code = create_invoice_in_db(data)
             # print(f"Factura creada con ID: {invoice_obj.id}")
 

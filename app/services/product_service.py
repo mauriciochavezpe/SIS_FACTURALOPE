@@ -50,13 +50,13 @@ def create_product():
 def update_product(id):
     try:
         data = request.get_json()
-        schema = ProductSchema(session=db.session)
+        schema = ProductSchema(session=db.session, partial=True)
         
         errors = schema.validate(data)
         if errors:
             return {"errors": errors}, 400
         
-        product = Product.query.get(id)
+        product = db.session.get(Product, id)
         if not product:
             return {"error": "Producto no encontrado"}, 404
         
@@ -75,7 +75,7 @@ def update_product(id):
 
 def delete_product(id):
     try:
-        product = Product.query.get(id)
+        product = db.session.get(Product, id)
         if not product:
             return {"error": "Producto no encontrado"}, 404
         
