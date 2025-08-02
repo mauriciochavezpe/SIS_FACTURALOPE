@@ -353,7 +353,7 @@ POST http://127.0.0.1:5000/api/invoices/send-to-sunat
 Content-Type: application/json
 
 {
-  "document": "F001-124",
+  "document": "F001-125",
   "document_type": "01",
   "ruc_cliente": "20611639059",
   "date": "2025-08-01T23:10:37.225Z",

@@ -14,7 +14,7 @@ from app.utils.utils import build_note_amount_text
 from app.utils.xml_utils.xml_templates import (
     CREDIT_NOTE_TEMPLATE, DEBIT_NOTE_TEMPLATE, INVOICE_TEMPLATE)
 
-from app.utils.utils_constantes import (UNIT_CODE_NIU,
+from app.constants.catalog_constants import (UNIT_CODE_NIU,
 PRICE_TYPE_CODE_MAIN,PLACEHOLDER_OBSERVACION,
 CURRENCY_PEN,TAX_NAME_IGV,TAX_TYPE_CODE_VAT,PLACEHOLDER_DATOS_EMISOR,PLACEHOLDER_DETALLE_PRODUCTOS,PLACEHOLDER_DETALLE_PRODUCTOS_NC_ND,
                                         PLACEHOLDER_DATA_RAZON_EMISOR,PLACEHOLDER_DATOS_CLIENTE,

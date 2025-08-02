@@ -5,9 +5,63 @@ from app.models.entities.Customer import Customer
 from flask import request
 from datetime import datetime
 from app.utils.catalog_manager import catalog_manager
-# from app.utils.utils_constantes import Constantes
-from app.utils.validators import validar_ruc
-from app.utils.data_parser import parse_customer_data
+import requests
+import os
+
+def validar_ruc(ruc):
+    try:
+        """
+        Valida el RUC peruano.
+        
+        Args:
+            ruc (str): RUC a validar.
+            
+        Returns:
+            bool: True si el RUC es válido, False en caso contrario.
+        """
+        url_request = os.getenv("VALIDAR_RUC_SUNAT")
+        url_request = url_request.replace("XXXXX", ruc)
+    
+        response = requests.get(url_request, timeout=10)
+        payload = response.json()
+        # print("payload",payload)
+        if("error" in payload):
+            print("❌ Error al validar RUC:", payload["error"])
+            # return {"error": payload["error"]}, 500
+            raise ValueError(payload["error"])
+        else:
+            cliente = payload.get("lista", [])
+            # quitar los espacios en blanco
+            if cliente and isinstance(cliente[0], dict):
+                cliente[0] = {k: v.strip() if isinstance(v, str) else v for k, v in cliente[0].items()}
+            return cliente
+    # return response
+    except Exception as e:
+        print(f"❌ Error al validar RUC: {e}")
+        return {"error": str(e)}, 500
+
+def parse_customer_data(data: list) -> dict:
+     """
+     Convierte los datos del cliente de la respuesta del servicio de RUC
+     a un diccionario compatible con el modelo Customer.
+     """
+     if not data or not isinstance(data, list) or not data[0]:
+         return {}
+
+     source = data[0]
+
+     # Mapeo de los campos del servicio a los campos del modelo Customer
+     customer_dict = {
+         'business_name': source.get('apenomdenunciado'),
+         'address': source.get('direstablecimiento'),
+         'province': source.get('desprovincia'),
+         'city': source.get('desdistrito'),
+         'country': source.get('desdepartamento'),
+         # El document_number (RUC) no viene en este payload,
+         # se debe añadir desde la variable que ya se tiene en el servicio.
+     }
+     return customer_dict
+
 def create_customer():
     try:
         data = request.get_json()

@@ -11,7 +11,7 @@ from app.schemas.invoice_schema import InvoiceSchema
 from datetime import datetime
 from flask import request
 from app.utils.catalog_manager import catalog_manager
-from app.utils.utils_constantes import (CATALOG_INVOICE_STATUS, STATUS_CREATED_INVOICE,STATUS_RESPONSE_INVOICE)
+from app.constants.catalog_constants import (CATALOG_INVOICE_STATUS, STATUS_CREATED_INVOICE,STATUS_RESPONSE_INVOICE)
 
 class InvoiceCreationError(Exception):
     """Excepción personalizada para errores durante la creación de facturas."""

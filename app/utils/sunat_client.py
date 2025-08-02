@@ -1,9 +1,3 @@
-"""
-Este módulo se encarga exclusivamente de la comunicación con el servicio de SUNAT.
-Orquesta la obtención de datos, la generación del XML, la firma
-y el envío del documento electrónico.
-"""
-
 import io
 import os
 import zipfile
@@ -13,15 +7,52 @@ from xml.etree import ElementTree as ET
 from zeep import Client
 from zeep.wsse.username import UsernameToken
 
-from app.config.certificado import firmar_xml_con_placeholder
+from app.utils.xml_security import firmar_xml_con_placeholder
 from app.services.customer_service import get_all_customers_by_ruc
 from app.services.invoice_service import get_invoice_by_serie_num
 from app.services.master_data_service import get_master_data_by_catalog
-from app.utils.utils import get_sunat_response_code, get_sunat_response_xml
-from app.utils.xml_generate_fragments import (
+from app.utils.xml.xml_generate_fragments import (
      complete_data_xml)
 from app.utils.xml_utils.file_utils import FileUtils
-from app.utils.utils_constantes import (CATALOG_07_IGV,)
+from app.constants.catalog_constants import (CATALOG_07_IGV)
+
+SUNAT_CODES: Dict[str, str] = {
+    "0": "Aceptado",
+    "98": "Aceptado con observaciones",
+    "99": "Rechazado",
+    "9999": "Error en el sistema de SUNAT",
+    "0011": "RUC del emisor no está habido",
+    "0128": "El comprobante ya fue informado",
+    "0149": "Serie y número ya informados",
+    "0151": "Valor de elementos o atributos no corresponde al tipo de documento",
+    "2033": "El documento modificado no existe",
+    "2034": "El documento modificado está dado de baja"
+}
+
+def get_sunat_response_code(response_code: str) -> str:
+    """
+    Get SUNAT response description based on response code.
+    
+    Args:
+        response_code (str): SUNAT response code
+    Returns:
+        str: Description of the response code or None if error
+    """
+    return SUNAT_CODES.get(response_code, "No se encontró el código")
+
+def get_sunat_response_xml(description) -> str:
+    """
+    Extract text content from SUNAT XML response description.
+    
+    Args:
+        description: XML description element
+    Returns:
+        str: Description text or None if error
+    """
+    if description is not None:
+        return description.text
+    return "No se encontró la descripción"
+
 class SunatClientError(Exception):
     """Excepción base para errores relacionados con el cliente de SUNAT."""
     pass
@@ -132,7 +163,7 @@ def _unzip_and_process_cdr(zip_bytes: bytes) -> Dict[str, Any]:
         with zipfile.ZipFile(io.BytesIO(zip_bytes)) as zip_file:
             nombre_xml_cdr = zip_file.namelist()[1]
             xml_bytes_cdr = zip_file.read(nombre_xml_cdr)
-
+            
             file_utils = FileUtils("CDR")
             file_utils.create_xml(xml_bytes_cdr.decode("utf-8"), nombre_xml_cdr)
 

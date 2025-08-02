@@ -4,7 +4,7 @@ from app.schemas.category_schema import CategorySchema
 from app.extension import db
 from datetime import datetime
 from app.utils.catalog_manager import catalog_manager
-# from app.utils.utils_constantes import Constantes
+from app.constants.catalog_constants import (CATALOG_STATUS, STATUS_ACTIVE)
 def get_all_categories():
     schema = CategorySchema(session=db.session, many=True)
     filter_data = request.args.to_dict()
@@ -15,9 +15,9 @@ def get_all_categories():
                 if hasattr(Category, key) and value.strip("'") != '':
                     query = query.filter(getattr(Category, key) == value.strip("'"))
                     
-        # active_status_id = catalog_manager.get_id(Constantes.CATALOG_STATUS, Constantes.STATUS_ACTIVE)
-        # if active_status_id:
-        #     query = query.filter(Category.id_status == active_status_id)
+        active_status_id = catalog_manager.get_id(CATALOG_STATUS, STATUS_ACTIVE)
+        if active_status_id:
+            query = query.filter(Category.id_status == active_status_id)
         
         results = query.all()
         return schema.dump(results), 200

@@ -4,7 +4,7 @@ from app.schemas.product_schema import ProductSchema
 from app.extension import db
 from datetime import datetime
 from app.utils.catalog_manager import catalog_manager
-from app.utils.utils_constantes import (CATALOG_STATUS,STATUS_ACTIVE)
+from app.constants.catalog_constants import (CATALOG_STATUS,STATUS_ACTIVE)
 
 def get_all_products():
     schema = ProductSchema(session=db.session, many=True)

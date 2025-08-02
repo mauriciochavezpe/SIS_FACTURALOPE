@@ -1,4 +1,4 @@
-from app.swagger import api
+from app.blueprints import api
 from app.routes.user_routes import user_blueprint
 from app.routes.product_routes import product_blueprint
 from app.routes.category_routes import category_blueprint
