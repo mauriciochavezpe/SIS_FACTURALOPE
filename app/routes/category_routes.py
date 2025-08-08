@@ -10,7 +10,7 @@ category_model = category_blueprint.model('CategoryModel', {
     'id_status': fields.Integer(required=True, description='The category status')
 })
 
-@category_blueprint.route('/')
+@category_blueprint.route('')
 class CategoryList(Resource):
     def get(self):
         categories,status = get_all_categories()
@@ -29,5 +29,5 @@ class Category(Resource):
         return category,status
 
     def delete(self, category_id):
-        status = delete_category(category_id)
-        return {'message': 'Category deleted successfully'}, status
+        msg,status = delete_category(category_id)
+        return msg, status

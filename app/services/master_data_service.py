@@ -82,7 +82,8 @@ def update_master_data(id):
 
 def delete_master_data(id):
     try:
-        master_data = MasterData.query.get(id)
+        db.session.get(MasterData, id)
+        master_data = db.session.get(MasterData, id) #MasterData.query.get(id)
         if not master_data:
             return {"error": "MasterData not found"}, 404
             

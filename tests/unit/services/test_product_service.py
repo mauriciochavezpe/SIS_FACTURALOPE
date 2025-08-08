@@ -107,7 +107,7 @@ def test_update_product_not_found(client):
 
     # Act
     response = client.put(f'/api/products/{non_existent_id}', json=update_data)
-
+    
     # Assert
     assert response.status_code == 404
     assert response.json['error'] == "Producto no encontrado"

@@ -71,7 +71,6 @@ def send_invoice_data_to_sunat(data: Dict[str, Any]):
                 "La variable de entorno SUNAT_RUC no está configurada.")
 
         rucs = [sunat_ruc, data.get("ruc_cliente")]
-        print(f"Datos de clientes obtenidos: {rucs}")
         
         payload_customers, status_cust = get_all_customers_by_ruc(rucs)
         # print(f"Datos de clientes obtenidos: {status_cust}")
@@ -91,13 +90,12 @@ def send_invoice_data_to_sunat(data: Dict[str, Any]):
 
         if document_type in ["01", "03"]:
             afecto_tributo = data.get("afecto_tributo")
+            # print(f"Afecto tributo: {CATALOG_07_IGV} , {afecto_tributo}")
             catalog_07, status_cat = get_master_data_by_catalog(
                 CATALOG_07_IGV, afecto_tributo)
             if status_cat != 200:
                 raise SunatClientError(
                     f"Error al obtener catálogo {CATALOG_07_IGV}: {catalog_07}")
-        # print(f"Datos obtenidos: {payload_customers}, {catalog_07}, {invoice_relative}")
-        # 2. Generar el XML
         # print("Generando XML...")
         xml_string, serie_number = complete_data_xml(
             data=data,
@@ -109,9 +107,10 @@ def send_invoice_data_to_sunat(data: Dict[str, Any]):
         xml_firmado = firmar_xml_con_placeholder(xml_string)
         name_file = f"{sunat_ruc}-{document_type}-{serie_number}"
         zip_base64 = _create_zip_for_sunat(xml_firmado, name_file)
-
+        env = os.getenv("env", "QAS")
+        print("estamos en el entorno", env)
         # 4. Enviar a SUNAT y procesar respuesta
-        cdr_response = _send_bill_to_sunat_ws(f"{name_file}.zip", zip_base64)
+        cdr_response = _send_bill_to_sunat_ws(f"{name_file}.zip", zip_base64,env)
         return cdr_response
 
     except (ValueError, SunatClientError) as e:
@@ -133,16 +132,23 @@ def _create_zip_for_sunat(xml_content: str, name_file: str) -> str:
         raise SunatClientError(f"Fallo en la creación del ZIP: {e}")
 
 
-def _send_bill_to_sunat_ws(nombre_zip: str, zip_base64: str) -> Dict[str, Any]:
+def _send_bill_to_sunat_ws(nombre_zip: str, zip_base64: str, env: str) -> Dict[str, Any]:
     """Se conecta al Web Service de SUNAT y envía el archivo ZIP."""
     try:
         current_dir = os.path.dirname(os.path.abspath(__file__))
         wsdl_path = os.path.join(
-            current_dir, "..", "wsdl", "billService.wsdl")
+            current_dir, "..", f"wsdl/{env}", "billService.wsdl")
+        if env == "QAS":
+            # wsdl_path = os.getenv("sunat_prd")
+            wsse = UsernameToken(os.getenv("SUNAT_USUARIO_DUMMY"),
+                                os.getenv("SUNAT_PASS_DUMMY"))
+        else:
+            user_ruc = os.getenv("SUNAT_RUC")+os.getenv("SUNAT_USUARIO_SECUNDARIO")
+            pss = os.getenv("SUNAT_PASS_SECUNDARIO")
+            print("user_ruc", user_ruc,pss)
+            wsse = UsernameToken(user_ruc, pss)
         wsdl_path = os.path.abspath(wsdl_path)
-
-        wsse = UsernameToken(os.getenv("SUNAT_USUARIO_DUMMY"),
-                             os.getenv("SUNAT_PASS_DUMMY"))
+        print(f"📥 Leyendo archivo ZIP: {wsdl_path}")
         client = Client(wsdl=wsdl_path, wsse=wsse)
 
         print(f"📤 Enviando comprobante {nombre_zip} a SUNAT...")

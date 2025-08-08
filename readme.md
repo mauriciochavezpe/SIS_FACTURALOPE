@@ -58,3 +58,4 @@ Catalogos [https://www.sunat.gob.pe/legislacion/superin/2015/anexoI-274-2015.pdf
 
 ## APUNTES
  - HACEMOS MATCH : flask db stamp head
+// MANUAL https://cpe.sunat.gob.pe/sites/default/files/inline-files/Manual-de-Consulta-Integrada-de-Comprobante-de-Pago-por-ServicioWEB_v2.pdf

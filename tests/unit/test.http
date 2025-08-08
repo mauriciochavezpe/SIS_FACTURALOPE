@@ -58,28 +58,21 @@ Content-Type: application/json
 
  
 ######################
-POST http://127.0.0.1:5000/api/products/
+POST http://127.0.0.1:5000/api/products
 Content-Type: application/json
 
-{
-    "name": "producto prueba",
-    "price": 200,
-    "stock_actual": 200,
-    "stock_inicial": 200,
-    "description": "producto prueba"
-}
+{"name": "clip",
+ "description": "", 
+ "category_id": 14,
+"price": 1,
+"stock_inicial": 10000, 
+"stock_actual": 10000}
 
 #### PUT PRODUCT
-PUT http://127.0.0.1:5000/api/products/11
+PUT http://127.0.0.1:5000/api/products/2
 Content-Type: application/json
 
-{
-    "name": "producto prueba",
-    "price": 200,
-    "stock_actual": 200,
-    "stock_inicial": 200,
-    "description": "producto prueba"
-}
+{"category":{"id":14,"name":"AB","description":"asdasdsad","id_status":65,"ip":"127.0.0.1","createdBy":"SYSTEM","modifiedBy":"SYSTEM","createdAt":"2025-08-07T00:39:39.325280","modifiedAt":"2025-08-07T00:59:11.291604"},"id":2,"name":"clip","price":1,"description":"clips actualizados\n","stock_inicial":10000,"stock_actual":10000,"id_status":65,"category_id":14,"ip":"127.0.0.1","createdBy":"system","modifiedBy":null,"createdAt":"2025-08-07T21:38:30.327609","modifiedAt":null}{"category":{"id":14,"name":"AB","description":"asdasdsad","id_status":65,"ip":"127.0.0.1","createdBy":"SYSTEM","modifiedBy":"SYSTEM","createdAt":"2025-08-07T00:39:39.325280","modifiedAt":"2025-08-07T00:59:11.291604"},"id":2,"name":"clip","price":1,"description":"clips actualizados\n","stock_inicial":10000,"stock_actual":10000,"id_status":65,"category_id":14,"ip":"127.0.0.1","createdBy":"system","modifiedBy":null,"createdAt":"2025-08-07T21:38:30.327609","modifiedAt":null}
 
 #### GET PRODUCTS
 GET http://127.0.0.1:5000/api/products/
@@ -98,28 +91,26 @@ POST http://127.0.0.1:5000/api/categories
 Content-Type: application/json
     
     {
-        "name": "test category",
-        "description": "test description",
-        "id_status": 1
+        "name": "12",
+        "description": ""
     }
 
+
+### eliminar categoria
+DELETE http://127.0.0.1:5000/api/categories/6
+Content-Type: application/json
+
 ### update category
-PUT http://127.0.0.1:5000/api/categories/1
+PUT http://127.0.0.1:5000/api/categories/9
 Content-Type: application/json
     
     {
-        "name": "test category 2",
-        "description": "test description 3",
-        "id_status": 0
+        "name": "test category 9",
+        "description": "test description 3"
     }
 
 #### GET INVOICES
 GET http://127.0.0.1:5000/api/customers
-Content-Type: application/json
-
-
-#### GET INVOICES BY ID
-GET http://127.0.0.1:5000/api/invoices/
 Content-Type: application/json
 
 
@@ -349,14 +340,14 @@ POST http://127.0.0.1:5000/api/invoices/send-to-sunat
 Content-Type: application/json
 
 {
-  "document": "F001-125",
+  "document": "F001-93",
   "document_type": "01",
   "ruc_cliente": "20611639059",
   "date": "2025-08-01T23:10:37.225Z",
   "relative_document": "",
   "codigo_table": "",
   "codigo_mensaje_table": "",
-  "customer_id": 13,
+  "customer_id": 1,
   "subtotal": 1,
   "monto_igv": 18,
   "metodo_pago": "01",
@@ -366,7 +357,7 @@ Content-Type: application/json
   "details": [
     {
       "discount": 0,
-      "product_id": 7,
+      "product_id": 1,
       "quantity": 1,
       "subtotal": 1,
       "unit_price": 1,
@@ -387,7 +378,7 @@ Content-Type: application/json
     "monto_total": "1.18",
     "ruc_cliente": "73119100",
     "date": "2025-05-12T14:48:58.000Z",
-    "customer_id": 12,
+    "customer_id": 1,
     "subtotal": "1",
     "monto_igv": "18",
     "metodo_pago": "01",
@@ -396,7 +387,7 @@ Content-Type: application/json
     "afecto_tributo":"10",
     "details":[{
         "discount": "0.00",
-        "product_id": "2",
+        "product_id": "1",
         "quantity": "1",
         "subtotal": "1",
         "unit_price": "1",
@@ -406,36 +397,35 @@ Content-Type: application/json
     ]
 }
 
-### nota de credito
+### nota de credito (dar de baja
 POST http://127.0.0.1:5000/api/invoices/send-to-sunat
 Content-Type: application/json
 
 
 {
-    "document": "FC01-10",
+    "document": "FC01-97",
     "document_type": "07",
-    "monto_total": "1.18",
-    "ruc_cliente": "20612922773",
-    "date": "2025-05-12T14:48:58.000Z",
-    "relative_document": "F001-10",
+    "monto_total": "0",
+    "ruc_cliente": "20611639059",
+    "date": "2025-08-07T14:48:58.000Z",
+    "relative_document": "F001-93",
     "codigo_table": "01",
     "codigo_mensaje_table": "ERROR EN LA OPERACION",
-    "customer_id": 12,
-    "subtotal": "1",
+    "customer_id": 1,
+    "subtotal": "0",
     "monto_igv": "18",
     "metodo_pago": "01",
-    "subtotal": "1",
+    "subtotal": "0",
     "quantity": "1",
     "afecto_tributo":"10",
-    
     "details":[{
         "discount": "0.00",
-        "product_id": "2",
+        "product_id": "1",
         "quantity": "1",
-        "subtotal": "1",
-        "unit_price": "1",
-        "description": "TEST 1",
-        "monto_total": "1.18"
+        "subtotal": "0",
+        "unit_price": "0",
+        "description": "MICA DE LAPTOP",
+        "monto_total": "0"
     }
     ]
 

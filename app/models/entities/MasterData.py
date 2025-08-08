@@ -13,8 +13,8 @@ class MasterData(Auditoria):
     extra2 = db.Column(db.String(255), nullable=True)
     extra3 = db.Column(db.String(255), nullable=True)
     
-    __table_args__ = (
-        db.UniqueConstraint('catalog_code', 'code', name='uq_catalog_code_code'),
-    )
+    # __table_args__ = (
+    #     db.UniqueConstraint('catalog_code', 'value', name='uq_catalog_code_code'),
+    # )
     
     

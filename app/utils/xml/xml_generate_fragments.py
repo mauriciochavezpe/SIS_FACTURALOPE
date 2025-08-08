@@ -343,7 +343,7 @@ def complete_data_xml(
                     "La información de la factura relacionada es requerida para notas.")
             xml_string = _complete_note_specific_data(
                 xml_string, data, invoice_relative)
-        print(f"XML generado: {xml_string}...")  # Log the first 100 characters for debugging
+        # print(f"XML generado: {xml_string}...")  # Log the first 100 characters for debugging
         return xml_string, serie_num
 
     except (ValueError, KeyError, TypeError) as e:

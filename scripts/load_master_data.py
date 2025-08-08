@@ -29,7 +29,8 @@ def cargarBatch():
                 ip=row.get('ip',''),
                 createdBy=row.get('createdBy',''),
                 modifiedBy=row.get('modifiedBy',''),
-                status_id=row.get('status_id', 23)
+                status_id=row.get('status_id', 23),
+                code= row.get('code', '')
             )
             master_data_batch.append(master_data)
         

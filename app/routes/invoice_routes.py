@@ -60,7 +60,6 @@ class InvoiceSend(Resource):
 
         try:
             invoice_obj, status_code = create_invoice_in_db(data)
-            # print(f"Factura creada con ID: {invoice_obj.id}")
 
             cdr_response = send_invoice_data_to_sunat(data)
             # print(f"Factura creada con ID: {cdr_response}")

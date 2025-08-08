@@ -13,7 +13,7 @@ product_model = product_blueprint.model('ProductModel', {
     'category_id': fields.Integer(description='The category ID')
 })
 
-@product_blueprint.route('/')
+@product_blueprint.route('')
 class ProductList(Resource):
     def get(self):
         products, status_code = get_all_products()

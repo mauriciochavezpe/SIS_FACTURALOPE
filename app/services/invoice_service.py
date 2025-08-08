@@ -11,7 +11,7 @@ from app.schemas.invoice_schema import InvoiceSchema
 from datetime import datetime
 from flask import request
 from app.utils.catalog_manager import catalog_manager
-from app.constants.catalog_constants import (CATALOG_INVOICE_STATUS, STATUS_CREATED_INVOICE,STATUS_RESPONSE_INVOICE)
+from app.constants.catalog_constants import (CATALOG_INVOICE_STATUS, STATUS_CREATED_INVOICE,STATUS_RESPONSE_INVOICE,CATALOG_STATUS,STATUS_ACTIVE)
 
 class InvoiceCreationError(Exception):
     """Excepción personalizada para errores durante la creación de facturas."""
@@ -90,7 +90,7 @@ def create_invoice_in_db(data: Dict[str, Any]) -> Invoice:
         correlativo = int(numero_str)
         pending_status_id = catalog_manager.get_id(
             CATALOG_INVOICE_STATUS, STATUS_CREATED_INVOICE)
-
+        print(f"Estado de la factura: {pending_status_id}")
         # Crear la cabecera de la factura
         invoice = Invoice(
             customer_id=data.get("customer_id"),
@@ -113,10 +113,11 @@ def create_invoice_in_db(data: Dict[str, Any]) -> Invoice:
         if not detalles_data:
             raise InvoiceCreationError(
                 "Debe proporcionar al menos un detalle de factura.")
-
+        pending_details_status_id = catalog_manager.get_id(
+            CATALOG_STATUS, STATUS_ACTIVE)
         for item in detalles_data:
             detail = InvoiceDetail(
-                
+                invoice_id=invoice.id,
                 product_id=item.get("product_id"),
                 quantity=Decimal(item.get("quantity", 1)),
                 unit_price=Decimal(item.get("unit_price", 0)),
@@ -126,7 +127,7 @@ def create_invoice_in_db(data: Dict[str, Any]) -> Invoice:
                 total=Decimal(item.get("total", 0)),
                 createdAt=datetime.now(),
                 createdBy="SYSTEM",
-                ip=request.remote_addr
+                ip=request.remote_addr,
             )
             invoice.invoice_details.append(detail)
 

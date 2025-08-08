@@ -68,8 +68,9 @@ def create_customer():
         password = data.pop('password_hash', None)
         if not password:
             return {"error": "Password is required"}, 400
-
-        if not DocumentType.validate_document(data['document_type'], data['document_number']):
+        parse_num_type = f"{int(data.get('document_type')):02d}"
+        print(f"parse_num_type: {parse_num_type}")
+        if not DocumentType.validate_document(parse_num_type, data['document_number']):
             return {
                 "error": "Invalid document number format for the selected document type"
             }, 400

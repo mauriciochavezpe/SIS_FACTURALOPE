@@ -27,17 +27,24 @@ def get_all_categories():
 def create_category():
     try:
         data = request.get_json()
+        print("data", data)
         schema = CategorySchema(session=db.session)
         
         errors = schema.validate(data)
+        print("errors", errors)
         if errors:
             return {"errors": errors}, 400
         print(request)
+        id_status = catalog_manager.get_id(CATALOG_STATUS, STATUS_ACTIVE)
+        if id_status:
+            data['id_status'] = id_status
+        else:
+            return {"error": "Status not found"}, 404
         new_category = Category(**data)
         new_category.createdAt = datetime.now()
         new_category.createdBy = data.get("user","SYSTEM")
         new_category.ip = request.remote_addr
-        
+        print(new_category)
         db.session.add(new_category)
         db.session.commit()
         

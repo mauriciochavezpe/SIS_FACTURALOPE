@@ -21,7 +21,7 @@ master_data_model = master_data_blueprint.model('MasterDataModel', {
     'extra3': fields.String(description='Extra field 3')
 })
 
-@master_data_blueprint.route('/')
+@master_data_blueprint.route('')
 class MasterDataList(Resource):
     @master_data_blueprint.doc(params={'catalog_code': 'Filter by catalog code'})
     def get(self):
