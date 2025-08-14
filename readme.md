@@ -59,3 +59,14 @@ Catalogos [https://www.sunat.gob.pe/legislacion/superin/2015/anexoI-274-2015.pdf
 ## APUNTES
  - HACEMOS MATCH : flask db stamp head
 // MANUAL https://cpe.sunat.gob.pe/sites/default/files/inline-files/Manual-de-Consulta-Integrada-de-Comprobante-de-Pago-por-ServicioWEB_v2.pdf
+
+
+## apuntes tech 
+en dict se accede mediante la llave. eg. invoice['serie']
+en obj que es para los modelos SQLAlchemy se accede mediante el atributo. eg. invoice.serie
+
+| Acceso              | Si clave no existe   | Permite valor por defecto |
+| ------------------- | -------------------- | ------------------------- |
+| `dict["clave"]`     | ❌ Lanza `KeyError` | ❌ No                   |
+| `dict.get("clave")` | ✅ Devuelve `None`  | ✅ Sí                   |
+| `dict.clave`        | ✅ Devuelve `Valor` | ✅ Sí                   |

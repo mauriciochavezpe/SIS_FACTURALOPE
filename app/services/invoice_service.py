@@ -5,6 +5,7 @@ from app import db
 
 from app.models.entities.Invoice import Invoice
 from app.models.entities.Product import Product
+from app.models.entities.Customer import Customer
 from app.models.entities.InvoiceDetails import InvoiceDetail
 from app.schemas.custom_detail_by_invoice_schema import InvoiceWithDetailsSchema
 from app.schemas.invoice_schema import InvoiceSchema
@@ -173,4 +174,13 @@ def update_invoice_status(documento: str, status_value: str, cdr_data: Dict[str,
     invoice.modifiedBy = request.headers.get("user", "system")
     invoice.ip = request.remote_addr
 
+    return invoice
+
+def get_invoice_by_id(id: int) -> Invoice:
+    print(id)
+    """Obtiene una factura por su ID."""
+    invoice = (db.session.query(Invoice).options(joinedload(Invoice.customer))
+                        .filter_by(id=id).first())
+    if not invoice:
+        raise InvoiceNotFoundError(f"Factura no encontrada: {id}")
     return invoice

@@ -1,11 +1,12 @@
 from flask_restx import Namespace, Resource, fields
 from flask import request
+from app.utils.xml_utils.file_utils import FileUtils
 
 from app import db
 from app.services.invoice_service import (
     InvoiceCreationError, InvoiceNotFoundError, create_invoice_in_db,
-    get_all_invoices, get_details_by_invoice, update_invoice_status)
-from app.utils.sunat_client import SunatClientError, send_invoice_data_to_sunat
+    get_all_invoices, get_details_by_invoice, update_invoice_status, get_invoice_by_id)
+from app.utils.sunat_client import SunatClientError, send_invoice_data_to_sunat,reload_bill_to_sunat,get_CRD
 
 invoice_blueprint = Namespace('invoices', description='Invoice operations')
 
@@ -34,7 +35,7 @@ invoice_model = invoice_blueprint.model('InvoiceModel', {
     })))
 })
 
-@invoice_blueprint.route('/')
+@invoice_blueprint.route('')
 class InvoiceList(Resource):
     def get(self):
         filters = request.args.to_dict()
@@ -81,3 +82,55 @@ class InvoiceSend(Resource):
         except Exception as e:
             db.session.rollback()
             return {"error": f"Ocurrió un error interno inesperado.{e}"}, 500
+        
+@invoice_blueprint.route('/reload-to-sunat')
+class InvoiceReload(Resource):
+    def post(self):
+        data = request.get_json()
+        if not data:
+            return {"error": "No se proporcionaron datos en la solicitud."}, 400
+        
+        try:
+        # buscar el ZIP del documento en asset y volverlo a reenviar a sunat, si falla volver a sobre escribir el CDR
+            invoice=get_invoice_by_id(data.get("id"))
+            cdr_response= reload_bill_to_sunat(invoice)
+            status_value = cdr_response.get("codigo_estado", "-1")
+            update_invoice_status(data["document"], status_value, cdr_response)
+            db.session.commit()
+
+            return {
+                "status": "success",
+                "message": "Factura creada y enviada a SUNAT exitosamente.",
+                "invoice_id": invoice.id,
+                "sunat_response": cdr_response
+            }, 201
+
+        except (InvoiceCreationError, SunatClientError, InvoiceNotFoundError) as e:
+            db.session.rollback()
+            return {"error": str(e)}, 400
+        
+        except Exception as e:
+            db.session.rollback()
+            return {"error": f"Ocurrió un error interno inesperado.{e}"}, 500
+        
+
+# obtener el CDR de la factura
+@invoice_blueprint.route('/cdr')
+class InvoiceCdr(Resource):
+    def post(self):
+        data = request.get_json()
+        if not data:
+            return {"error": "No se proporcionaron datos en la solicitud."}, 400
+        
+        try:
+            invoice=get_invoice_by_id(data.get("id"))
+            crd_response = get_CRD(invoice)
+            return crd_response
+        except (InvoiceCreationError, SunatClientError, InvoiceNotFoundError) as e:
+            db.session.rollback()
+            return {"error": str(e)}, 400
+        
+        except Exception as e:
+            db.session.rollback()
+            return {"error": f"Ocurrió un error interno inesperado.{e}"}, 500
+        

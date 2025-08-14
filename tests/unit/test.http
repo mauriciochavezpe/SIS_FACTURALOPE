@@ -459,3 +459,15 @@ Content-Type: application/json
     ]
 
 }
+
+### probaremos un documento de compra para intnetar cambiar el estado
+POST http://127.0.0.1:4041/api/invoices/reload-to-sunat
+Content-Type: application/json
+
+{"id":71}
+
+### probaremos un documento CDR
+POST http://127.0.0.1:4041/api/invoices/cdr
+Content-Type: application/json
+
+{"id":70}

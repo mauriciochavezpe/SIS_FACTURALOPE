@@ -3,7 +3,7 @@ import os
 import zipfile
 from typing import Any, Dict
 from xml.etree import ElementTree as ET
-
+from app.models.entities.Invoice import Invoice
 from zeep import Client
 from zeep.wsse.username import UsernameToken
 
@@ -106,11 +106,13 @@ def send_invoice_data_to_sunat(data: Dict[str, Any]):
         # 3. Firmar y empaquetar
         xml_firmado = firmar_xml_con_placeholder(xml_string)
         name_file = f"{sunat_ruc}-{document_type}-{serie_number}"
+        fullname_zip = f"{name_file}.zip"
+        # print("Generando ZIP...")
         zip_base64 = _create_zip_for_sunat(xml_firmado, name_file)
         env = os.getenv("env", "QAS")
         print("estamos en el entorno", env)
         # 4. Enviar a SUNAT y procesar respuesta
-        cdr_response = _send_bill_to_sunat_ws(f"{name_file}.zip", zip_base64,env)
+        cdr_response = _send_bill_to_sunat_ws(fullname_zip, zip_base64,env)
         return cdr_response
 
     except (ValueError, SunatClientError) as e:
@@ -145,16 +147,16 @@ def _send_bill_to_sunat_ws(nombre_zip: str, zip_base64: str, env: str) -> Dict[s
         else:
             user_ruc = os.getenv("SUNAT_RUC")+os.getenv("SUNAT_USUARIO_SECUNDARIO")
             pss = os.getenv("SUNAT_PASS_SECUNDARIO")
-            print("user_ruc", user_ruc,pss)
             wsse = UsernameToken(user_ruc, pss)
         wsdl_path = os.path.abspath(wsdl_path)
         print(f"📥 Leyendo archivo ZIP: {wsdl_path}")
         client = Client(wsdl=wsdl_path, wsse=wsse)
 
-        print(f"📤 Enviando comprobante {nombre_zip} a SUNAT...")
+        print(f"📤 Enviando comprobante {nombre_zip} {nombre_zip} {nombre_zip} a SUNAT...")
         payload = client.service.sendBill(
             fileName=nombre_zip, contentFile=zip_base64)
-
+        print("✅ Comprobante enviado correctamente a SUNAT.")
+        print("palyload", zip_base64)
         result = _unzip_and_process_cdr(payload)
         print("✅ Envío correcto. SUNAT respondió con CDR.")
         return result
@@ -200,3 +202,45 @@ def _read_xml_cdr(xml_bytes: bytes, name: str) -> Dict[str, Any]:
         }
     except ET.ParseError as e:
         raise SunatClientError(f"Error al leer el CDR XML: {e}")
+
+
+def reload_bill_to_sunat(invoice):
+    try:
+        
+        customer = invoice.customer.document_number
+        only_full_name = f"{customer}-{int(invoice.document_type):02d}-{invoice.serie}-{invoice.num_invoice}"
+        fu=FileUtils("assets")
+        zip_content_ls = fu.get_files_content(only_full_name)
+        found = any(f.endswith((".zip",".xml")) for f in zip_content_ls)
+        if not found:
+            return {"error": "No se encontró el archivo en el directorio de assets."}, 400
+    
+        full_name_path_with_zip = f"{only_full_name}.zip"
+        
+        newbase64_zip = fu.get_file_base64(full_name_path_with_zip)
+        env = os.getenv("env", "QAS")
+        cdr_response = _send_bill_to_sunat_ws(full_name_path_with_zip, newbase64_zip,env)
+        return cdr_response
+    except Exception as e:
+        raise SunatClientError(f"Error al procesar la factura: {e}")
+    
+def get_CRD(invoice):
+    try:
+        customer = invoice.customer.document_number
+        only_full_name = f"R-{customer}-{int(invoice.document_type):02d}-{invoice.serie}-{invoice.num_invoice}.xml"
+        print(f"only_full_name: {only_full_name}")
+        fu=FileUtils("CDR")
+        zip_content_ls = fu.get_files_content(only_full_name)
+        found = any(f.endswith((".zip",".xml")) for f in zip_content_ls)
+        if not found:
+            return {"error": "No se encontró el archivo en el directorio de CDR."}, 400
+        else:
+            newbase64_zip = fu.get_file_base64(only_full_name)
+            
+        # retornar la informacion de la CDR
+        return {"document_name": only_full_name,
+                "document_base64":newbase64_zip}
+    except Exception as e:
+        raise SunatClientError(f"Error al procesar la factura: {e}")
+    
+        

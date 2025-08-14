@@ -14,4 +14,4 @@ if __name__ == "__main__":
         db.create_all()  # Esto asegura que las tablas base existan si no usas migraciones.
         # download_wsdl_files()
         obtener_certificado()
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=4041)

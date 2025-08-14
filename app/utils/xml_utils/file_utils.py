@@ -2,6 +2,7 @@ import os
 import zipfile
 import base64
 import xml.etree.ElementTree as ET
+import fnmatch
 
 class FileUtils:
     def __init__(self, base_path):
@@ -51,3 +52,30 @@ class FileUtils:
         except Exception as e:
             print(f"❌ Error creating ZIP file: {e}")
             return None
+    def get_files_content(self, zip_file_name):
+        try:
+            matched=[
+                f for f in os.listdir(self.base_path)
+                if zip_file_name in f
+            ]
+            return matched
+            
+        except Exception as e:
+            print(f"❌ Error getting file content: {e}")
+            return []
+    def get_file_base64(self, filename:str)-> str:
+        try:
+            pathfull = os.path.join(self.base_path, filename)
+            with open(pathfull, "rb") as f:
+                file_content = f.read()
+                file_base64 = base64.b64encode(file_content).decode('utf-8')
+                return file_base64  
+        except Exception as e:
+            print(f"❌ Error getting file content: {e}")
+            return {"error": str(e)}
+    
+    def get_file_content(self, pathfull:str)-> str:
+        with open(pathfull, "r") as f:
+            file_content = f.read()
+            return file_content
+    
