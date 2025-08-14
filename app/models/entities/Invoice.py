@@ -17,10 +17,9 @@ class Invoice(Auditoria):
     related_invoice_id = db.Column(db.Integer, db.ForeignKey('invoice.id'), nullable=True)
 
     invoice_details = db.relationship('InvoiceDetail', back_populates='invoice', lazy=True, cascade='all, delete-orphan')
+    customer = db.relationship("Customer", back_populates="invoices")
+    status = db.relationship("MasterData", back_populates="invoices")
     
-    __table_args__ = (
-        db.UniqueConstraint('num_invoice', 'serie', name='uq_invoice_serie_num'),
-    )
     
     def __repr__(self):
         return f'<Invoice {self.num_invoice}>'

@@ -1,6 +1,7 @@
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from marshmallow import fields, validates, ValidationError
-
+from .customer_schema import CustomerSchema
+from .master_data_schema import MasterDataSchema
 class InvoiceDetailNestedSchema(SQLAlchemyAutoSchema):
     discount = fields.Decimal(required=True)
     product_id = fields.Integer(required=True)
@@ -29,7 +30,8 @@ class ComplexInvoiceSchema(SQLAlchemyAutoSchema):
 
 class InvoiceWithDetailsSchema(SQLAlchemyAutoSchema):
     invoice_details = fields.List(fields.Nested(InvoiceDetailNestedSchema))
-
+    customer = fields.Nested(CustomerSchema,exclude=("password_hash",))
+    status = fields.Nested(MasterDataSchema,only=("value","code","extra"))
     class Meta:
         # Provide the model class for SQLAlchemyAutoSchema
         from app.models.entities.Invoice import Invoice

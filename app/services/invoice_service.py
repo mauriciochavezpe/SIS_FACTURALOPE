@@ -65,7 +65,10 @@ def get_invoice_by_serie_num(serie_num: str) -> tuple[dict[str, Any], int]:
 
 def get_details_by_invoice(invoice_id: int) -> Dict[str, Any]:
     """Obtiene los detalles completos de una factura, incluyendo sus productos."""
-    invoice = db.session.query(Invoice).options(joinedload(Invoice.invoice_details).joinedload(InvoiceDetail.product).joinedload(Product.category)).filter(Invoice.id == invoice_id).first()
+    invoice = db.session.query(Invoice).options(
+        joinedload(Invoice.invoice_details).joinedload(InvoiceDetail.product).joinedload(Product.category),
+        joinedload(Invoice.customer)  # Cargar explícitamente la relación con el cliente
+    ).filter(Invoice.id == invoice_id).first()
 
     if not invoice:
         raise InvoiceNotFoundError(f"Factura con ID {invoice_id} no encontrada.")

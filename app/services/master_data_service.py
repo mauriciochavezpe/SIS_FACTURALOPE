@@ -7,7 +7,11 @@ from datetime import datetime
 def get_all_master_data():
     try:
         schema = MasterDataSchema(session=db.session, many=True)
-        filter_data = request.args.to_dict()
+        
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 10, type=int)
+        
+        filter_data = {k: v for k, v in request.args.items() if k not in ['page', 'per_page']}
         query = db.session.query(MasterData)
         
         if filter_data:
@@ -15,8 +19,18 @@ def get_all_master_data():
                 if hasattr(MasterData, key) and value.strip("'") != '':
                     query = query.filter(getattr(MasterData, key) == value.strip("'"))
         
-        results = query.all()
-        return schema.dump(results), 200
+        paginated_query = query.paginate(page=page, per_page=per_page, error_out=False)
+        results = paginated_query.items
+        
+        response = {
+            "data": schema.dump(results),
+            "total": paginated_query.total,
+            "pages": paginated_query.pages,
+            "current_page": paginated_query.page,
+            "per_page": paginated_query.per_page
+        }
+        
+        return response, 200
         
     except Exception as e:
         return {"error": str(e)}, 500

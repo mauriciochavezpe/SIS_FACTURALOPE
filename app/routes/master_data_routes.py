@@ -10,6 +10,7 @@ from app.services.master_data_service import (
 master_data_blueprint = Namespace('master_data', description='Master data operations')
 
 master_data_model = master_data_blueprint.model('MasterDataModel', {
+    'id': fields.Integer(readOnly=True, description='The unique identifier of a master data record'),
     'catalog_code': fields.String(required=True, description='The catalog code'),
     'code': fields.String(required=True, description='The code'),
     'value': fields.String(required=True, description='The value'),
@@ -21,9 +22,22 @@ master_data_model = master_data_blueprint.model('MasterDataModel', {
     'extra3': fields.String(description='Extra field 3')
 })
 
+pagination_model = master_data_blueprint.model('Pagination', {
+    'data': fields.List(fields.Nested(master_data_model)),
+    'total': fields.Integer(description='Total number of records'),
+    'pages': fields.Integer(description='Total number of pages'),
+    'current_page': fields.Integer(description='Current page number'),
+    'per_page': fields.Integer(description='Number of records per page')
+})
+
 @master_data_blueprint.route('')
 class MasterDataList(Resource):
-    @master_data_blueprint.doc(params={'catalog_code': 'Filter by catalog code'})
+    @master_data_blueprint.doc(params={
+        'catalog_code': 'Filter by catalog code',
+        'page': 'Page number',
+        'per_page': 'Number of records per page'
+    })
+    @master_data_blueprint.marshal_with(pagination_model)
     def get(self):
         master_data, status = get_all_master_data()
         return master_data, status
@@ -35,11 +49,13 @@ class MasterDataList(Resource):
 
 @master_data_blueprint.route('/<int:id>')
 class MasterData(Resource):
+    @master_data_blueprint.marshal_with(master_data_model)
     def get(self, id):
         master_data, status = get_master_data_by_id(id)
         return master_data, status
 
     @master_data_blueprint.expect(master_data_model)
+    @master_data_blueprint.marshal_with(master_data_model)
     def put(self, id):
         master_data, status = update_master_data(id)
         return master_data, status
@@ -47,12 +63,3 @@ class MasterData(Resource):
     def delete(self, id):
         result, status = delete_master_data(id)
         return result, status
-
-# @master_data_blueprint.route('/factura_dummy')
-# class MasterDataDummy(Resource):
-#     def get(self):
-#         master_data, status = generacion_factura_dummy()
-#         return master_data, status
-#     def post(self):
-#         master_data, status = generacion_factura_dummy()
-#         return master_data, status

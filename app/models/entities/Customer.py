@@ -28,9 +28,10 @@ class Customer(Auditoria):
         default=DocumentType.DNI.code,
         comment='Tipo de documento según SUNAT'
     )
-    invoices = db.relationship('Invoice', backref='customer', lazy=True)
+    invoices = db.relationship('Invoice', back_populates='customer', lazy=True)
     
     def set_password(self, password):
+        print('set_password, password: ', password)
         self.password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
 
     def check_password(self, password):

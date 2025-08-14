@@ -7,7 +7,7 @@ customer_blueprint = Namespace('customers', description='Customer operations')
 customer_model = customer_blueprint.model('CustomerModel', {
     'username': fields.String(required=True, description='The customer username'),
     'email': fields.String(required=True, description='The customer email'),
-    'password_hash': fields.String(required=True, description='The customer password'),
+    'password': fields.String(description='The customer password'),
     'phone': fields.String(description='The customer phone number'),
     'document_number': fields.String(required=True, description='The customer document number'),
     'is_business': fields.Boolean(description='Is the customer a business?'),
@@ -22,7 +22,7 @@ customer_model = customer_blueprint.model('CustomerModel', {
     'document_type': fields.String(required=True, description='The customer document type')
 })
 
-@customer_blueprint.route('/')
+@customer_blueprint.route('')
 class CustomerList(Resource):
     def get(self):
         customers,status = get_all_customers()

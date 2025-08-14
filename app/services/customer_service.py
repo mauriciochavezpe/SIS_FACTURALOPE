@@ -64,8 +64,9 @@ def parse_customer_data(data: list) -> dict:
 
 def create_customer():
     try:
+        PASS_HARD="LIMA2025"
         data = request.get_json()
-        password = data.pop('password_hash', None)
+        password = data.pop('password', PASS_HARD)
         if not password:
             return {"error": "Password is required"}, 400
         parse_num_type = f"{int(data.get('document_type')):02d}"
@@ -74,9 +75,9 @@ def create_customer():
             return {
                 "error": "Invalid document number format for the selected document type"
             }, 400
-        
-        schema = CustomerSchema(session=db.session, exclude=['password_hash'])
+        schema = CustomerSchema(session=db.session)
         new_customer = schema.load(data)
+        print(f"new_customer: {new_customer}")
         new_customer.set_password(password)
         new_customer.createdAt = datetime.now()
         new_customer.createdBy = data.get("user","SYSTEM")
@@ -98,6 +99,8 @@ def get_all_customers():
         for key, value in filter_data.items():
             if hasattr(Customer, key):
                 query = query.filter(getattr(Customer, key) == value)
+        
+        query = query.filter_by(is_active=True)
         
         results = query.all()
         

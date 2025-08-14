@@ -110,7 +110,7 @@ Content-Type: application/json
     }
 
 #### GET INVOICES
-GET http://127.0.0.1:5000/api/customers
+GET http://127.0.0.1:5000/api/invoices
 Content-Type: application/json
 
 
@@ -118,23 +118,15 @@ Content-Type: application/json
 POST http://127.0.0.1:5000/api/customers
 Content-Type: application/json
     
-    {
-  "username": "RC_CASH",
-  "email": "RC_CASH@GMAIL.COM",
-  "password_hash": "RC_CASH123",
-  "phone": "999999999",
-  "document_number": "20611639059",
-  "is_business": true,
-  "commercial_name": "RC CASH E.I.R.L.",
-  "business_name": "RC CASH E.I.R.L.",
-  "address": "AV. LOS VIRREYES - Nro: 2800  - INT.: 1  - URBANIZACION TILDA  - Dpto: 1  - ATE",
-  "city": "ATE",
-  "province": "LIMA",
-  "postal_code": "",
-  "country": "PERU",
-  "full_name": "",
-  "document_type": "6"
-}
+{"username":"SOLGAS S.A.",
+"email":"test@yopmail.com",
+"phone":"951236547",
+"document_number":"20100176450",
+"is_active":false,
+"is_business":true,
+"commercial_name":"SOLGAS S.A.",
+"business_name":"SOLGAS S.A.","address":"CAL. CARPACCIO - Nro: 250  - INT.: 701  - URBANIZACION SAN BORJA  - SAN BORJA","city":"SAN BORJA","province":"LIMA","postal_code":"","country":"LIMA","document_type":"ruc","id":""}
+
 
 
 #### CREATE CUSTOMER
@@ -147,6 +139,7 @@ Content-Type: application/json
     "password": "SecurePass123!",
     "phone": "1234567891",
     "document_type": "6",
+    "password":"lima2025",
     "document_number": "20612922773",
     "business_name": "RONSOCO SAC",
     "commercial_name": "RONSOCO SAC",
@@ -199,7 +192,7 @@ Content-Type: application/json
 
 
 #### GET INVOICE
-GET http://127.0.0.1:5000/api/invoices/
+GET http://127.0.0.1:5000/api/invoices/details/62
 Content-Type: application/json
 
 #### CREATE INVOICE

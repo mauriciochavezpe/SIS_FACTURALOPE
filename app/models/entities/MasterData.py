@@ -13,6 +13,7 @@ class MasterData(Auditoria):
     extra2 = db.Column(db.String(255), nullable=True)
     extra3 = db.Column(db.String(255), nullable=True)
     
+    invoices = db.relationship('Invoice', back_populates='status', lazy=True)
     # __table_args__ = (
     #     db.UniqueConstraint('catalog_code', 'value', name='uq_catalog_code_code'),
     # )
